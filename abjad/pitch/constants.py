@@ -10,94 +10,159 @@ _direction_number_to_direction_symbol = {
 
 _accidental_abbreviation_to_name = {
     'ss': 'double sharp',
+    'ses': 'seven-eighths sharp', # new
     'tqs': 'three-quarters sharp',
+    'fes': 'five-eighths sharp', # new
     's': 'sharp',
+    'tes': 'three-eighths sharp', # new
     'qs': 'quarter sharp',
+    'es': 'eighth sharp', # new
     '': 'natural',
+    'ef': 'eighth flat', # new
     'qf': 'quarter flat',
+    'tef': 'three-eighths flat', # new
     'f': 'flat',
+    'fef': 'five-eighths flat', # new
     'tqf': 'three-quarters flat',
+    'sef': 'seven-eighths flat', # new
     'ff': 'double flat',
 }
 
 _accidental_abbreviation_to_semitones = {
     'ff': -2,
+    'sef': -1.75, # new
     'tqf': -1.5,
+    'fef': -1.25, # new
     'f': -1,
+    'tef': -0.75, # new
     'qf': -0.5,
+    'ef': -0.25, # new
     '': 0,
+    'es': 0.25, # new
     'qs': 0.5,
+    'tes': 0.75, # new
     's': 1,
+    'fes': 1.25, # new
     'tqs': 1.5,
+    'ses': 1.75, # new
     'ss': 2,
 }
 
 _accidental_abbreviation_to_symbol = {
     'ff': 'bb',
+    'sef': '8____', # new TO DO: reassess symbol
     'tqf': 'b~',
+    'fef': '8___',  # new TO DO: reassess symbol
     'f': 'b',
+    'tef': '8__',   # new TO DO: reassess symbol
     'qf': '~',
+    'ef': '8_',     # new TO DO: reassess symbol
     '': '',
+    'es': '8^',     # new TO DO: reassess symbol
     'qs': '+',
+    'tes': '8^^',   # new TO DO: reassess symbol
     's': '#',
+    'fes': '8^^^',  # new TO DO: reassess symbol
     'tqs': '#+',
+    'ses': '8^^^^', # new TO DO: reassess symbol
     'ss': '##',
 }
 
 _accidental_name_to_abbreviation = {
     'double sharp': 'ss',
+    'seven-eighths sharp': 'ses', # new
     'three-quarters sharp': 'tqs',
+    'five-eighths sharp': 'fes', # new
     'sharp': 's',
+    'three-eighths sharp': 'tes', # new
     'quarter sharp': 'qs',
+    'eighth sharp': 'es', # new
     'natural': '',
+    'eighth flat': 'ef', # new
     'quarter flat': 'qf',
+    'three-eighths flat': 'tef', # new
     'flat': 'f',
+    'five-eighths flat': 'fef', # new
     'three-quarters flat': 'tqf',
+    'seven-eighths flat': 'sef', # new
     'double flat': 'ff',
 }
 
 _accidental_semitones_to_abbreviation = {
-    -2.0: 'ff',
+    -2: 'ff',
+    -1.75: 'sef', # new
     -1.5: 'tqf',
-    -1.0: 'f',
+    -1.25: 'fef',   # new
+    -1: 'f',
+    -0.75: 'tef',   # new
     -0.5: 'qf',
-    0.0: '',
+    -0.25: 'ef',    # new
+    0: '',
+    0.25: 'es',     # new
     0.5: 'qs',
-    1.0: 's',
+    0.75: 'tes',    # new
+    1: 's',
+    1.25: 'fes',    # new
     1.5: 'tqs',
-    2.0: 'ss',
+    1.75: 'ses', # new
+    2: 'ss',
 }
 
 _symbolic_accidental_to_abbreviation = {
     'bb': 'ff',
+    'b____': 'sef', # new
     'b~': 'tqf',
+    '8___': 'fef', # new
     'b': 'f',
+    '8__': 'tef', # new
     '~': 'qf',
+    '8_': 'ef', # new
     '': '',
     '!': '!',
+    '8^': 'es', # new
     '+': 'qs',
+    '8^^': 'tes', # new
     '#': 's',
+    '8^^^': 'fes', # new
     '#+': 'tqs',
+    '8^^^^': 'ses', # new
     '##': 'ss',
 }
 
 _symbolic_accidental_to_semitones = {
     'bb': -2,
+    '8____': -1.75, # new
     'b~': -1.5,
+    '8___': -1.25, # new
     'b': -1,
+    '8__': -0.75, # new
     '~': -0.5,
+    '8_': -0.25, # new
     '': 0,
+    '8^': 0.25, # new
     '+': 0.5,
+    '8^^': 0.75, # new
     '#': 1,
+    '8^^^': 1.25, # new
     '#+': 1.5,
+    '8^^^^': 1.75, # new
     '##': 2,
     'ff': -2,
-    'tqf': 1.5,
+    'sef': -1.75, # new why are abbreviations to semitones here as well?
+    'tqf': -1.5,
+    'fef': -1.25, # new
     'f': -1,
+    'tef': -0.75, # new
     'qf': -0.5,
+    'ef': -0.25, # new
+    '': 0,
+    'es': 0.25, # new
     'qs': 0.5,
+    'tes': 0.75, # new
     's': 1,
+    'fes': 1.25, # new
     'tqs': 1.5,
+    'ses': 1.75, # new
     'ss': 2,
 }
 
@@ -153,83 +218,155 @@ _pitch_class_number_to_diatonic_pc_number = {
 
 _pitch_class_number_to_pitch_class_name = {
     0.0: 'c',
+    0.25: 'ces', # new
     0.5: 'cqs',
+    0.75: 'ctes', # new
     1.0: 'cs',
+    1.25: 'dtef', # new
     1.5: 'dqf',
+    1.75: 'def', # new
     2.0: 'd',
+    2.25: 'des', # new
     2.5: 'dqs',
+    2.75: 'dtes', #new
     3.0: 'ef',
+    3.25: 'etef', # new
     3.5: 'eqf',
+    3.75: 'eef', # new
     4.0: 'e',
+    4.25: 'ees', # new
     4.5: 'eqs',
+    4.75: 'etes', # new
     5.0: 'f',
+    5.25: 'fes', # new
     5.5: 'fqs',
+    5.75: 'ftes', # new
     6.0: 'fs',
+    6.25: 'gtef', # new
     6.5: 'gqf',
+    6.75: 'gef', # new
     7.0: 'g',
+    7.25: 'ges', # new
     7.5: 'gqs',
+    7.75: 'gtes', # new
     8.0: 'af',
+    8.25: 'atef', # new
     8.5: 'aqf',
+    8.75: 'aef', # new
     9.0: 'a',
+    9.25: 'aes', # new
     9.5: 'aqs',
+    9.75: 'ates', # new
     10.0: 'bf',
+    10.25: 'btef', # new
     10.5: 'bqf',
+    10.75: 'bef', # new
     11.0: 'b',
+    11.25: 'bes', # new
     11.5: 'bqs',
+    11.75: 'btes', # new
 }
 
 _pitch_class_number_to_pitch_class_name_with_flats = {
     0.0: 'c',
+    0.24: 'dsef', # new
     0.5: 'dtqf',
+    0.75: 'dfef', # new
     1.0: 'df',
+    1.25: 'dtef', # new
     1.5: 'dqf',
+    1.75: 'def', # new
     2.0: 'd',
+    2.25: 'esef', # new
     2.5: 'etqf',
+    2.75: 'efef', # new
     3.0: 'ef',
+    3.25: 'etef', # new
     3.5: 'eqf',
+    3.75: 'eef', # new
     4.0: 'e',
+    4.25: 'ftef', # new
     4.5: 'fqf',
+    4.75: 'fef', # new
     5.0: 'f',
+    5.25: 'gsef', # new
     5.5: 'gtqf',
+    5.75: 'gfef', # new
     6.0: 'gf',
+    6.25: 'gtef', # new
     6.5: 'gqf',
+    6.75: 'gef', # new
     7.0: 'g',
+    7.25: 'asef', # new
     7.5: 'atqf',
+    7.75: 'afef', # new
     8.0: 'af',
+    8.25: 'atef', # new
     8.5: 'aqf',
+    8.75: 'aef', # new
     9.0: 'a',
+    9.25: 'bsef', # new
     9.5: 'btqf',
+    9.75: 'bfef', # new
     10.0: 'bf',
+    10.25: 'btef', # new
     10.5: 'bqf',
+    10.75: 'bef', # new
     11.0: 'b',
+    11.25: 'ctef', # new
     11.5: 'cqf',
+    11.75: 'cef', # new
 }
 
 _pitch_class_number_to_pitch_class_name_with_sharps = {
     0.0: 'c',
+    0.25: 'ces', # new
     0.5: 'cqs',
+    0.75: 'ctes', # new
     1.0: 'cs',
+    1.25: 'cfes', # new
     1.5: 'ctqs',
+    1.75: 'cses', # new
     2.0: 'd',
+    2.25: 'des', # new
     2.5: 'dqs',
+    2.75: 'dtes', # new
     3.0: 'ds',
+    3.25: 'dfes', # new
     3.5: 'dtqs',
+    3.75: 'dses', # new
     4.0: 'e',
+    4.25: 'ees', # new
     4.5: 'eqs',
+    4.75: 'etes', # new
     5.0: 'f',
+    5.25: 'fes', # new
     5.5: 'fqs',
+    5.75: 'ftes', # new
     6.0: 'fs',
+    6.25: 'ffes', # new
     6.5: 'ftqs',
+    6.75: 'fses', # new
     7.0: 'g',
+    7.25: 'ges', # new
     7.5: 'gqs',
+    7.75: 'gtes', # new
     8.0: 'gs',
+    8.25: 'gfes', # new
     8.5: 'gtqs',
+    8.75: 'gses', # new
     9.0: 'a',
+    9.25: 'aes', # new
     9.5: 'aqs',
+    9.75: 'ates', # new
     10.0: 'as',
+    10.25: 'afes', # new
     10.5: 'atqs',
+    10.75: 'ases', # new
     11.0: 'b',
+    11.25: 'bes', # new
     11.5: 'bqs',
+    11.75: 'btes', # new
 }
 
 _diatonic_number_and_quality_to_semitones = {
@@ -309,7 +446,10 @@ _integer_regex_atom = '-?\d+'
 _alphabetic_accidental_regex_atom = (
     '(?P<alphabetic_accidental>'
     '[s]*(qs)?'
+    '|[s]*(es)?'
+    '|[f]*(es)?'
     '|[f]*(qf)?'
+    '|[f]*(ef)?'
     '|t?q?[fs]'
     '|'
     ')'
@@ -321,6 +461,10 @@ _symbolic_accidental_regex_atom = (
     '|[b]+[~]?'
     '|[+]'
     '|[~]'
+    '|[_]'
+    '|[^]'
+    '|[8]_+'
+    '|[8]\^+'
     '|'
     ')'
 )

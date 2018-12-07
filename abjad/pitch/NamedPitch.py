@@ -427,7 +427,7 @@ class NamedPitch(Pitch):
 
     def _from_number(self, number):
         import abjad
-        number = self._to_nearest_quarter_tone(number)
+        number = self._to_nearest_eighth_tone(number)
         div, mod = divmod(number, 12)
         pitch_class = abjad.NumberedPitchClass(mod)
         self._from_named_parts(

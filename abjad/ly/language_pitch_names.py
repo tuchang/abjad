@@ -196,73 +196,129 @@ language_pitch_names = {
 
     'english':  {
         'cff': NamedPitchClass('cff'),
+        'csef': NamedPitchClass('csef'), #new
         'ctqf': NamedPitchClass('ctqf'),
+        'cfef': NamedPitchClass('cfef'),#new
         'cf': NamedPitchClass('cf'),
+        'ctef': NamedPitchClass('ctef'),#new
         'cqf': NamedPitchClass('cqf'),
+        'cef': NamedPitchClass('cef'),#new
         'c': NamedPitchClass('c'),
+        'ces': NamedPitchClass('ces'),#new
         'cqs': NamedPitchClass('cqs'),
+        'ctes': NamedPitchClass('ctes'),#new
         'cs': NamedPitchClass('cs'),
+        'cfes': NamedPitchClass('cfes'),#new
         'ctqs': NamedPitchClass('ctqs'),
+        'cses': NamedPitchClass('cses'), #new
         'css': NamedPitchClass('css'),
         'cx': NamedPitchClass('css'),
         'dff': NamedPitchClass('dff'),
+        'dsef': NamesPitchClass('dsef'), #new
         'dtqf': NamedPitchClass('dtqf'),
+        'dfef': NamedPitchClass('dfef'),#new
         'df': NamedPitchClass('df'),
+        'dtef': NamedPitchClass('dtef'),#new
         'dqf': NamedPitchClass('dqf'),
+        'def': NamedPitchClass('def'),#new
         'd': NamedPitchClass('d'),
+        'des': NamedPitchClass('des'),#new
         'dqs': NamedPitchClass('dqs'),
+        'dtes': NamedPitchClass('dtes'),#new
         'ds': NamedPitchClass('ds'),
+        'dfes': NamedPitchClass('dfes'),#new
         'dtqs': NamedPitchClass('dtqs'),
+        'dses': NamedPitchClass('dses'), #new
         'dss': NamedPitchClass('dss'),
         'dx': NamedPitchClass('dss'),
         'eff': NamedPitchClass('eff'),
+        'esef': NamedPitchClass('esef'), #new
         'etqf': NamedPitchClass('etqf'),
+        'efef': NamedPitchClass('efef'),#new
         'ef': NamedPitchClass('ef'),
+        'etef': NamedPitchClass('etef'),#new
         'eqf': NamedPitchClass('eqf'),
+        'eef': NamedPitchClass('eef'),#new
         'e': NamedPitchClass('e'),
+        'ees': NamedPitchClass('ees'),#new
         'eqs': NamedPitchClass('eqs'),
+        'etes': NamedPitchClass('etes'),#new
         'es': NamedPitchClass('es'),
+        'efes': NamedPitchClass('efes'),#new
         'etqs': NamedPitchClass('etqs'),
+        'eses': NamedPitchClass('eses'), #new
         'ess': NamedPitchClass('ess'),
         'ex': NamedPitchClass('ess'),
         'fff': NamedPitchClass('fff'),
+        'fsef': NamedPitchClass('fsef'), #new
         'ftqf': NamedPitchClass('ftqf'),
+        'ffef': NamedPitchClass('ffef'),#new
         'ff': NamedPitchClass('ff'),
+        'ftef': NamedPitchClass('ftef'),#new
         'fqf': NamedPitchClass('fqf'),
+        'fef': NamedPitchClass('fef'),#new
         'f': NamedPitchClass('f'),
+        'fes': NamedPitchClass('fes'),#new
         'fqs': NamedPitchClass('fqs'),
+        'ftes': NamedPitchClass('ftes'),#new
         'fs': NamedPitchClass('fs'),
+        'ffes': NamedPitchClass('ffes'),#new
         'ftqs': NamedPitchClass('ftqs'),
+        'fses': NamedPitchClass('fses'), #new
         'fss': NamedPitchClass('fss'),
         'fx': NamedPitchClass('fss'),
         'gff': NamedPitchClass('gff'),
+        'gsef': NamedPitchClass('gsef'), #new
         'gtqf': NamedPitchClass('gtqf'),
+        'gfef': NamedPitchClass('gfef'),#new
         'gf': NamedPitchClass('gf'),
+        'gtef': NamedPitchClass('gtef'),#new
         'gqf': NamedPitchClass('gqf'),
+        'gef': NamedPitchClass('gef'),#new
         'g': NamedPitchClass('g'),
+        'ges': NamedPitchClass('ges'),#new
         'gqs': NamedPitchClass('gqs'),
+        'gtes': NamedPitchClass('gtes'),#new
         'gs': NamedPitchClass('gs'),
+        'gfes': NamedPitchClass('gfes'),#new
         'gtqs': NamedPitchClass('gtqs'),
+        'gses': NamedPitchClass('gses'), #new
         'gss': NamedPitchClass('gss'),
         'gx': NamedPitchClass('gss'),
         'aff': NamedPitchClass('aff'),
+        'asef': NamedPitchClass('asef'), #new
         'atqf': NamedPitchClass('atqf'),
+        'afef': NamedPitchClass('afef'),#new
         'af': NamedPitchClass('af'),
+        'atef': NamedPitchClass('atef'),#new
         'aqf': NamedPitchClass('aqf'),
+        'aef': NamedPitchClass('aef'),#new
         'a': NamedPitchClass('a'),
+        'aes': NamedPitchClass('aes'),#new
         'aqs': NamedPitchClass('aqs'),
+        'ates': NamedPitchClass('ates'),#new
         'as': NamedPitchClass('as'),
+        'afes': NamedPitchClass('afes'),#new
         'atqs': NamedPitchClass('atqs'),
+        'ases': NamedPitchClass('ases'), #new
         'ass': NamedPitchClass('ass'),
         'ax': NamedPitchClass('ass'),
         'bff': NamedPitchClass('bff'),
+        'bsef': NamedPitchClass('bsef'), #new
         'btqf': NamedPitchClass('btqf'),
+        'bfef': NamedPitchClass('bfef'),#new
         'bf': NamedPitchClass('bf'),
+        'btef': NamedPitchClass('btef'),#new
         'bqf': NamedPitchClass('bqf'),
+        'bef': NamedPitchClass('bef'),#new
         'b': NamedPitchClass('b'),
+        'bes': NamedPitchClass('bes'),#new
         'bqs': NamedPitchClass('bqs'),
+        'btes': NamedPitchClass('btes'),#new
         'bs': NamedPitchClass('bs'),
+        'bfes': NamedPitchClass('bfes'),#new
         'btqs': NamedPitchClass('btqs'),
+        'bses': NamedPitchClass('bses'), #new
         'bss': NamedPitchClass('bss'),
         'bx': NamedPitchClass('bss'),
         'c-flatflat': NamedPitchClass('cff'),

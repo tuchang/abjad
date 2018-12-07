@@ -167,13 +167,15 @@ class Pitch(object):
             return pitch_number - down
 
     @staticmethod
-    def _to_nearest_quarter_tone(number):
+    def _to_nearest_eighth_tone(number):
         number = round(float(number) * 4) / 4
         div, mod = divmod(number, 1)
         if mod == 0.75:
-            div += 1
+            div += 0.75 # used to be 1
         elif mod == 0.5:
             div += 0.5
+        elif mod == 0.25: # new
+            div += 0.25 # new
         return mathtools.integer_equivalent_number_to_integer(div)
 
     @staticmethod
