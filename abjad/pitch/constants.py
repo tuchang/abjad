@@ -110,7 +110,7 @@ _accidental_semitones_to_abbreviation = {
 
 _symbolic_accidental_to_abbreviation = {
     'bb': 'ff',
-    'b____': 'sef', # new
+    '8____': 'sef', # new
     'b~': 'tqf',
     '8___': 'fef', # new
     'b': 'f',
