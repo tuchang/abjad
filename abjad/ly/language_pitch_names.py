@@ -302,7 +302,7 @@ language_pitch_names = {
                 NamedPitchClass(diatonic_pitch_class_name + accidental_abbreviation)
             for diatonic_pitch_class_name in 'cdefgab'
             for accidental_abbreviation in [
-                'ef', 'es', 'tef', 'tes', 'fef', 'fes', 'sef', 'ses',
+                'ef', 'es', 'tef', 'tes', 'fef', 'fes',# 'sef', 'ses',
                 ]
         }
     },

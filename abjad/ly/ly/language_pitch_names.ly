@@ -1,15 +1,21 @@
 \version "2.19.24"
 
 %%% DEFINITIONS %%%
-
+%%% Greg defined the eighth tones %%%
 #(define alterations '(
   (-1 . "ff")
   (-3/4 . "tqf")
+  (-5/8 . "fef")
   (-1/2 . "f")
+  (-3/8 . "tef")
   (-1/4 . "qf")
+  (-1/8 . "ef")
   (0 . "")
+  (1/8 . "es")
   (1/4 . "qs")
+  (3/8 . "tes")
   (1/2 . "s")
+  (5/8 . "fes")
   (3/4 . "tqs")
   (1 . "ss")))
 
@@ -48,7 +54,8 @@
 %%% MAIN %%%
 
 #(begin
-  (display "from abjad.pitch import NamedPitchClass\n\n\n")
+  (display "# -*- coding: utf-8 -*-\n\n")
+  (display "from abjad.tools.pitchtools import NamedPitchClass\n\n\n")
   (display (format "lilypond_version = \"~A\"\n\n" (lilypond-version)))
   (display "language_pitch_names = {")
   (map handle-language language-pitch-names)

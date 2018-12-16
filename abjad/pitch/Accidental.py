@@ -58,74 +58,93 @@ class Accidental(object):
 
     def __init__(self, name='', *, arrow=None):
         import abjad
-        semitones = 0
-        _arrow = None
         if name is None:
-            pass
+            semitones = 0
         elif isinstance(name, str):
-            if name in constants._accidental_name_to_abbreviation:
+            semitones = 0
+            if self._is_abbreviation(name):
+                if name in constants._accidental_abbreviation_to_semitones:
+                    semitones = constants._accidental_abbreviation_to_semitones[name]
+                else:
+                    while name and name.startswith(('f', 's')):
+                        if name[0] == 's':
+                            semitones += 1
+                        else:
+                            semitones -= 1
+                        name = name[1:]
+                    if name == 'qs':
+                        semitones += 0.5
+
+                    elif name == 'es':
+                        semitones += 0.25
+                    elif name == 'tes':
+                        semitones += 0.75
+                    elif name == 'fes':
+                        semitones += 1.25
+
+                    elif name == 'qf':
+                        semitones -= 0.5
+
+                    elif name == 'ef':
+                        semitones -= 0.25
+                    elif name == 'tef':
+                        semitones -= 0.75
+                    elif name == 'fef':
+                        semitones -= 1.25
+            elif self._is_symbol(name):
+                if name in constants._accidental_symbol_to_semitones:
+                    semitones = constants._accidental_symbol_to_semitones[name]
+                else:
+                    while name and name.startswith(('b', '#')):
+                        if name[0] == '#':
+                            semitones += 1
+                        else:
+                            semitones -= 1
+                        name = name[1:]
+                    if name == '+':
+                        semitones += 0.5
+
+                    elif name == '8^':
+                        semitone += 0.25
+                    elif name == '8^^':
+                        semitone += 0.75
+                    elif name == '8^^^':
+                        semitone += 1.25
+
+                    elif name == '~':
+                        semitones -= 0.5
+
+                    elif name == '8_':
+                        semitone -= 0.25
+                    elif name == '8__':
+                        semitone -= 0.75
+                    elif name == '8___':
+                        semitone -= 1.25
+            elif name in constants._accidental_name_to_abbreviation:
                 name = constants._accidental_name_to_abbreviation[name]
                 semitones = constants._accidental_abbreviation_to_semitones[name]
             else:
-                match = constants._comprehensive_accidental_regex.match(name)
-                if not match:
-                    try:
-                        pitch = abjad.NamedPitch(name)
-                        semitones = pitch.accidental.semitones
-                        _arrow = pitch.accidental.arrow
-                    except Exception:
-                        message = 'can not instantiate {} from {!r}.'
-                        message = message.format(type(self).__name__, name)
-                        raise TypeError(message)
-                else:
-                    group_dict = match.groupdict()
-                    if group_dict['alphabetic_accidental']:
-                        prefix, _, suffix = name.partition('q')
-                        if prefix.startswith('s'):
-                            semitones += len(prefix)
-                        elif prefix.startswith('f'):
-                            semitones -= len(prefix)
-                        if suffix == 's':
-                            semitones += 0.5
-                            if prefix == 't':
-                                semitones += 1
-                        elif suffix == 'f':
-                            semitones -= 0.5
-                            if prefix == 't':
-                                semitones -= 1
-                    elif group_dict['symbolic_accidental']:
-                        semitones += name.count('#')
-                        semitones -= name.count('b')
-                        if name.endswith('+'):
-                            semitones += 0.5
-                        elif name.endswith('~'):
-                            semitones -= 0.5
-        elif isinstance(name, numbers.Number):
-            semitones = float(name)
-            assert (semitones % 1.) in (0., 0.5)
-        elif hasattr(name, 'accidental'):
-            _arrow = name.accidental.arrow
-            semitones = name.accidental.semitones
-        elif isinstance(name, type(self)):
-            _arrow = name.arrow
-            semitones = name.semitones
-        else:
-            try:
-                pitch = abjad.NamedPitch(name)
-                semitones = pitch.accidental.semitones
-                _arrow = pitch.accidental.arrow
-            except Exception:
                 message = 'can not initialize accidental from value: {!r}'
                 message = message.format(name)
                 raise ValueError(message)
+        elif isinstance(name, type(self)):
+            semitones = name.semitones
+        elif isinstance(name, (int, float)):
+            semitones = float(name)
+            assert (semitones % 1.) in (0., 0.25, 0.5, 0.75)
+        elif hasattr(name, 'accidental'):
+            semitones = name.accidental.semitones
+        else:
+            message = 'can not initialize accidental from value: {!r}'
+            message = message.format(name)
+            raise ValueError(message)
         semitones = mathtools.integer_equivalent_number_to_integer(semitones)
         self._semitones = semitones
-        self._arrow = _arrow
-        if arrow is not None:
-            arrow = enums.VerticalAlignment.from_expr(arrow)
-            if arrow is enums.Center:
-                arrow = None
-            self._arrow = arrow
+        if arrow not in (None, abjad.Up, abjad.Down):
+            message = 'arrow must be none, up or down: {!r}.'
+            message = message.format(arrow)
+            raise TypeError(message)
+        self._arrow = arrow
 
     ### SPECIAL METHODS ###
 
