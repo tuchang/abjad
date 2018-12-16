@@ -442,31 +442,32 @@ _stop_punctuation_to_inclusivity_string = {
 ### REGEX ATOMS ###
 
 _integer_regex_atom = '-?\d+'
-#fix this
-_alphabetic_accidental_regex_atom = """
-    (?P<alphabetic_accidental>
-    [s]*(qs)?
-    |[s]*(es)?
-    |[f]*(es)?
-    |[f]*(qf)?
-    |[f]*(ef)?
-    |[sft]?[qe]?[sf]?
-    |)
-    """
-#fix this
-_symbolic_accidental_regex_atom = '''
-    (?P<symbol>
-    [#]+[+]?
-    |[b]+[~]?
-    |[+]
-    |[~]
-    |[_]
-    |[^]
-    |[8]_+
-    |[8]\^+
-    |
-    )
-    '''
+
+_alphabetic_accidental_regex_atom = (
+    '(?P<alphabetic_accidental>'
+    '[s]*(qs)?'
+    '|[s]*(es)?'
+    '|[f]*(es)?'
+    '|[f]*(qf)?'
+    '|[f]*(ef)?'
+    '|[sft]?[qe]?[sf]?'
+    '|'
+    ')'
+)
+
+_symbolic_accidental_regex_atom = (
+    '(?P<symbol>'
+    '[#]+[+]?'
+    '|[b]+[~]?'
+    '|[+]'
+    '|[~]'
+    '|[_]'
+    '|[^]'
+    '|[8]_+'
+    '|[8]\^+'
+    '|'
+    ')'
+)
 
 _octave_number_regex_atom = (
     '(?P<octave_number>{}|)'.format(_integer_regex_atom)
