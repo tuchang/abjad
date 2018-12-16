@@ -450,7 +450,7 @@ _alphabetic_accidental_regex_atom = """
     |[f]*(es)?
     |[f]*(qf)?
     |[f]*(ef)?
-    |t?q?e?[fs]
+    |[sft]?[qe]?[sf]?
     |)
     """
 #fix this
