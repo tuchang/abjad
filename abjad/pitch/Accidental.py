@@ -92,8 +92,8 @@ class Accidental(object):
                     elif name == 'fef':
                         semitones -= 1.25
             elif self._is_symbol(name):
-                if name in constants._accidental_symbol_to_semitones:
-                    semitones = constants._accidental_symbol_to_semitones[name]
+                if name in constants._symbolic_accidental_to_semitones:
+                    semitones = constants._symbolic_accidental_to_semitones[name]
                 else:
                     while name and name.startswith(('b', '#')):
                         if name[0] == '#':
