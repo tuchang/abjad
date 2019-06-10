@@ -163,28 +163,6 @@ class LogicalTie(Selection):
         """
         return Selection(self)
 
-    @property #NEW FROM GRE
-    def start_offset(self):
-        """
-        Gets start offset of logical tie.
-
-        Returns offset.
-        """
-        if self.items:
-            head = self.items[0]
-            return inspect(head).timespan().start_offset
-
-    @property #NEW FROM GRE
-    def stop_offset(self):
-        """
-        Gets start offset of logical tie.
-
-        Returns offset.
-        """
-        if self.items:
-            tail = self.items[-1]
-            return inspect(tail).timespan().stop_offset
-
     @property
     def tail(self):
         """
