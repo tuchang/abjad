@@ -84,7 +84,7 @@ def beam(
     #beam_rests: bool = None,
     beam_rests: typing.Optional[bool] = True,
     durations: typing.Sequence[Duration] = None,
-    selector: typings.Selector = 
+    selector: typings.Selector =
         'abjad.select().leaves(do_not_iterate_grace_containers=True)',
     span_beam_count: int = None,
     start_beam: StartBeam = None,
@@ -135,7 +135,7 @@ def beam(
         if beam_rests and isinstance(argument, silent_prototype):
             return True
         return False
-    
+
     leaves = []
     for leaf in original_leaves:
         if not _is_beamable(leaf, beam_rests=beam_rests):
@@ -209,7 +209,7 @@ def beam(
     def _leaf_neighbors(leaf, original_leaves):
         assert leaf is not original_leaves[0]
         assert leaf is not original_leaves[-1]
-        this_index = original_leaves.index(leaf) 
+        this_index = original_leaves.index(leaf)
         previous_leaf = original_leaves[this_index - 1]
         previous = 0
         if _is_beamable(previous_leaf, beam_rests=beam_rests):
