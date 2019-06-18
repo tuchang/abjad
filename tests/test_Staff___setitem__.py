@@ -4,13 +4,15 @@ import pytest
 
 def test_Staff___setitem___01():
 
-    staff = abjad.Staff([
-        abjad.Note("c'4"),
-        abjad.Rest((1, 4)),
-        abjad.Chord([2, 3, 4], (1, 4)),
-        abjad.Skip((1, 4)),
-        abjad.Tuplet((4, 5), 4 * abjad.Note(0, (1, 16))),
-        ])
+    staff = abjad.Staff(
+        [
+            abjad.Note("c'4"),
+            abjad.Rest((1, 4)),
+            abjad.Chord([2, 3, 4], (1, 4)),
+            abjad.Skip((1, 4)),
+            abjad.Tuplet((4, 5), 4 * abjad.Note(0, (1, 16))),
+        ]
+    )
 
     assert len(staff) == 5
     assert abjad.inspect(staff).wellformed()
@@ -97,8 +99,8 @@ def test_Staff___setitem___05():
 
     staff = abjad.Staff(4 * abjad.Note("c'4"))
 
-    statement = 'staff[0] = [abjad.Note(2, (1, 4)), abjad.Note(2, (1, 4))]'
-    assert pytest.raises(AssertionError, statement)
+    with pytest.raises(AssertionError):
+        staff[0] = [abjad.Note(2, (1, 4)), abjad.Note(2, (1, 4))]
 
 
 def test_Staff___setitem___06():
@@ -108,7 +110,8 @@ def test_Staff___setitem___06():
 
     staff = abjad.Staff(4 * abjad.Note("c'4"))
 
-    assert pytest.raises(Exception, 'staff[0:2] = abjad.Note(2, (1, 4))')
+    with pytest.raises(Exception):
+        staff[0:2] = abjad.Note(2, (1, 4))
 
 
 def test_Staff___setitem___07():

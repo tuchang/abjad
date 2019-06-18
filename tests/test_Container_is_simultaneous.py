@@ -45,7 +45,9 @@ def test_Container_is_simultaneous_04():
     A simultaneous container can hold Contexts.
     """
 
-    container = abjad.Container([abjad.Voice("c'8 cs'8"), abjad.Voice("d'8 ef'8")])
+    container = abjad.Container(
+        [abjad.Voice("c'8 cs'8"), abjad.Voice("d'8 ef'8")]
+    )
     container.is_simultaneous = True
 
     assert format(container) == abjad.String.normalize(
@@ -63,7 +65,7 @@ def test_Container_is_simultaneous_04():
             }
         >>
         """
-        )
+    )
 
 
 def test_Container_is_simultaneous_05():
@@ -76,4 +78,5 @@ def test_Container_is_simultaneous_05():
 
     # not allowed
     container = abjad.Container("c'8 c'8 c'8 c'8")
-    pytest.raises(Exception, 'container.is_simultaneous = True')
+    with pytest.raises(Exception):
+        container.is_simultaneous = True

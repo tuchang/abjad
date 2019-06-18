@@ -29,9 +29,11 @@ def test_Inspection_duration_01():
             }
         >>
         """
-        )
+    )
 
-    assert abjad.inspect(score).duration(in_seconds=True) == abjad.Duration(400, 133)
+    assert abjad.inspect(score).duration(in_seconds=True) == abjad.Duration(
+        400, 133
+    )
 
 
 def test_Inspection_duration_02():
@@ -40,8 +42,8 @@ def test_Inspection_duration_02():
     """
 
     container = abjad.Container("c'8 d'8 e'8 f'8")
-    statement = 'inspect(container).duration(in_seconds=True)'
-    assert pytest.raises(Exception, statement)
+    with pytest.raises(Exception):
+        abjad.inspect(container).duration(in_seconds=True)
 
 
 def test_Inspection_duration_03():
@@ -68,12 +70,20 @@ def test_Inspection_duration_03():
             f'8
         }
         """
-        )
+    )
 
-    assert abjad.inspect(staff[0]).duration(in_seconds=True) == abjad.Duration(15, 19)
-    assert abjad.inspect(staff[1]).duration(in_seconds=True) == abjad.Duration(15, 19)
-    assert abjad.inspect(staff[2]).duration(in_seconds=True) == abjad.Duration(5, 7)
-    assert abjad.inspect(staff[3]).duration(in_seconds=True) == abjad.Duration(5, 7)
+    assert abjad.inspect(staff[0]).duration(in_seconds=True) == abjad.Duration(
+        15, 19
+    )
+    assert abjad.inspect(staff[1]).duration(in_seconds=True) == abjad.Duration(
+        15, 19
+    )
+    assert abjad.inspect(staff[2]).duration(in_seconds=True) == abjad.Duration(
+        5, 7
+    )
+    assert abjad.inspect(staff[3]).duration(in_seconds=True) == abjad.Duration(
+        5, 7
+    )
 
 
 def test_Inspection_duration_04():
@@ -82,5 +92,5 @@ def test_Inspection_duration_04():
     """
 
     note = abjad.Note("c'4")
-    statement = 'inspect(note).duration(in_seconds=True)'
-    assert pytest.raises(Exception, statement)
+    with pytest.raises(Exception):
+        abjad.inspect(note).duration(in_seconds=True)

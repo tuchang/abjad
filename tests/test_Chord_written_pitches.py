@@ -12,8 +12,10 @@ def test_Chord_written_pitches_01():
 
     assert isinstance(pitches, abjad.PitchSegment)
     assert len(pitches) == 3
-    assert pytest.raises(Exception, 'pitches.pop()')
-    assert pytest.raises(Exception, 'pitches.remove(pitches[0])')
+    with pytest.raises(Exception):
+        pitches.pop()
+    with pytest.raises(Exception):
+        pitches.remove(pitches[0])
 
 
 def test_Chord_written_pitches_02():
@@ -50,7 +52,7 @@ def test_Chord_written_pitches_04():
         abjad.NamedPitch(4),
         abjad.NamedPitch(3),
         abjad.NamedPitch(2),
-        ]
+    ]
 
     assert format(chord) == "<d' ef' e'>4"
 
@@ -61,10 +63,6 @@ def test_Chord_written_pitches_05():
     """
 
     chord = abjad.Chord([], (1, 4))
-    chord.written_pitches = [
-        4,
-        abjad.NamedPitch(3),
-        abjad.NamedPitch(2),
-        ]
+    chord.written_pitches = [4, abjad.NamedPitch(3), abjad.NamedPitch(2)]
 
     assert format(chord) == "<d' ef' e'>4"

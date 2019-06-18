@@ -2,7 +2,7 @@ import collections
 from .TypedCollection import TypedCollection
 
 
-class TypedTuple(TypedCollection, collections.Sequence):
+class TypedTuple(TypedCollection, collections.abc.Sequence):
     """
     Typed tuple.
     """
@@ -13,19 +13,10 @@ class TypedTuple(TypedCollection, collections.Sequence):
 
     ### INITIALIZER ###
 
-    def __init__(
-        self,
-        items=None,
-        item_class=None,
-        ):
-        TypedCollection.__init__(
-            self,
-            item_class=item_class,
-            items=items,
-            )
+    def __init__(self, items=None, item_class=None):
+        TypedCollection.__init__(self, item_class=item_class, items=items)
         items = items or []
-        self._collection = tuple(
-            self._item_coercer(item) for item in items)
+        self._collection = tuple(self._item_coercer(item) for item in items)
 
     ### SPECIAL METHODS ###
 
@@ -36,6 +27,7 @@ class TypedTuple(TypedCollection, collections.Sequence):
         Returns new typed tuple.
         """
         import abjad
+
         if isinstance(argument, type(self)):
             items = argument._collection
             return abjad.new(self, items=self._collection[:] + items)
@@ -77,11 +69,12 @@ class TypedTuple(TypedCollection, collections.Sequence):
         Returns integer.
         """
         import abjad
+
         hash_values = abjad.StorageFormatManager(self).get_hash_values()
         try:
             result = hash(hash_values)
         except TypeError:
-            message = 'unhashable type: {}'.format(self)
+            message = "unhashable type: {}".format(self)
             raise TypeError(message)
         return result
 
@@ -92,6 +85,7 @@ class TypedTuple(TypedCollection, collections.Sequence):
         Returns new typed tuple.
         """
         import abjad
+
         items = self._collection * argument
         return abjad.new(self, items=items)
 

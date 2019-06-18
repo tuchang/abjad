@@ -1,5 +1,6 @@
 import abc
 import typing
+from abjad import const
 from abjad import instruments
 from abjad.indicators.Clef import Clef
 from abjad.indicators.MarginMarkup import MarginMarkup
@@ -34,11 +35,9 @@ class ScoreTemplate(object):
 
     ### CLASS VARIABLES ###
 
-    __documentation_section__ = 'Score templates'
+    __documentation_section__: typing.Optional[str] = "Score templates"
 
-    __slots__ = (
-        '_voice_abbreviations',
-        )
+    __slots__ = ("_voice_abbreviations",)
 
     _always_make_global_rests = False
 
@@ -61,17 +60,14 @@ class ScoreTemplate(object):
         pass
 
     def __illustrate__(
-        self,
-        default_paper_size=None,
-        global_staff_size=None,
-        includes=None,
-        ):
+        self, default_paper_size=None, global_staff_size=None, includes=None
+    ):
         """
         Illustrates score template.
         """
         score: Score = self()
         for voice in iterate(score).components(Voice):
-            skip = Skip(1, tag='ScoreTemplate.__illustrate__')
+            skip = Skip(1, tag="abjad.ScoreTemplate.__illustrate__")
             voice.append(skip)
         self.attach_defaults(score)
         lilypond_file: LilyPondFile = score.__illustrate__()
@@ -80,7 +76,7 @@ class ScoreTemplate(object):
             default_paper_size=default_paper_size,
             global_staff_size=global_staff_size,
             includes=includes,
-            )
+        )
         return lilypond_file
 
     def __repr__(self) -> str:
@@ -93,22 +89,22 @@ class ScoreTemplate(object):
 
     def _make_global_context(self):
         global_rests = Context(
-            lilypond_type='GlobalRests',
-            name='Global_Rests',
-            tag='_make_global_context',
-            )
+            lilypond_type="GlobalRests",
+            name="Global_Rests",
+            tag="abjad.ScoreTemplate._make_global_context",
+        )
         global_skips = Context(
-            lilypond_type='GlobalSkips',
-            name='Global_Skips',
-            tag='_make_global_context',
-            )
+            lilypond_type="GlobalSkips",
+            name="Global_Skips",
+            tag="abjad.ScoreTemplate._make_global_context",
+        )
         global_context = Context(
             [global_rests, global_skips],
-            lilypond_type='GlobalContext',
+            lilypond_type="GlobalContext",
             is_simultaneous=True,
-            name='Global_Context',
-            tag='_make_global_context',
-            )
+            name="Global_Context",
+            tag="abjad.ScoreTemplate._make_global_context",
+        )
         return global_context
 
     ### PUBLIC PROPERTIES ###
@@ -141,10 +137,8 @@ class ScoreTemplate(object):
     ### PUBLIC METHODS ###
 
     def allows_instrument(
-        self,
-        staff_name: str,
-        instrument: instruments.Instrument,
-        ) -> bool:
+        self, staff_name: str, instrument: instruments.Instrument
+    ) -> bool:
         """
         Is true when ``staff_name`` allows ``instrument``.
 
@@ -153,14 +147,12 @@ class ScoreTemplate(object):
         return True
 
     def allows_part_assignment(
-        self,
-        voice_name: str,
-        part_assignment: PartAssignment,
-        ) -> bool:
+        self, voice_name: str, part_assignment: PartAssignment
+    ) -> bool:
         """
         Is true when ``voice_name`` allows ``part_assignment``.
         """
-        section = part_assignment.section or 'ZZZ'
+        section = part_assignment.section or "ZZZ"
         if voice_name.startswith(section):
             return True
         return False
@@ -177,7 +169,7 @@ class ScoreTemplate(object):
         """
         assert isinstance(argument, (Score, Staff, StaffGroup)), repr(argument)
         wrappers: typing.List[Wrapper] = []
-        tag = Tags().REMOVE_ALL_EMPTY_STAVES
+        tag = const.REMOVE_ALL_EMPTY_STAVES
         empty_prototype = (MultimeasureRest, Skip)
         prototype = (Staff, StaffGroup)
         if isinstance(argument, Score):
@@ -193,9 +185,12 @@ class ScoreTemplate(object):
         for staff__group in staff__groups:
             leaf = None
             voices = select(staff__group).components(Voice)
-            # find first leaf in first nonempty voice
+            # find leaf 0 in first nonempty voice
             for voice in voices:
-                leaves = select(voice).leaves()
+                leaves = []
+                for leaf_ in select(voice).leaves():
+                    if inspect(leaf_).annotation(const.HIDDEN) is not True:
+                        leaves.append(leaf_)
                 if not all(isinstance(_, empty_prototype) for _ in leaves):
                     leaf = inspect(voice).leaf(0)
                     break
@@ -208,7 +203,7 @@ class ScoreTemplate(object):
                             voice_might_vanish = True
                     if not voice_might_vanish:
                         leaf = inspect(voice).leaf(0)
-                        if leaf is not None:    
+                        if leaf is not None:
                             break
             # otherwise, as last resort find first leaf in first voice
             if leaf is None:
@@ -217,41 +212,44 @@ class ScoreTemplate(object):
                 continue
             instrument = inspect(leaf).indicator(instruments.Instrument)
             if instrument is None:
-                string = 'default_instrument'
+                string = "default_instrument"
                 instrument = inspect(staff__group).annotation(string)
                 if instrument is not None:
                     wrapper = attach(
                         instrument,
                         leaf,
-                        tag='attach_defaults',
+                        context=staff__group.lilypond_type,
+                        tag="abjad.ScoreTemplate.attach_defaults",
                         wrapper=True,
-                        )
+                    )
                     wrappers.append(wrapper)
             margin_markup = inspect(leaf).indicator(MarginMarkup)
             if margin_markup is None:
-                string = 'default_margin_markup'
+                string = "default_margin_markup"
                 margin_markup = inspect(staff__group).annotation(string)
                 if margin_markup is not None:
                     wrapper = attach(
                         margin_markup,
                         leaf,
-                        tag=Tag('-PARTS').prepend('attach_defaults'),
+                        tag=Tag("-PARTS").prepend(
+                            "abjad.ScoreTemplate.attach_defaults"
+                        ),
                         wrapper=True,
-                        )
+                    )
                     wrappers.append(wrapper)
         for staff in staves:
             leaf = inspect(staff).leaf(0)
             clef = inspect(leaf).indicator(Clef)
             if clef is not None:
                 continue
-            clef = inspect(staff).annotation('default_clef')
+            clef = inspect(staff).annotation("default_clef")
             if clef is not None:
                 wrapper = attach(
                     clef,
                     leaf,
-                    tag='attach_defaults',
+                    tag="abjad.ScoreTemplate.attach_defaults",
                     wrapper=True,
-                    )
+                )
                 wrappers.append(wrapper)
         return wrappers
 

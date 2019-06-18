@@ -49,14 +49,11 @@ class Accidental(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = (
-        '_arrow',
-        '_semitones',
-        )
+    __slots__ = ("_arrow", "_semitones")
 
     ### INITIALIZER ##
 
-    def __init__(self, name='', *, arrow=None):
+    def __init__(self, name="", *, arrow=None):
         import abjad
         if name is None:
             semitones = 0
@@ -122,7 +119,9 @@ class Accidental(object):
                         semitone -= 1.25
             elif name in constants._accidental_name_to_abbreviation:
                 name = constants._accidental_name_to_abbreviation[name]
-                semitones = constants._accidental_abbreviation_to_semitones[name]
+                semitones = constants._accidental_abbreviation_to_semitones[
+                    name
+                ]
             else:
                 message = 'can not initialize accidental from value: {!r}'
                 message = message.format(name)
@@ -165,7 +164,7 @@ class Accidental(object):
         Returns new accidental.
         """
         if not isinstance(argument, type(self)):
-            message = 'can only add accidental to other accidental.'
+            message = "can only add accidental to other accidental."
             raise TypeError(message)
         semitones = self.semitones + argument.semitones
         return type(self)(semitones)
@@ -210,8 +209,8 @@ class Accidental(object):
 
         Returns new object of `argument` type.
         """
-        if not hasattr(argument, '_apply_accidental'):
-            message = 'do not know how to apply accidental to {!r}.'
+        if not hasattr(argument, "_apply_accidental"):
+            message = "do not know how to apply accidental to {!r}."
             message = message.format(argument)
             raise TypeError(message)
         return argument._apply_accidental(self)
@@ -231,7 +230,7 @@ class Accidental(object):
         try:
             result = hash(hash_values)
         except TypeError:
-            raise TypeError(f'unhashable type: {self}')
+            raise TypeError(f"unhashable type: {self}")
         return result
 
     def __lt__(self, argument):
@@ -349,15 +348,17 @@ class Accidental(object):
         Returns string.
         """
         if self.semitones in constants._accidental_semitones_to_abbreviation:
-            return constants._accidental_semitones_to_abbreviation[self.semitones]
-        character = 's'
+            return constants._accidental_semitones_to_abbreviation[
+                self.semitones
+            ]
+        character = "s"
         if self.semitones < 0:
-            character = 'f'
+            character = "f"
         semitones = abs(self.semitones)
         semitones, remainder = divmod(semitones, 1.0)
         abbreviation = character * int(semitones)
         if remainder:
-            abbreviation += 'q{}'.format(character)
+            abbreviation += "q{}".format(character)
         return abbreviation
 
     def __sub__(self, argument):
@@ -377,7 +378,7 @@ class Accidental(object):
         Returns new accidental.
         """
         if not isinstance(argument, type(self)):
-            message = 'can only subtract accidental from other accidental.'
+            message = "can only subtract accidental from other accidental."
             raise TypeError(message)
         semitones = self.semitones - argument.semitones
         return type(self)(semitones)
@@ -402,8 +403,8 @@ class Accidental(object):
             repr_is_indented=False,
             storage_format_args_values=[self.name],
             storage_format_is_indented=False,
-            storage_format_kwargs_names=['arrow'],
-            )
+            storage_format_kwargs_names=["arrow"],
+        )
 
     def _get_lilypond_format(self):
         return self._abbreviation
@@ -488,7 +489,9 @@ class Accidental(object):
         Returns string.
         """
         try:
-            abbreviation = constants._accidental_semitones_to_abbreviation[self.semitones]
+            abbreviation = constants._accidental_semitones_to_abbreviation[
+                self.semitones
+            ]
             name = constants._accidental_abbreviation_to_name[abbreviation]
         except KeyError:
             name = str(self)
@@ -562,7 +565,9 @@ class Accidental(object):
 
         Returns string.
         """
-        abbreviation = constants._accidental_semitones_to_abbreviation[self.semitones]
+        abbreviation = constants._accidental_semitones_to_abbreviation[
+            self.semitones
+        ]
         symbol = constants._accidental_abbreviation_to_symbol[abbreviation]
         return symbol
 
@@ -613,6 +618,7 @@ class Accidental(object):
         Returns none.
         """
         import abjad
+
         for leaf in abjad.iterate(selection).leaves():
             if isinstance(leaf, abjad.Note):
                 leaf.written_pitch = leaf.written_pitch._respell_with_flats()
@@ -666,6 +672,7 @@ class Accidental(object):
         Returns none.
         """
         import abjad
+
         for leaf in abjad.iterate(selection).leaves():
             if isinstance(leaf, abjad.Note):
                 leaf.written_pitch = leaf.written_pitch._respell_with_sharps()

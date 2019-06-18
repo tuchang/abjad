@@ -3,7 +3,7 @@ import fractions
 from abjad.system.StorageFormatManager import StorageFormatManager
 
 
-class NonreducedRatio(collections.Sequence):
+class NonreducedRatio(collections.abc.Sequence):
     """
     Nonreduced ratio.
 
@@ -25,9 +25,7 @@ class NonreducedRatio(collections.Sequence):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = (
-        '_numbers',
-        )
+    __slots__ = ("_numbers",)
 
     ### INITIALIZER ###
 
@@ -56,7 +54,7 @@ class NonreducedRatio(collections.Sequence):
         """
         return StorageFormatManager.compare_objects(self, argument)
 
-    def __format__(self, format_specification=''):
+    def __format__(self, format_specification=""):
         """
         Formats duration.
 
@@ -69,7 +67,8 @@ class NonreducedRatio(collections.Sequence):
         Returns string.
         """
         import abjad
-        if format_specification in ('', 'storage'):
+
+        if format_specification in ("", "storage"):
             return abjad.StorageFormatManager(self).get_storage_format()
         return str(self)
 
@@ -167,12 +166,13 @@ class NonreducedRatio(collections.Sequence):
 
     def _get_format_specification(self):
         import abjad
+
         return abjad.FormatSpecification(
             client=self,
             storage_format_args_values=[self.numbers],
             storage_format_is_indented=False,
             storage_format_kwargs_names=[],
-            )
+        )
 
     ### PRIVATE PROPERTIES ###
 
@@ -206,11 +206,9 @@ class NonreducedRatio(collections.Sequence):
         Returns tuple of multipliers.
         """
         import abjad
+
         weight = sum(self.numbers)
-        multipliers = [
-            abjad.Multiplier((_, weight))
-            for _ in self.numbers
-            ]
+        multipliers = [abjad.Multiplier((_, weight)) for _ in self.numbers]
         multipliers = tuple(multipliers)
         return multipliers
 

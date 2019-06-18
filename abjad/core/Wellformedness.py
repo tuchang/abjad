@@ -1,3 +1,5 @@
+import typing
+from abjad import const
 from abjad.indicators.Clef import Clef
 from abjad.indicators.StartHairpin import StartHairpin
 from abjad.indicators.StartTextSpan import StartTextSpan
@@ -11,6 +13,7 @@ from abjad.top.setting import setting
 from abjad.utilities.Sequence import Sequence
 from .Container import Container
 from .Context import Context
+from .Leaf import Leaf
 
 
 class Wellformedness(object):
@@ -26,11 +29,9 @@ class Wellformedness(object):
 
     ### CLASS VARIABLES ###
 
-    __documentation_section__ = 'Collaborators'
+    __documentation_section__ = "Collaborators"
 
-    __slots__ = (
-        '_allow_percussion_clef',
-        )
+    __slots__ = ("_allow_percussion_clef",)
 
     _publish_storage_format = True
 
@@ -49,7 +50,7 @@ class Wellformedness(object):
         """
         if argument is None:
             return
-        check_names = [_ for _ in dir(self) if _.startswith('check_')]
+        check_names = [_ for _ in dir(self) if _.startswith("check_")]
         triples = []
         for current_check_name in sorted(check_names):
             current_check = getattr(self, current_check_name)
@@ -67,21 +68,19 @@ class Wellformedness(object):
     ### PUBLIC PROPERTIES ###
 
     @property
-    def allow_percussion_clef(self):
+    def allow_percussion_clef(self) -> typing.Optional[bool]:
         """
         Is true when wellformedness allows percussion clef.
-
-        Returns true, false or none.
         """
         return self._allow_percussion_clef
 
     ### PUBLIC METHODS ###
 
-    def check_duplicate_ids(self, argument=None):
+    def check_duplicate_ids(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         """
         Checks duplicate IDs.
-
-        Returns violators and total.
         """
         violators = []
         components = iterate(argument).components()
@@ -90,11 +89,14 @@ class Wellformedness(object):
         if len(unique_ids) < len(total_ids):
             for current_id in unique_ids:
                 if 1 < total_ids.count(current_id):
-                    violators.extend([_ for _ in components
-                        if id(_) == current_id])
+                    violators.extend(
+                        [_ for _ in components if id(_) == current_id]
+                    )
         return violators, len(total_ids)
 
-    def check_empty_containers(self, argument=None):
+    def check_empty_containers(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks empty containers.
 
@@ -119,8 +121,6 @@ class Wellformedness(object):
             >>> violators
             [Container()]
 
-        Returns list of empty containers and count of all containers in
-        ``argument``.
         """
         violators, containers = [], set()
         for container in iterate(argument).components(Container):
@@ -129,35 +129,38 @@ class Wellformedness(object):
                 violators.append(container)
         return violators, len(containers)
 
-    def check_misrepresented_flags(self, argument=None):
+    def check_misrepresented_flags(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         """
         Checks misrepresented flags.
-
-        Returns violators and total.
         """
-        violators, total = [], set()
+        violators: typing.List[Leaf] = []
+        total = set()
         for leaf in iterate(argument).leaves():
             total.add(leaf)
             flags = leaf.written_duration.flag_count
-            left = getattr(setting(leaf), 'stem_left_beam_count', None)
-            right = getattr(setting(leaf), 'stem_right_beam_count', None)
+            left = getattr(setting(leaf), "stem_left_beam_count", None)
+            right = getattr(setting(leaf), "stem_right_beam_count", None)
             if left is not None:
-                if (flags < left or
-                    (left < flags and right not in (flags, None))):
+                if flags < left or (
+                    left < flags and right not in (flags, None)
+                ):
                     if leaf not in violators:
                         violators.append(leaf)
             if right is not None:
-                if (flags < right or
-                    (right < flags and left not in (flags, None))):
+                if flags < right or (
+                    right < flags and left not in (flags, None)
+                ):
                     if leaf not in violators:
                         violators.append(leaf)
         return violators, len(total)
 
-    def check_missing_parents(self, argument=None):
+    def check_missing_parents(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         """
         Checks missing parents.
-
-        Returns violators and total.
         """
         violators, total = [], set()
         components = iterate(argument).components()
@@ -169,7 +172,9 @@ class Wellformedness(object):
                     violators.append(component)
         return violators, len(total)
 
-    def check_notes_on_wrong_clef(self, argument=None):
+    def check_notes_on_wrong_clef(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks notes and chords on wrong clef.
 
@@ -260,7 +265,6 @@ class Wellformedness(object):
             0 /	0 unterminated hairpins
             0 /	0 unterminated text spanners
 
-        Returns true or false.
         """
         violators, total = [], set()
         for leaf in iterate(argument).leaves():
@@ -273,12 +277,14 @@ class Wellformedness(object):
                 continue
             allowable_clefs = [Clef(_) for _ in instrument.allowable_clefs]
             if self.allow_percussion_clef:
-                allowable_clefs.append(Clef('percussion'))
+                allowable_clefs.append(Clef("percussion"))
             if clef not in allowable_clefs:
                 violators.append(leaf)
         return violators, len(total)
 
-    def check_out_of_range_pitches(self, argument=None):
+    def check_out_of_range_pitches(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks out-of-range notes.
 
@@ -315,12 +321,48 @@ class Wellformedness(object):
             0 /	0 unterminated hairpins
             0 /	0 unterminated text spanners
 
-        Returns true or false.
+        ..  container:: example
+
+            Allows out-of-range pitches:
+
+            >>> staff = abjad.Staff("c'8 r8 <d fs>8 r8")
+            >>> violin = abjad.Violin()
+            >>> abjad.attach(violin, staff[0])
+            >>> abjad.attach(abjad.const.ALLOW_OUT_OF_RANGE, staff[2])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    c'8
+                    r8
+                    <d fs>8
+                    r8
+                }
+
+            >>> agent = abjad.inspect(staff)
+            >>> print(agent.tabulate_wellformedness())
+            0 /	5 duplicate ids
+            0 /	1 empty containers
+            0 /	4 misrepresented flags
+            0 /	5 missing parents
+            0 /	4 notes on wrong clef
+            0 /	2 out of range pitches
+            0 /	0 overlapping text spanners
+            0 /	0 unmatched stop text spans
+            0 /	0 unterminated hairpins
+            0 /	0 unterminated text spanners
+
         """
         violators, total = [], set()
         for leaf in iterate(argument).leaves(pitched=True):
             total.add(leaf)
-            if inspect(leaf).annotation('HIDDEN') is True:
+            if inspect(leaf).has_indicator(const.ALLOW_OUT_OF_RANGE):
+                continue
+            # TODO: change to has_indicator(const.HIDDEN):
+            if inspect(leaf).annotation(const.HIDDEN) is True:
                 continue
             instrument = inspect(leaf).effective(Instrument)
             if instrument is None:
@@ -329,7 +371,9 @@ class Wellformedness(object):
                 violators.append(leaf)
         return violators, len(total)
 
-    def check_overlapping_text_spanners(self, argument=None):
+    def check_overlapping_text_spanners(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks overlapping text spanners.
 
@@ -437,43 +481,46 @@ class Wellformedness(object):
             0 /	0 unterminated hairpins
             0 /	2 unterminated text spanners
 
-        Returns violators and total.
         """
         violators, total = [], 0
+
         def key(wrapper):
             if isinstance(wrapper.indicator, StartTextSpan):
                 priority = 1
             else:
                 priority = 0
             return (wrapper.start_offset, priority)
+
         for context in iterate(argument).components(Context):
             wrappers = context._dependent_wrappers[:]
             wrappers.sort(key=key)
-            open_spanners = {}
+            open_spanners: typing.Dict = {}
             for wrapper in wrappers:
                 if isinstance(wrapper.indicator, StartTextSpan):
-                    #print(wrapper.indicator)
+                    # print(wrapper.indicator)
                     total += 1
                     command = wrapper.indicator.command
-                    command = command.replace('start', '')
-                    command = command.replace('Start', '')
-                    #print(command, 'START', wrapper.start_offset)
+                    command = command.replace("start", "")
+                    command = command.replace("Start", "")
+                    # print(command, 'START', wrapper.start_offset)
                     if command not in open_spanners:
                         open_spanners[command] = []
                     if open_spanners[command]:
                         violators.append(wrapper.component)
                     open_spanners[command].append(wrapper.component)
                 elif isinstance(wrapper.indicator, StopTextSpan):
-                    #print(wrapper.indicator)
+                    # print(wrapper.indicator)
                     command = wrapper.indicator.command
-                    command = command.replace('stop', '')
-                    command = command.replace('Stop', '')
-                    #print(command, 'STOP', wrapper.start_offset)
+                    command = command.replace("stop", "")
+                    command = command.replace("Stop", "")
+                    # print(command, 'STOP', wrapper.start_offset)
                     if command in open_spanners and open_spanners[command]:
                         open_spanners[command].pop()
         return violators, total
 
-    def check_unmatched_stop_text_spans(self, argument=None):
+    def check_unmatched_stop_text_spans(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks unmatched stop text spans.
 
@@ -532,34 +579,37 @@ class Wellformedness(object):
             >>> abjad.inspect(voice).wellformed()
             True
 
-        Returns violators and total.
         """
         violators, total = [], 0
         for context in iterate(argument).components(Context):
             wrappers = context._dependent_wrappers[:]
             wrappers.sort(key=lambda _: _.start_offset)
-            open_spanners = {}
+            open_spanners: typing.Dict = {}
             for wrapper in wrappers:
                 if isinstance(wrapper.indicator, StartTextSpan):
                     total += 1
                     command = wrapper.indicator.command
-                    command = command.replace('start', '')
-                    command = command.replace('Start', '')
+                    command = command.replace("start", "")
+                    command = command.replace("Start", "")
                     if command not in open_spanners:
                         open_spanners[command] = []
                     open_spanners[command].append(wrapper.component)
                 elif isinstance(wrapper.indicator, StopTextSpan):
                     command = wrapper.indicator.command
-                    command = command.replace('stop', '')
-                    command = command.replace('Stop', '')
-                    if (command not in open_spanners or
-                        not open_spanners[command]):
+                    command = command.replace("stop", "")
+                    command = command.replace("Stop", "")
+                    if (
+                        command not in open_spanners
+                        or not open_spanners[command]
+                    ):
                         violators.append(wrapper.component)
                     else:
                         open_spanners[command].pop()
         return violators, total
 
-    def check_unterminated_hairpins(self, argument=None):
+    def check_unterminated_hairpins(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks unterminated hairpins.
 
@@ -676,7 +726,6 @@ class Wellformedness(object):
             >>> abjad.inspect(voice).wellformed()
             True
 
-        Returns violators and total.
         """
         violators, total = [], 0
         for context in iterate(argument).components(Context):
@@ -685,19 +734,23 @@ class Wellformedness(object):
             wrappers = context._dependent_wrappers[:]
             wrappers.sort(key=lambda _: _.start_offset)
             for wrapper in wrappers:
-                parameter = getattr(wrapper.indicator, 'parameter', None)
-                if (parameter == 'DYNAMIC' or
-                    isinstance(wrapper.indicator, StopHairpin)):
+                parameter = getattr(wrapper.indicator, "parameter", None)
+                if parameter == "DYNAMIC" or isinstance(
+                    wrapper.indicator, StopHairpin
+                ):
                     last_dynamic = wrapper.indicator
                     last_tag = wrapper.tag
                     if isinstance(wrapper.indicator, StartHairpin):
                         total += 1
-            if (isinstance(last_dynamic, StartHairpin) and
-                'right_broken' not in str(last_tag)):
+            if isinstance(
+                last_dynamic, StartHairpin
+            ) and "right_broken" not in str(last_tag):
                 violators.append(wrapper.component)
         return violators, total
 
-    def check_unterminated_text_spanners(self, argument=None):
+    def check_unterminated_text_spanners(
+        self, argument=None
+    ) -> typing.Tuple[typing.List, int]:
         r"""
         Checks unterminated text spanners.
 
@@ -756,28 +809,29 @@ class Wellformedness(object):
             >>> abjad.inspect(voice).wellformed()
             True
 
-        Returns violators and total.
         """
         violators, total = [], 0
         for context in iterate(argument).components(Context):
             wrappers = context._dependent_wrappers[:]
             wrappers.sort(key=lambda _: _.start_offset)
-            open_spanners = {}
+            open_spanners: typing.Dict = {}
             for wrapper in wrappers:
                 if isinstance(wrapper.indicator, StartTextSpan):
                     total += 1
                     command = wrapper.indicator.command
-                    command = command.replace('start', '')
-                    command = command.replace('Start', '')
+                    command = command.replace("start", "")
+                    command = command.replace("Start", "")
                     if command not in open_spanners:
                         open_spanners[command] = []
                     open_spanners[command].append(wrapper.component)
                 elif isinstance(wrapper.indicator, StopTextSpan):
                     command = wrapper.indicator.command
-                    command = command.replace('stop', '')
-                    command = command.replace('Stop', '')
-                    if (command not in open_spanners or
-                        not open_spanners[command]):
+                    command = command.replace("stop", "")
+                    command = command.replace("Stop", "")
+                    if (
+                        command not in open_spanners
+                        or not open_spanners[command]
+                    ):
                         # unmatched stop text span
                         pass
                     else:

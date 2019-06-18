@@ -7,23 +7,21 @@ class Line(object):
 
     ..  container:: example
 
-        >>> string = r'    %@%  \with-color %! MEASURE_NUMBER_MARKUP:SM31'
+        >>> string = r'    %@%  \with-color %! MEASURE_NUMBER:SM31'
         >>> abjad.Line(string)
-        Line(string='    %@%  \\with-color %! MEASURE_NUMBER_MARKUP:SM31')
+        Line(string='    %@%  \\with-color %! MEASURE_NUMBER:SM31')
 
     """
 
     ### CLASS VARIABLES ###
 
-    __documentation_section__ = 'Segment-makers'
+    __documentation_section__ = "Segment-makers"
 
-    __slots__ = (
-        '_string',
-        )
+    __slots__ = ("_string",)
 
     ### INITIALIZER ###
 
-    def __init__(self, string=''):
+    def __init__(self, string=""):
         assert isinstance(string, str), repr(string)
         self._string = string
 
@@ -41,9 +39,9 @@ class Line(object):
 
         ..  container:: example
 
-            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER:SM31'
             >>> str(abjad.Line(string))
-            '    %@%  \\with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            '    %@%  \\with-color %! MEASURE_NUMBER:SM31'
 
         Returns string.
         """
@@ -58,9 +56,9 @@ class Line(object):
 
         ..  container:: example
 
-            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER:SM31'
             >>> abjad.Line(string).string
-            '    %@%  \\with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            '    %@%  \\with-color %! MEASURE_NUMBER:SM31'
 
         Returns string.
         """
@@ -69,14 +67,14 @@ class Line(object):
     ### PUBLIC METHODS ###
 
     def get_tags(self):
-        """
+        r"""
         Gets tags.
 
         ..  container:: example
 
-            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER:SM31'
             >>> abjad.Line(string).get_tags()
-            ['MEASURE_NUMBER_MARKUP', 'SM31']
+            ['MEASURE_NUMBER', 'SM31']
 
         ..  container:: example
 
@@ -90,10 +88,10 @@ class Line(object):
         Returns list of zero or more strings.
         """
         tags = []
-        if ' %! ' in self.string:
-            for chunk in self.string.split(' %! ')[1:]:
+        if " %! " in self.string:
+            for chunk in self.string.split(" %! ")[1:]:
                 parts = chunk.split()
-                tags.extend(parts[0].split(':'))
+                tags.extend(parts[0].split(":"))
         return tags
 
     def is_active(self):
@@ -139,9 +137,9 @@ class Line(object):
         Returns true or false.
         """
         string = self.string.strip()
-        if string.startswith('%@%'):
+        if string.startswith("%@%"):
             return True
-        if string.startswith('%%%'):
+        if string.startswith("%%%"):
             return True
         return False
 
@@ -151,20 +149,20 @@ class Line(object):
 
         ..  container:: example
 
-            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER_MARKUP:SM31'
+            >>> string = r'    %@%  \with-color %! MEASURE_NUMBER:SM31'
             >>> line = abjad.Line(string)
 
         ..  container:: example
 
             Strings:
 
-            >>> line.match('MEASURE_NUMBER_MARKUP')
+            >>> line.match('MEASURE_NUMBER')
             True
 
             >>> line.match('SM31')
             True
 
-            >>> line.match(['MEASURE_NUMBER_MARKUP', 'SM31'])
+            >>> line.match(['MEASURE_NUMBER', 'SM31'])
             False
 
             >>> line.match('%@%')
@@ -194,7 +192,7 @@ class Line(object):
             Functions:
 
             >>> def predicate(tags):
-            ...     if 'SM31' in tags and 'MEASURE_NUMBER_MARKUP' in tags:
+            ...     if 'SM31' in tags and 'MEASURE_NUMBER' in tags:
             ...         return True
             ...     else:
             ...         return False
@@ -203,7 +201,7 @@ class Line(object):
             True
 
             >>> def predicate(tags):
-            ...     if 'SM31' in tags and 'MEASURE_NUMBER_MARKUP' not in tags:
+            ...     if 'SM31' in tags and 'MEASURE_NUMBER' not in tags:
             ...         return True
             ...     else:
             ...         return False

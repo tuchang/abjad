@@ -21,25 +21,15 @@ class Duplication(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = (
-        '_counts',
-        '_indices',
-        '_period',
-        )
+    __slots__ = ("_counts", "_indices", "_period")
 
     _publish_storage_format = True
 
     ### INITIALIZER ###
 
-    def __init__(
-        self,
-        *,
-        counts=None,
-        indices=None,
-        period=None,
-        ):
+    def __init__(self, *, counts=None, indices=None, period=None):
         if counts is not None:
-            if isinstance(counts, collections.Sequence):
+            if isinstance(counts, collections.abc.Sequence):
                 assert len(counts)
                 counts = tuple(int(_) for _ in counts)
                 assert all(0 <= _ for _ in counts)
@@ -157,7 +147,7 @@ class Duplication(object):
         """
         import abjad
 
-        if not isinstance(argument, collections.Sequence):
+        if not isinstance(argument, collections.abc.Sequence):
             argument = (argument,)
 
         counts = self.counts
@@ -191,19 +181,14 @@ class Duplication(object):
             else:
                 result = type(argument)()
             iterator = abjad.sequence(argument).partition_by_counts(
-                [self.period],
-                cyclic=True,
-                overhang=True,
-                )
+                [self.period], cyclic=True, overhang=True
+            )
             for i, shard in enumerate(iterator):
                 shard = type(argument)(shard) * counts[i]
                 result = result + shard
             return result
 
-        pattern = abjad.Pattern(
-            indices=self.indices,
-            period=self.period,
-            )
+        pattern = abjad.Pattern(indices=self.indices, period=self.period)
         result = []
         length = len(argument)
         j = 0
@@ -235,7 +220,7 @@ class Duplication(object):
         try:
             result = hash(hash_values)
         except TypeError:
-            raise TypeError(f'unhashable type: {self}')
+            raise TypeError(f"unhashable type: {self}")
         return result
 
     def __repr__(self) -> str:

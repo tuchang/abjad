@@ -5,12 +5,13 @@ import uqbar.apis
 
 
 def yield_all_modules(paths=None):
-    '''
+    """
     Yields all modules encountered in `path`.
 
     Returns generator.
-    '''
+    """
     import abjad
+
     _paths = []
     if not paths:
         _paths = abjad.__path__
@@ -19,7 +20,7 @@ def yield_all_modules(paths=None):
         _paths.extend(module.__path__)
     elif isinstance(paths, types.ModuleType):
         _paths.extend(paths.__path__)
-    elif isinstance(paths, collections.Iterable):
+    elif isinstance(paths, collections.abc.Iterable):
         for path in paths:
             if isinstance(path, types.ModuleType):
                 _paths.extend(path.__path__)
