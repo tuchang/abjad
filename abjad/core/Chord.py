@@ -4,7 +4,6 @@ from abjad import instruments
 from abjad import mathtools
 from abjad import pitch as abjad_pitch
 from abjad import typings
-from abjad.indicators.Tremolo import Tremolo
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.top.inspect import inspect
 from abjad.top.parse import parse
@@ -66,6 +65,7 @@ class Chord(Leaf):
         tag: str = None,
     ) -> None:
         from abjad.ly import drums
+        from .Note import Note
 
         assert len(arguments) in (0, 1, 2)
         self._note_heads = NoteHeadList(client=self)
@@ -83,12 +83,13 @@ class Chord(Leaf):
             written_duration = leaf.written_duration
             if multiplier is None:
                 multiplier = leaf.multiplier
-            if "written_pitch" in dir(leaf):
+            # TODO: move to dedicated from_note() constructor:
+            if isinstance(leaf, Note) and leaf.note_head is not None:
                 written_pitches.append(leaf.note_head.written_pitch)
                 are_cautionary = [leaf.note_head.is_cautionary]
                 are_forced = [leaf.note_head.is_forced]
                 are_parenthesized = [leaf.note_head.is_parenthesized]
-            elif "written_pitches" in dir(leaf):
+            elif isinstance(leaf, Chord):
                 written_pitches.extend(
                     x.written_pitch for x in leaf.note_heads
                 )
@@ -97,6 +98,7 @@ class Chord(Leaf):
                 are_parenthesized = [
                     x.is_parenthesized for x in leaf.note_heads
                 ]
+        # TODO: move to dedicated constructor:
         elif len(arguments) == 2:
             written_pitches, written_duration = arguments
             if isinstance(written_pitches, str):
@@ -104,7 +106,7 @@ class Chord(Leaf):
             elif isinstance(written_pitches, type(self)):
                 written_pitches = written_pitches.written_pitches
         elif len(arguments) == 0:
-            written_pitches = [0, 4, 7]
+            written_pitches = [abjad_pitch.NamedPitch(_) for _ in [0, 4, 7]]
             written_duration = Duration(1, 4)
         else:
             raise ValueError(f"can not initialize chord from {arguments!r}.")
@@ -132,6 +134,7 @@ class Chord(Leaf):
                     is_parenthesized=is_parenthesized,
                 )
             else:
+                assert isinstance(written_pitch, str), repr(written_pitch)
                 note_head = DrumNoteHead(
                     written_pitch=written_pitch,
                     is_cautionary=is_cautionary,
@@ -144,11 +147,9 @@ class Chord(Leaf):
 
     ### SPECIAL METHODS ###
 
-    def __copy__(self, *arguments):
+    def __copy__(self, *arguments) -> "Chord":
         """
-        Shallow copies chord.
-
-        Returns new chord.
+        Copies chord.
         """
         new_chord = Leaf.__copy__(self, *arguments)
         new_chord.note_heads[:] = []
@@ -157,9 +158,16 @@ class Chord(Leaf):
             new_chord.note_heads.append(note_head)
         return new_chord
 
-    def __getnewargs__(self):
+    def __getnewargs__(
+        self
+    ) -> typing.Tuple[abjad_pitch.PitchSegment, Duration]:
         """
         Gets new chord arguments.
+
+        ..  container:: example
+
+            >>> abjad.Chord("<c' d'>4").__getnewargs__()
+            (PitchSegment("c' d'"), Duration(1, 4))
 
         Returns pair.
         """
@@ -172,23 +180,12 @@ class Chord(Leaf):
         result.append(self._format_grace_body())
         result.append(("comments", bundle.before.comments))
         commands = bundle.before.commands
-        if inspect(self).has_indicator(Tremolo):
-            tremolo_command = self._format_repeat_tremolo_command()
-            commands = list(commands)
-            commands.append(tremolo_command)
-            commands = tuple(commands)
         result.append(("commands", commands))
         result.append(("indicators", bundle.before.indicators))
         result.append(("grob overrides", bundle.grob_overrides))
         result.append(("context settings", bundle.context_settings))
         result.append(("spanners", bundle.before.spanners))
-        return result
-
-    def _format_close_brackets_slot(self, bundle):
-        result = []
-        if inspect(self).has_indicator(Tremolo):
-            brackets_close = ["}"]
-            result.append([("close brackets", ""), brackets_close])
+        result.append(self._format_after_grace_opening())
         return result
 
     def _format_leaf_nucleus(self):
@@ -205,18 +202,6 @@ class Chord(Leaf):
             result.append(">")
             result = "\n".join(result)
             result += str(self._get_formatted_duration())
-        elif inspect(self).has_indicator(Tremolo):
-            reattack_duration = self._get_tremolo_reattack_duration()
-            duration_string = reattack_duration.lilypond_duration_string
-            durated_pitches = []
-            for note_head in note_heads:
-                durated_pitch = format(note_head) + duration_string
-                durated_pitches.append(durated_pitch)
-            tremolo = inspect(self).indicator(Tremolo)
-            if tremolo.is_slurred:
-                durated_pitches[0] = durated_pitches[0] + r" \("
-                durated_pitches[-1] = durated_pitches[-1] + r" \)"
-            result = " ".join(durated_pitches)
         else:
             result.extend([format(_) for _ in note_heads])
             result = "<%s>%s" % (
@@ -225,25 +210,6 @@ class Chord(Leaf):
             )
         # single string, but wrapped in list bc contribution
         return ["nucleus", [result]]
-
-    def _format_open_brackets_slot(self, bundle):
-        result = []
-        if inspect(self).has_indicator(Tremolo):
-            brackets_open = ["{"]
-            result.append([("open brackets", ""), brackets_open])
-        return result
-
-    def _format_repeat_tremolo_command(self):
-        tremolo = inspect(self).indicator(Tremolo)
-        reattack_duration = self._get_tremolo_reattack_duration()
-        repeat_count = self.written_duration / reattack_duration / 2
-        if not mathtools.is_integer_equivalent(repeat_count):
-            message = f"can not tremolo duration {self.written_duration}"
-            message += f" with {tremolo.beam_count} beams."
-            raise Exception(message)
-        repeat_count = int(repeat_count)
-        command = r"\repeat tremolo {}".format(repeat_count)
-        return command
 
     def _get_compact_representation(self):
         return f"<{self._get_summary()}>{self._get_formatted_duration()}"
@@ -272,16 +238,6 @@ class Chord(Leaf):
 
     def _get_summary(self):
         return " ".join([str(x) for x in self.note_heads])
-
-    def _get_tremolo_reattack_duration(self):
-        tremolos = inspect(self).indicators(Tremolo)
-        if not tremolos:
-            return
-        tremolo = tremolos[0]
-        exponent = 2 + tremolo.beam_count
-        denominator = 2 ** exponent
-        reattack_duration = Duration(1, denominator)
-        return reattack_duration
 
     ### PUBLIC PROPERTIES ###
 
@@ -356,9 +312,9 @@ class Chord(Leaf):
         self.note_heads.extend(note_heads)
 
     @property
-    def written_duration(self):
+    def written_duration(self) -> Duration:
         """
-        Gets written duration of chord.
+        Gets and sets written duration of chord.
 
         ..  container:: example
 
@@ -380,18 +336,15 @@ class Chord(Leaf):
             >>> chord.written_duration = abjad.Duration(1, 16)
             >>> abjad.show(chord) # doctest: +SKIP
 
-        Set duration.
-
-        Returns duration.
         """
-        return Leaf.written_duration.fget(self)
+        return super().written_duration
 
     @written_duration.setter
     def written_duration(self, argument):
         Leaf.written_duration.fset(self, argument)
 
     @property
-    def written_pitches(self):
+    def written_pitches(self) -> abjad_pitch.PitchSegment:
         """
         Written pitches in chord.
 
@@ -424,8 +377,6 @@ class Chord(Leaf):
             PitchSegment("f' b' d''")
 
         Set written pitches with any iterable.
-
-        Returns tuple.
         """
         return abjad_pitch.PitchSegment(
             items=(note_head.written_pitch for note_head in self.note_heads),
