@@ -63,9 +63,9 @@ class Staccato(object):
 
     __slots__ = ("_direction", "_tweaks")
 
-    _format_slot: enums.HorizontalAlignment = enums.Right
+    _format_slot = enums.Right
 
-    _time_orientation: enums.HorizontalAlignment = enums.Right
+    _time_orientation = enums.Right
 
     ### INITIALIZER ###
 

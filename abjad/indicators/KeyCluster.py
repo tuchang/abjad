@@ -56,11 +56,15 @@ class KeyCluster(object):
         include_black_keys: bool = True,
         include_white_keys: bool = True,
         hide: bool = False,
-        markup_direction: enums.VerticalAlignment = enums.Up,
+        markup_direction: enums.VerticalAlignment = None,
     ) -> None:
         assert include_black_keys or include_white_keys
         self._include_black_keys = bool(include_black_keys)
         self._include_white_keys = bool(include_white_keys)
+        if markup_direction is None:
+            result = enums.Up
+            assert isinstance(result, enums.VerticalAlignment)
+            markup_direction = result
         assert markup_direction in (enums.Up, enums.Center, enums.Down)
         self._markup_direction = markup_direction
         self._hide = bool(hide)

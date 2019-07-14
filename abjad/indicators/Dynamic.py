@@ -355,7 +355,8 @@ class Dynamic(object):
         import abjad
 
         if not isinstance(component_expression, abjad.Leaf):
-            return False
+            strings = ["Must be leaf (not {component_expression})."]
+            return strings
         return True
 
     def _format_effort_dynamic(self):
@@ -512,7 +513,9 @@ class Dynamic(object):
         if self._direction is not None:
             return self._direction
         elif self.name == "niente" or self.effort:
-            return enums.Down
+            result = enums.Down
+            assert isinstance(result, enums.VerticalAlignment)
+            return result
         else:
             return None
 

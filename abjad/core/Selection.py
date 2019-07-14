@@ -7,8 +7,8 @@ from abjad import enums
 from abjad import exceptions
 from abjad import mathtools
 from abjad import typings
-from abjad.indicators.TieIndicator import TieIndicator
 from abjad.indicators.RepeatTie import RepeatTie
+from abjad.indicators.TieIndicator import TieIndicator
 from abjad.mathtools import Ratio
 from abjad.pitch.PitchSet import PitchSet
 from abjad.system.FormatSpecification import FormatSpecification
@@ -526,19 +526,14 @@ class Selection(collections.abc.Sequence):
     ### PRIVATE METHODS ###
 
     def _attach_tie_to_leaves(self, repeat_ties=False):
-        from abjad.spanners import tie as abjad_tie
-
-        leaves = []
-        for leaf in self:
-            assert isinstance(leaf, Leaf), repr(leaf)
-            for leaf_ in abjad_inspect(leaf).logical_tie().leaves:
-                if leaf_ not in leaves:
-                    leaves.append(leaf_)
-        leaves = Selection(leaves)
-        for leaf in leaves:
-            detach(TieIndicator, leaf)
-            detach(RepeatTie, leaf)
-        abjad_tie(leaves, repeat=repeat_ties)
+        if not repeat_ties:
+            for leaf in self[:-1]:
+                detach(TieIndicator, leaf)
+                attach(TieIndicator(), leaf)
+        else:
+            for leaf in self[1:]:
+                detach(RepeatTie, leaf)
+                attach(RepeatTie(), leaf)
 
     @staticmethod
     def _check(items):
@@ -3839,7 +3834,7 @@ class Selection(collections.abc.Sequence):
         pitched: bool = None,
         reverse: bool = False,
         tail: bool = None,
-        trim: typing.Union[bool, enums.HorizontalAlignment] = None,
+        trim: typing.Union[bool, int] = None,
     ) -> typing.Union["Selection", Expression]:
         r'''
         Selects leaves (without grace notes).
@@ -5635,6 +5630,132 @@ class Selection(collections.abc.Sequence):
                     e'8
                     f'8
                 }
+
+        ..  container:: example
+
+            STATAL SELECTOR WITH PATTERN.  Note that this currently only works
+            with pattern objects; slices and integer indices do not work yet.
+
+            Selector configured for logical ties 4, 5, 6, 7:
+
+            ..  container:: example
+
+                >>> staff = abjad.Staff("c'8 d' ~ { d' e' r f'~ } f' r")
+                >>> abjad.setting(staff).auto_beaming = False
+                >>> abjad.show(staff) # doctest: +SKIP
+
+                >>> pattern = abjad.index([4, 5, 6, 7])
+                >>> result = abjad.select(staff).logical_ties()[pattern]
+
+                >>> for item in result:
+                ...     item
+                ...
+                LogicalTie([Note("f'8"), Note("f'8")])
+                LogicalTie([Rest('r8')])
+
+            ..  container:: example expression
+
+                >>> selector = abjad.select().logical_ties()[pattern]
+                >>> result = selector(staff)
+
+                >>> selector.print(result)
+                LogicalTie([Note("f'8"), Note("f'8")])
+                LogicalTie([Rest('r8')])
+
+                >>> selector.color(result)
+                >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff, strict=89)
+                \new Staff
+                \with
+                {
+                    autoBeaming = ##f
+                }
+                {
+                    c'8
+                    d'8
+                    ~
+                    {
+                        d'8
+                        e'8
+                        r8
+                        \abjad-color-music #'red
+                        f'8
+                        ~
+                    }
+                    \abjad-color-music #'red
+                    f'8
+                    \abjad-color-music #'blue
+                    r8
+                }
+
+            Selects logical ties 4 and 5 on first call.
+
+            Setting ``previous`` effects statal outcome:
+
+            ..  container:: example
+
+                >>> staff = abjad.Staff("c'8 d' ~ { d' e' r f'~ } f' r")
+                >>> abjad.setting(staff).auto_beaming = False
+                >>> abjad.show(staff) # doctest: +SKIP
+
+                >>> logical_ties = abjad.select(staff).logical_ties()
+                >>> previous = len(logical_ties)
+                >>> previous
+                6
+
+                >>> pattern = abjad.index([4, 5, 6, 7])
+                >>> result = abjad.select(staff, previous=previous)
+                >>> result = result.logical_ties()[pattern]
+
+                >>> for item in result:
+                ...     item
+                ...
+                LogicalTie([Note("c'8")])
+                LogicalTie([Note("d'8"), Note("d'8")])
+
+            ..  container:: example expression
+
+                >>> selector = abjad.select(previous=previous)
+                >>> selector = selector.logical_ties()[pattern]
+                >>> result = selector(staff)
+
+                >>> selector.print(result)
+                LogicalTie([Note("c'8")])
+                LogicalTie([Note("d'8"), Note("d'8")])
+
+                >>> selector.color(result)
+                >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff, strict=89)
+                \new Staff
+                \with
+                {
+                    autoBeaming = ##f
+                }
+                {
+                    \abjad-color-music #'red
+                    c'8
+                    \abjad-color-music #'blue
+                    d'8
+                    ~
+                    {
+                        \abjad-color-music #'blue
+                        d'8
+                        e'8
+                        r8
+                        f'8
+                        ~
+                    }
+                    f'8
+                    r8
+                }
+
+            Selects logical ties 6 and 7 on second call.
 
         '''
         if self._expression:
