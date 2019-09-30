@@ -56,9 +56,7 @@ class Segment(TypedTuple):
 
     ### SPECIAL METHODS ###
 
-    def __illustrate__(
-        self, markup_direction=enums.Up, figure_name=None, **keywords
-    ):
+    def __illustrate__(self, markup_direction=enums.Up, figure_name=None, **keywords):
         """
         Illustrates segment.
 

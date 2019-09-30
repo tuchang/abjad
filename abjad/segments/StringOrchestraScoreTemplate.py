@@ -542,9 +542,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
             instrument = abjad.Violin()
             instrument_count = self.violin_count
             instrument_staff_group, instrument_tag_names = self._make_instrument_staff_group(
-                clef_name=clef_name,
-                count=instrument_count,
-                instrument=instrument,
+                clef_name=clef_name, count=instrument_count, instrument=instrument
             )
             staff_group.append(instrument_staff_group)
             tag_names.extend(instrument_tag_names)
@@ -558,9 +556,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
             instrument = abjad.Viola()
             instrument_count = self.viola_count
             instrument_staff_group, instrument_tag_names = self._make_instrument_staff_group(
-                clef_name=clef_name,
-                count=instrument_count,
-                instrument=instrument,
+                clef_name=clef_name, count=instrument_count, instrument=instrument
             )
             staff_group.append(instrument_staff_group)
             tag_names.extend(instrument_tag_names)
@@ -574,9 +570,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
             instrument = abjad.Cello()
             instrument_count = self.cello_count
             instrument_staff_group, instrument_tag_names = self._make_instrument_staff_group(
-                clef_name=clef_name,
-                count=instrument_count,
-                instrument=instrument,
+                clef_name=clef_name, count=instrument_count, instrument=instrument
             )
             staff_group.append(instrument_staff_group)
             tag_names.extend(instrument_tag_names)
@@ -590,9 +584,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
             instrument = abjad.Contrabass()
             instrument_count = self.contrabass_count
             instrument_staff_group, instrument_tag_names = self._make_instrument_staff_group(
-                clef_name=clef_name,
-                count=instrument_count,
-                instrument=instrument,
+                clef_name=clef_name, count=instrument_count, instrument=instrument
             )
             staff_group.append(instrument_staff_group)
             tag_names.extend(instrument_tag_names)
@@ -611,9 +603,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
 
     ### PRIVATE METHODS ###
 
-    def _make_instrument_staff_group(
-        self, clef_name=None, count=None, instrument=None
-    ):
+    def _make_instrument_staff_group(self, clef_name=None, count=None, instrument=None):
         import abjad
 
         tag = "abjad.StringOrchestraScoreTemplate._make_instrument_staff_group"
@@ -639,9 +629,7 @@ class StringOrchestraScoreTemplate(ScoreTemplate):
                 tag_names.append(tag_name)
         return instrument_staff_group, tag_names
 
-    def _make_performer_staff_group(
-        self, clef_name=None, instrument=None, number=None
-    ):
+    def _make_performer_staff_group(self, clef_name=None, instrument=None, number=None):
         import abjad
 
         tag = "StringOrchestraScoreTemplate._make_performer_staff_group"

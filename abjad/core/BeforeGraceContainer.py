@@ -166,12 +166,7 @@ class BeforeGraceContainer(Container):
 
     __slots__ = ("_command", "_main_leaf")
 
-    _commands = (
-        r"\acciaccatura",
-        r"\appoggiatura",
-        r"\grace",
-        r"\slashedGrace",
-    )
+    _commands = (r"\acciaccatura", r"\appoggiatura", r"\grace", r"\slashedGrace")
 
     ### INITIALIZER ###
 

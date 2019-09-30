@@ -47,11 +47,7 @@ class DurationInequality(Inequality):
     ### INITIALIZER ###
 
     def __init__(
-        self,
-        operator_string: str = "<",
-        duration=None,
-        *,
-        preprolated: bool = None,
+        self, operator_string: str = "<", duration=None, *, preprolated: bool = None
     ) -> None:
         Inequality.__init__(self, operator_string=operator_string)
         if duration is None:

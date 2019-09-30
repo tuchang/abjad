@@ -213,9 +213,7 @@ class Iteration(object):
 
     ### PUBLIC METHODS ###
 
-    def components(
-        self, prototype=None, *, exclude=None, grace=None, reverse=None
-    ):
+    def components(self, prototype=None, *, exclude=None, grace=None, reverse=None):
         r"""
         Iterates components.
 
@@ -399,19 +397,13 @@ class Iteration(object):
             if not reverse:
                 for item in self.client:
                     generator = Iteration(item).components(
-                        prototype,
-                        exclude=exclude,
-                        grace=grace,
-                        reverse=reverse,
+                        prototype, exclude=exclude, grace=grace, reverse=reverse
                     )
                     yield from generator
             else:
                 for item in reversed(self.client):
                     generator = Iteration(item).components(
-                        prototype,
-                        exclude=exclude,
-                        grace=grace,
-                        reverse=reverse,
+                        prototype, exclude=exclude, grace=grace, reverse=reverse
                     )
                     yield from generator
         else:
@@ -498,13 +490,7 @@ class Iteration(object):
                 yield Selection(pair)
 
     def leaves(
-        self,
-        prototype=None,
-        *,
-        exclude=None,
-        grace=None,
-        pitched=None,
-        reverse=None,
+        self, prototype=None, *, exclude=None, grace=None, pitched=None, reverse=None
     ):
         r"""
         Iterates leaves.
@@ -750,13 +736,7 @@ class Iteration(object):
         )
 
     def logical_ties(
-        self,
-        *,
-        exclude=None,
-        grace=None,
-        nontrivial=None,
-        pitched=None,
-        reverse=None,
+        self, *, exclude=None, grace=None, nontrivial=None, pitched=None, reverse=None
     ):
         r"""
         Iterates logical ties.

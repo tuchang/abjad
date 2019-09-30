@@ -245,10 +245,7 @@ class ScoreTemplate(object):
             clef = inspect(staff).annotation("default_clef")
             if clef is not None:
                 wrapper = attach(
-                    clef,
-                    leaf,
-                    tag="abjad.ScoreTemplate.attach_defaults",
-                    wrapper=True,
+                    clef, leaf, tag="abjad.ScoreTemplate.attach_defaults", wrapper=True
                 )
                 wrappers.append(wrapper)
         return wrappers

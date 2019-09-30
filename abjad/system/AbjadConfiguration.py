@@ -80,9 +80,7 @@ class AbjadConfiguration(Configuration):
                     "(such as PDFs and LilyPond files) should be saved.",
                     "Defaults to $HOME/.abjad/output/",
                 ],
-                "default": os.path.join(
-                    str(self.configuration_directory), "output"
-                ),
+                "default": os.path.join(str(self.configuration_directory), "output"),
                 "validator": str,
             },
             "composer_email": {
@@ -288,9 +286,7 @@ class AbjadConfiguration(Configuration):
         Returns string.
         """
         result = "Abjad {} ({})"
-        result = result.format(
-            class_.get_abjad_version_string(), "development"
-        )
+        result = result.format(class_.get_abjad_version_string(), "development")
         return result
 
     @staticmethod

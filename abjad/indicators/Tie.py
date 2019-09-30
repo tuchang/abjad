@@ -138,9 +138,7 @@ class Tie(object):
     @staticmethod
     def _tag_show(strings):
         return LilyPondFormatManager.tag(
-            strings,
-            deactivate=True,
-            tag=abjad_tags.SHOW_TO_JOIN_BROKEN_SPANNERS,
+            strings, deactivate=True, tag=abjad_tags.SHOW_TO_JOIN_BROKEN_SPANNERS
         )
 
     ### PUBLIC PROPERTIES ###

@@ -1881,8 +1881,7 @@ class Label(object):
                 if not pitches:
                     continue
                 interval_class_vector = IntervalClassVector(
-                    pitches,
-                    item_class=NumberedInversionEquivalentIntervalClass,
+                    pitches, item_class=NumberedInversionEquivalentIntervalClass
                 )
                 markup = interval_class_vector._label
                 label = Markup(markup, direction=direction)
@@ -3498,9 +3497,7 @@ class Label(object):
                     if "#" in string:
                         string = '"' + string + '"'
                     label = Markup(
-                        rf"\markup {{ {string} }}",
-                        direction=direction,
-                        literal=True,
+                        rf"\markup {{ {string} }}", direction=direction, literal=True
                     )
                 elif isinstance(leaf, Chord):
                     pitches = leaf.written_pitches

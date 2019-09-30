@@ -84,9 +84,7 @@ class UpdateManager(object):
         while sibling is not None and sibling._parent is container:
             displacement -= abjad_inspect(sibling).duration()
             sibling = sibling._sibling(1)
-        start_offset = Offset(
-            main_leaf_start_offset, displacement=displacement
-        )
+        start_offset = Offset(main_leaf_start_offset, displacement=displacement)
         displacement += abjad_inspect(leaf).duration()
         stop_offset = Offset(main_leaf_start_offset, displacement=displacement)
         return start_offset, stop_offset
@@ -223,14 +221,10 @@ class UpdateManager(object):
 
     # TODO: reimplement with some type of bisection
     def _to_measure_number(self, component, measure_start_offsets):
-        component_start_offset = (
-            abjad_inspect(component).timespan().start_offset
-        )
+        component_start_offset = abjad_inspect(component).timespan().start_offset
         displacement = component_start_offset.displacement
         if displacement is not None:
-            component_start_offset = Offset(
-                component_start_offset, displacement=None
-            )
+            component_start_offset = Offset(component_start_offset, displacement=None)
             # score-initial grace music only:
             if displacement < 0 and component_start_offset == 0:
                 measure_number = 0
@@ -293,11 +287,7 @@ class UpdateManager(object):
         if not timespans:
             return
         for timespan in timespans:
-            if (
-                timespan.start_offset
-                <= component._start_offset
-                < timespan.stop_offset
-            ):
+            if timespan.start_offset <= component._start_offset < timespan.stop_offset:
                 pair = timespan.annotation
                 clocktime_start_offset, clocktime_duration = pair
                 local_offset = component._start_offset - timespan.start_offset
@@ -305,11 +295,7 @@ class UpdateManager(object):
                 duration = multiplier * clocktime_duration
                 offset = clocktime_start_offset + duration
                 component._start_offset_in_seconds = Offset(offset)
-            if (
-                timespan.start_offset
-                <= component._stop_offset
-                < timespan.stop_offset
-            ):
+            if timespan.start_offset <= component._stop_offset < timespan.stop_offset:
                 pair = timespan.annotation
                 clocktime_start_offset, clocktime_duration = pair
                 local_offset = component._stop_offset - timespan.start_offset
@@ -380,13 +366,10 @@ class UpdateManager(object):
                     on_beat_grace_container = on_beat_wrapper[0]
                 if on_beat_grace_container is not None:
                     durations = [
-                        abjad_inspect(_).duration()
-                        for _ in on_beat_grace_container
+                        abjad_inspect(_).duration() for _ in on_beat_grace_container
                     ]
                     start_displacement = sum(durations)
-                    start_offset = Offset(
-                        start_offset, displacement=start_displacement
-                    )
+                    start_offset = Offset(start_offset, displacement=start_displacement)
             stop_offset = start_offset + component._get_duration()
         component._start_offset = start_offset
         component._stop_offset = stop_offset
@@ -397,17 +380,11 @@ class UpdateManager(object):
         measure_start_offsets = self._get_measure_start_offsets(component)
         root = abjad_inspect(component).parentage().root
         for component in self._iterate_entire_score(root):
-            measure_number = self._to_measure_number(
-                component, measure_start_offsets
-            )
+            measure_number = self._to_measure_number(component, measure_start_offsets)
             component._measure_number = measure_number
 
     def _update_now(
-        self,
-        component,
-        offsets=False,
-        offsets_in_seconds=False,
-        indicators=False,
+        self, component, offsets=False, offsets_in_seconds=False, indicators=False
     ):
         assert offsets or offsets_in_seconds or indicators
         if component._is_forbidden_to_update:

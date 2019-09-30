@@ -51,9 +51,7 @@ class LilyPondTweakManager(LilyPondNameManager):
 
     ### SPECIAL METHODS ###
 
-    def __getattr__(
-        self, name
-    ) -> typing.Union[LilyPondNameManager, typing.Any]:
+    def __getattr__(self, name) -> typing.Union[LilyPondNameManager, typing.Any]:
         r"""
         Gets LilyPondNameManager (or LilyPondGrobNameManager) keyed to 
         ``name``.

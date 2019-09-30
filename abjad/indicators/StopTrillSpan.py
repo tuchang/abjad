@@ -33,9 +33,7 @@ class StopTrillSpan(object):
 
     ### INITIALIZER ###
 
-    def __init__(
-        self, *, leak: bool = None, right_broken: bool = None
-    ) -> None:
+    def __init__(self, *, leak: bool = None, right_broken: bool = None) -> None:
         if leak is not None:
             leak = bool(leak)
         self._leak = leak
@@ -69,9 +67,7 @@ class StopTrillSpan(object):
     def _tag_hide(strings):
         abjad_tags = Tags()
         return LilyPondFormatManager.tag(
-            strings,
-            deactivate=False,
-            tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS,
+            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
         )
 
     ### PUBLIC PROPERTIES ###

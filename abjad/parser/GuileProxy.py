@@ -100,9 +100,7 @@ class GuileProxy(object):
         Handles LilyPond ``\language`` command.
         """
         if string in self.client._language_pitch_names:
-            self.client._pitch_names = self.client._language_pitch_names[
-                string
-            ]
+            self.client._pitch_names = self.client._language_pitch_names[string]
         # try reparsing the next note name, if a note name immediately follows
         lookahead = self.client._parser.lookahead
         if lookahead.type == "STRING":
@@ -161,12 +159,8 @@ class GuileProxy(object):
             elif isinstance(component, (core.Chord, core.Note)):
                 pitch = self._make_relative_leaf(component, pitch)
                 if component in self.client._repeated_chords:
-                    for repeated_chord in self.client._repeated_chords[
-                        component
-                    ]:
-                        repeated_chord.written_pitches = (
-                            component.written_pitches
-                        )
+                    for repeated_chord in self.client._repeated_chords[component]:
+                        repeated_chord.written_pitches = component.written_pitches
             elif isinstance(component, core.Container):
                 for child in component:
                     pitch = recurse(child, pitch)
@@ -206,9 +200,7 @@ class GuileProxy(object):
         Handles LilyPond ``\times`` command.
         """
         n, d = fraction.numerator, fraction.denominator
-        if not isinstance(music, core.Context) and not isinstance(
-            music, core.Leaf
-        ):
+        if not isinstance(music, core.Context) and not isinstance(music, core.Leaf):
             assert isinstance(music, core.Container), repr(music)
             leaves = music[:]
             music[:] = []
@@ -222,9 +214,7 @@ class GuileProxy(object):
         from abjad import parser as abjad_parser
 
         def recurse(music):
-            key_signatures = music._get_indicators(
-                abjad_indicators.KeySignature
-            )
+            key_signatures = music._get_indicators(abjad_indicators.KeySignature)
             if key_signatures:
                 for x in key_signatures:
                     tonic = abjad_pitch.NamedPitch((x.tonic.name, 4))
@@ -330,15 +320,9 @@ class GuileProxy(object):
             float(down_pitch._get_diatonic_pitch_number())
             - float(reference._get_diatonic_pitch_number())
         ):
-            pair = (
-                up_pitch.pitch_class.name,
-                up_octave + pitch.octave.number - 3,
-            )
+            pair = (up_pitch.pitch_class.name, up_octave + pitch.octave.number - 3)
             pitch = abjad_pitch.NamedPitch(pair)
         else:
-            pair = (
-                down_pitch.pitch_class.name,
-                down_octave + pitch.octave.number - 3,
-            )
+            pair = (down_pitch.pitch_class.name, down_octave + pitch.octave.number - 3)
             pitch = abjad_pitch.NamedPitch(pair)
         return pitch

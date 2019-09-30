@@ -4,6 +4,7 @@ from abjad import enums
 from abjad import mathtools
 from abjad.system.FormatSpecification import FormatSpecification
 from . import constants
+
 try:
     from quicktions import Fraction
 except ImportError:
@@ -52,15 +53,13 @@ class Accidental(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = (
-        '_arrow',
-        '_semitones',
-        )
+    __slots__ = ("_arrow", "_semitones")
 
     ### INITIALIZER ##
 
-    def __init__(self, name='', *, arrow=None):
+    def __init__(self, name="", *, arrow=None):
         import abjad
+
         semitones = 0
         _arrow = None
         if name is None:
@@ -73,40 +72,41 @@ class Accidental(object):
                     semitones = pitch.accidental.semitones
                     _arrow = pitch.accidental.arrow
                 except Exception:
-                    message = 'can not instantiate {} from {!r}.'
+                    message = "can not instantiate {} from {!r}."
                     message = message.format(type(self).__name__, name)
                     raise TypeError(message)
             else:
                 group_dict = match.groupdict()
-                if group_dict['alphabetic_accidental']:
-                    prefix, _, suffix = name.partition('q')
-                    if prefix.startswith('s'):
+                if group_dict["alphabetic_accidental"]:
+                    prefix, _, suffix = name.partition("q")
+                    if prefix.startswith("s"):
                         semitones += len(prefix)
-                    elif prefix.startswith('f'):
+                    elif prefix.startswith("f"):
                         semitones -= len(prefix)
-                    if suffix == 's':
+                    if suffix == "s":
                         semitones += Fraction(1, 2)
-                        if prefix == 't':
+                        if prefix == "t":
                             semitones += 1
-                    elif suffix == 'f':
+                    elif suffix == "f":
                         semitones -= Fraction(1, 2)
-                        if prefix == 't':
+                        if prefix == "t":
                             semitones -= 1
-                elif group_dict['symbolic_accidental']:
-                    semitones += name.count('#')
-                    semitones -= name.count('b')
-                    if name.endswith('+'):
+                elif group_dict["symbolic_accidental"]:
+                    semitones += name.count("#")
+                    semitones -= name.count("b")
+                    if name.endswith("+"):
                         semitones += Fraction(1, 2)
-                    elif name.endswith('~'):
+                    elif name.endswith("~"):
                         semitones -= Fraction(1, 2)
-                elif group_dict['ekmelily_accidental']:
+                elif group_dict["ekmelily_accidental"]:
                     semitones = constants._accidental_abbreviation_to_semitones[
-                        group_dict['ekmelily_accidental']]
+                        group_dict["ekmelily_accidental"]
+                    ]
         elif isinstance(name, numbers.Number):
             semitones = abjad.Fraction(int(round(12 * name)), 12)
             if semitones.denominator == 12:
                 semitones = abjad.Fraction(int(round(6 * name)), 6)
-        elif hasattr(name, 'accidental'):
+        elif hasattr(name, "accidental"):
             _arrow = name.accidental.arrow
             semitones = name.accidental.semitones
         elif isinstance(name, type(self)):
@@ -118,7 +118,7 @@ class Accidental(object):
                 semitones = pitch.accidental.semitones
                 _arrow = pitch.accidental.arrow
             except Exception:
-                message = 'can not initialize accidental from value: {!r}'
+                message = "can not initialize accidental from value: {!r}"
                 message = message.format(name)
                 raise ValueError(message)
         semitones = mathtools.integer_equivalent_number_to_integer(semitones)
@@ -149,7 +149,7 @@ class Accidental(object):
         Returns new accidental.
         """
         if not isinstance(argument, type(self)):
-            message = 'can only add accidental to other accidental.'
+            message = "can only add accidental to other accidental."
             raise TypeError(message)
         semitones = self.semitones + argument.semitones
         return type(self)(semitones)
@@ -194,8 +194,8 @@ class Accidental(object):
 
         Returns new object of `argument` type.
         """
-        if not hasattr(argument, '_apply_accidental'):
-            message = 'do not know how to apply accidental to {!r}.'
+        if not hasattr(argument, "_apply_accidental"):
+            message = "do not know how to apply accidental to {!r}."
             message = message.format(argument)
             raise TypeError(message)
         return argument._apply_accidental(self)
@@ -316,14 +316,14 @@ class Accidental(object):
         """
         if self.semitones in constants._accidental_semitones_to_abbreviation:
             return constants._accidental_semitones_to_abbreviation[self.semitones]
-        character = 's'
+        character = "s"
         if self.semitones < 0:
-            character = 'f'
+            character = "f"
         semitones = abs(self.semitones)
         semitones, remainder = divmod(semitones, 1.0)
         abbreviation = character * int(semitones)
         if remainder:
-            abbreviation += 'q{}'.format(character)
+            abbreviation += "q{}".format(character)
         return abbreviation
 
     def __sub__(self, argument):
@@ -343,7 +343,7 @@ class Accidental(object):
         Returns new accidental.
         """
         if not isinstance(argument, type(self)):
-            message = 'can only subtract accidental from other accidental.'
+            message = "can only subtract accidental from other accidental."
             raise TypeError(message)
         semitones = self.semitones - argument.semitones
         return type(self)(semitones)
@@ -368,8 +368,8 @@ class Accidental(object):
             repr_is_indented=False,
             storage_format_args_values=[str(self)],
             storage_format_is_indented=False,
-            storage_format_kwargs_names=['arrow'],
-            )
+            storage_format_kwargs_names=["arrow"],
+        )
 
     def _get_lilypond_format(self):
         return self._abbreviation
@@ -539,6 +539,7 @@ class Accidental(object):
         Returns none.
         """
         import abjad
+
         for leaf in abjad.iterate(selection).leaves():
             if isinstance(leaf, abjad.Note):
                 leaf.written_pitch = leaf.written_pitch._respell_with_flats()
@@ -592,6 +593,7 @@ class Accidental(object):
         Returns none.
         """
         import abjad
+
         for leaf in abjad.iterate(selection).leaves():
             if isinstance(leaf, abjad.Note):
                 leaf.written_pitch = leaf.written_pitch._respell_with_sharps()

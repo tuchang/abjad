@@ -90,8 +90,7 @@ class Descendants(collections.abc.Sequence):
                 append_x = True
                 if not (
                     inspect(component).timespan().start_offset < cross_offset
-                    and cross_offset
-                    < inspect(component).timespan().stop_offset
+                    and cross_offset < inspect(component).timespan().stop_offset
                 ):
                     append_x = False
                 if append_x:

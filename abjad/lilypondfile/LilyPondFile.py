@@ -511,9 +511,7 @@ class LilyPondFile(object):
     def _get_formatted_blocks(self):
         result = []
         for item in self.items:
-            if "_get_lilypond_format" in dir(item) and not isinstance(
-                item, str
-            ):
+            if "_get_lilypond_format" in dir(item) and not isinstance(item, str):
                 try:
                     string = item._get_lilypond_format(tag=self.tag)
                 except TypeError:
@@ -527,9 +525,7 @@ class LilyPondFile(object):
     def _get_formatted_comments(self):
         result = []
         for comment in self.comments:
-            if "_get_lilypond_format" in dir(comment) and not isinstance(
-                comment, str
-            ):
+            if "_get_lilypond_format" in dir(comment) and not isinstance(comment, str):
                 lilypond_format = format(comment)
                 if lilypond_format:
                     string = f"% {comment}"
@@ -580,9 +576,7 @@ class LilyPondFile(object):
         return "\n\n".join(self._get_format_pieces())
 
     @staticmethod
-    def _make_global_context_block(
-        font_size=3, minimum_distance=10, padding=4
-    ):
+    def _make_global_context_block(font_size=3, minimum_distance=10, padding=4):
         assert isinstance(font_size, (int, float))
         assert isinstance(padding, (int, float))
         block = ContextBlock(name="Global_Context", type_="Engraver_group")
@@ -1398,9 +1392,7 @@ class LilyPondFile(object):
                         "Voice_3": "voiceThree",
                         "Voice_4": "voiceFour",
                     }
-                    command_string = voice_name_to_command_string.get(
-                        voice_name
-                    )
+                    command_string = voice_name_to_command_string.get(voice_name)
                     if command_string:
                         command = LilyPondLiteral("\\" + command_string)
                         attach(command, voice)

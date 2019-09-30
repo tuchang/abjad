@@ -96,12 +96,7 @@ class Fermata(object):
 
     ### CLASS VARIABLES ###
 
-    _allowable_commands = (
-        "fermata",
-        "longfermata",
-        "shortfermata",
-        "verylongfermata",
-    )
+    _allowable_commands = ("fermata", "longfermata", "shortfermata", "verylongfermata")
 
     __slots__ = ("_command", "_tweaks")
 

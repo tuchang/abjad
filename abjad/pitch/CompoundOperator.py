@@ -244,10 +244,7 @@ class CompoundOperator(object):
         operators = self.operators or []
         for operator in operators:
             markup = operator._get_markup(direction=direction)
-            if (
-                self.show_identity_operators
-                or not operator._is_identity_operator()
-            ):
+            if self.show_identity_operators or not operator._is_identity_operator():
                 markups.append(markup)
         if len(markups) == 0:
             return

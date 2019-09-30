@@ -44,9 +44,7 @@ class Parser(object):
             self._logger = yacc.NullLogger()
 
         self._lexer = ply.lex.lex(
-            debug=self.debug,
-            debuglog=self.logger,
-            object=self.lexer_rules_object,
+            debug=self.debug, debuglog=self.logger, object=self.lexer_rules_object
         )
 
         if self.pickle_path and not os.path.exists(self.pickle_path):

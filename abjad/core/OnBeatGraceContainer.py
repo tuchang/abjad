@@ -767,9 +767,7 @@ def on_beat_grace_container(
     anchor_leaf = abjad_inspect(anchor_voice_selection).leaf(0)
     anchor_voice = abjad_inspect(anchor_leaf).parentage().get(Voice)
     if anchor_voice.name is None:
-        raise Exception(
-            f"anchor voice must be named:\n   {repr(anchor_voice)}"
-        )
+        raise Exception(f"anchor voice must be named:\n   {repr(anchor_voice)}")
     anchor_voice_insert = Voice(name=anchor_voice.name)
     mutate(anchor_voice_selection).wrap(anchor_voice_insert)
     container = Container(simultaneous=True)
@@ -778,9 +776,7 @@ def on_beat_grace_container(
     on_beat_grace_container._match_anchor_leaf()
     on_beat_grace_container._set_leaf_durations()
     insert_duration = abjad_inspect(anchor_voice_insert).duration()
-    grace_container_duration = abjad_inspect(
-        on_beat_grace_container
-    ).duration()
+    grace_container_duration = abjad_inspect(on_beat_grace_container).duration()
     if insert_duration < grace_container_duration:
         message = f"graces {repr(grace_container_duration)}"
         message += f" exceed anchor {repr(insert_duration)}."

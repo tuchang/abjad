@@ -65,20 +65,12 @@ class LilyPondFormatBundle(object):
             "opening",
             "closing",
         )
-        grob_contribution_names = (
-            "context_settings",
-            "grob_overrides",
-            "grob_reverts",
-        )
+        grob_contribution_names = ("context_settings", "grob_overrides", "grob_reverts")
         names = [
-            _
-            for _ in slot_contribution_names
-            if getattr(self, _).has_contributions
+            _ for _ in slot_contribution_names if getattr(self, _).has_contributions
         ]
         names.extend(_ for _ in grob_contribution_names if getattr(self, _))
-        return FormatSpecification(
-            client=self, storage_format_kwargs_names=names
-        )
+        return FormatSpecification(client=self, storage_format_kwargs_names=names)
 
     ### PUBLIC METHODS ###
 

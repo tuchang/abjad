@@ -38,10 +38,7 @@ class Skip(Leaf):
     ### INITIALIZER ###
 
     def __init__(
-        self,
-        *arguments,
-        multiplier: typings.DurationTyping = None,
-        tag: str = None,
+        self, *arguments, multiplier: typings.DurationTyping = None, tag: str = None
     ) -> None:
         input_leaf = None
         written_duration = None

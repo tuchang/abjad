@@ -8,12 +8,7 @@ def test_Selection_are_logical_voice_01():
     False if not allow orphans; True if allow orphans.
     """
 
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     assert abjad.select(notes).are_logical_voice()
 
 

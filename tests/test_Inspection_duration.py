@@ -31,9 +31,7 @@ def test_Inspection_duration_01():
         """
     )
 
-    assert abjad.inspect(score).duration(in_seconds=True) == abjad.Duration(
-        400, 133
-    )
+    assert abjad.inspect(score).duration(in_seconds=True) == abjad.Duration(400, 133)
 
 
 def test_Inspection_duration_02():
@@ -72,18 +70,10 @@ def test_Inspection_duration_03():
         """
     )
 
-    assert abjad.inspect(staff[0]).duration(in_seconds=True) == abjad.Duration(
-        15, 19
-    )
-    assert abjad.inspect(staff[1]).duration(in_seconds=True) == abjad.Duration(
-        15, 19
-    )
-    assert abjad.inspect(staff[2]).duration(in_seconds=True) == abjad.Duration(
-        5, 7
-    )
-    assert abjad.inspect(staff[3]).duration(in_seconds=True) == abjad.Duration(
-        5, 7
-    )
+    assert abjad.inspect(staff[0]).duration(in_seconds=True) == abjad.Duration(15, 19)
+    assert abjad.inspect(staff[1]).duration(in_seconds=True) == abjad.Duration(15, 19)
+    assert abjad.inspect(staff[2]).duration(in_seconds=True) == abjad.Duration(5, 7)
+    assert abjad.inspect(staff[3]).duration(in_seconds=True) == abjad.Duration(5, 7)
 
 
 def test_Inspection_duration_04():

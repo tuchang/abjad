@@ -663,9 +663,7 @@ def bow_contact_spanner(
         previous_leaf = inspect(leaf).leaf(-1)
         previous_contact_point = None
         if previous_leaf is not None:
-            previous_contact_points = inspect(previous_leaf).indicators(
-                BowContactPoint
-            )
+            previous_contact_points = inspect(previous_leaf).indicators(BowContactPoint)
             if previous_contact_points:
                 previous_contact_point = previous_contact_points[0]
         if (
@@ -679,9 +677,7 @@ def bow_contact_spanner(
                 direction_change = enums.Up
         else:
             previous_leaf = inspect(leaf).leaf(-1)
-            previous_contact_point = inspect(previous_leaf).indicator(
-                BowContactPoint
-            )
+            previous_contact_point = inspect(previous_leaf).indicator(BowContactPoint)
             if (
                 previous_contact_point < this_contact_point
                 and next_contact_point < this_contact_point
@@ -1453,15 +1449,11 @@ def glissando(
                         ]
                     )
                 literal = LilyPondLiteral(strings)
-                attach(
-                    literal, leaf, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
-                )
+                attach(literal, leaf, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS)
             elif left_broken and leaf is leaves[1]:
                 string = r"\override NoteColumn.glissando-skip = ##t"
                 literal = LilyPondLiteral(string)
-                attach(
-                    literal, leaf, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
-                )
+                attach(literal, leaf, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS)
             if leaf is leaves[-1]:
                 strings = [
                     r"\revert Accidental.stencil",
@@ -1471,10 +1463,7 @@ def glissando(
                 ]
                 if hide_middle_stems:
                     strings.extend(
-                        [
-                            r"\revert Dots.transparent",
-                            r"\revert Stem.transparent",
-                        ]
+                        [r"\revert Dots.transparent", r"\revert Stem.transparent"]
                     )
                 if right_broken:
                     deactivate_glissando = True

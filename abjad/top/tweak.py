@@ -238,11 +238,7 @@ def tweak(argument, deactivate=None, expression=None, tag=None):
 
     constants = (enums.Down, enums.Left, enums.Right, enums.Up)
     prototype = (bool, int, float, str, tuple, abjad.Scheme)
-    if (
-        expression is True
-        or argument in constants
-        or isinstance(argument, prototype)
-    ):
+    if expression is True or argument in constants or isinstance(argument, prototype):
         manager = abjad.LilyPondTweakManager(deactivate=deactivate, tag=tag)
         manager._pending_value = argument
         return manager

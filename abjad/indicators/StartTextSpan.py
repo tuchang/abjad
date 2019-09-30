@@ -186,9 +186,7 @@ class StartTextSpan(object):
     def _get_left_text_directive(self):
         if isinstance(self.left_text, str):
             return self.left_text
-        concat_hspace_left_markup = markups.Markup.hspace(
-            self.concat_hspace_left
-        )
+        concat_hspace_left_markup = markups.Markup.hspace(self.concat_hspace_left)
         markup_list = [self.left_text, concat_hspace_left_markup]
         markup = markups.Markup.concat(markup_list)
         override = LilyPondGrobOverride(

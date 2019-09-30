@@ -71,10 +71,7 @@ class LilyPondFormatManager(object):
                     neutral_markup_wrappers.append(wrapper)
             # store context wrappers
             elif wrapper.context is not None:
-                if (
-                    wrapper.annotation is None
-                    and wrapper.component is component
-                ):
+                if wrapper.annotation is None and wrapper.component is component:
                     context_wrappers.append(wrapper)
             # store noncontext wrappers
             else:
@@ -115,9 +112,7 @@ class LilyPondFormatManager(object):
                 # otherwise we've found a default leaf context setting
                 else:
                     # parse default context setting
-                    string = manager.format_lilypond_context_setting_inline(
-                        name, value
-                    )
+                    string = manager.format_lilypond_context_setting_inline(name, value)
                     result.append(string)
         result.sort()
         bundle.context_settings.extend(result)
@@ -281,9 +276,7 @@ class LilyPondFormatManager(object):
         bundle = LilyPondFormatBundle()
         manager._populate_indicator_format_contributions(component, bundle)
         manager._populate_spanner_format_contributions(component, bundle)
-        manager._populate_context_setting_format_contributions(
-            component, bundle
-        )
+        manager._populate_context_setting_format_contributions(component, bundle)
         manager._populate_grob_override_format_contributions(component, bundle)
         manager._populate_grob_revert_format_contributions(component, bundle)
         bundle.sort_overrides()
@@ -321,9 +314,7 @@ class LilyPondFormatManager(object):
         return "\n".join(pieces)
 
     @staticmethod
-    def format_lilypond_context_setting_inline(
-        name, value, context=None
-    ) -> str:
+    def format_lilypond_context_setting_inline(name, value, context=None) -> str:
         """
         Formats LilyPond context setting ``name`` with ``value`` in
         ``context``.
@@ -352,19 +343,11 @@ class LilyPondFormatManager(object):
         Formats LilyPond ``argument`` according to Scheme formatting
         conventions.
         """
-        if "_get_lilypond_format" in dir(argument) and not isinstance(
-            argument, str
-        ):
+        if "_get_lilypond_format" in dir(argument) and not isinstance(argument, str):
             pass
         elif argument in (True, False):
             argument = Scheme(argument)
-        elif argument in (
-            enums.Up,
-            enums.Down,
-            enums.Left,
-            enums.Right,
-            enums.Center,
-        ):
+        elif argument in (enums.Up, enums.Down, enums.Left, enums.Right, enums.Center):
             argument = Scheme(repr(argument).lower())
         elif isinstance(argument, int) or isinstance(argument, float):
             argument = Scheme(argument)
@@ -456,9 +439,7 @@ class LilyPondFormatManager(object):
         return result
 
     @staticmethod
-    def make_lilypond_tweak_string(
-        attribute, value, directed=True, grob=None
-    ) -> str:
+    def make_lilypond_tweak_string(attribute, value, directed=True, grob=None) -> str:
         r"""
         Makes Lilypond \tweak string.
 

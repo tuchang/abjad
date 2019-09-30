@@ -219,9 +219,7 @@ class LilyPondEngraver(object):
 
         dictionary = engravers[self.name]
         assert isinstance(dictionary, dict), repr(dictionary)
-        return tuple(
-            LilyPondGrob(name=name) for name in dictionary["grobs_created"]
-        )
+        return tuple(LilyPondGrob(name=name) for name in dictionary["grobs_created"])
 
     @property
     def name(self) -> str:

@@ -122,6 +122,4 @@ class IntervalClassSegment(Segment):
         """
         import abjad
 
-        return len(
-            abjad.IntervalClassSet(self, item_class=self.item_class)
-        ) < len(self)
+        return len(abjad.IntervalClassSet(self, item_class=self.item_class)) < len(self)

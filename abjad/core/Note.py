@@ -56,10 +56,7 @@ class Note(Leaf):
     ### INITIALIZER ###
 
     def __init__(
-        self,
-        *arguments,
-        multiplier: typings.DurationTyping = None,
-        tag: str = None,
+        self, *arguments, multiplier: typings.DurationTyping = None, tag: str = None
     ) -> None:
         from abjad.ly import drums
         from .Chord import Chord

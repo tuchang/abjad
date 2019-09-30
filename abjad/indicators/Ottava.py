@@ -45,11 +45,7 @@ class Ottava(object):
     ### INITIALIZER ###
 
     def __init__(
-        self,
-        n: int = None,
-        *,
-        format_slot: str = None,
-        right_broken: bool = None,
+        self, n: int = None, *, format_slot: str = None, right_broken: bool = None
     ) -> None:
         if n is not None:
             assert isinstance(n, int), repr(n)
@@ -107,9 +103,7 @@ class Ottava(object):
     def _tag_hide(strings):
         abjad_tags = Tags()
         return LilyPondFormatManager.tag(
-            strings,
-            deactivate=False,
-            tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS,
+            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
         )
 
     ### PUBLIC PROPERTIES ###

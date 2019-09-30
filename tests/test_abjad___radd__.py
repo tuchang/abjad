@@ -3,15 +3,9 @@ import inspect
 import pytest
 
 
-ignored_classes = (
-    abjad.String,
-    abjad.StorageFormatManager,
-    abjad.FormatSpecification,
-)
+ignored_classes = (abjad.String, abjad.StorageFormatManager, abjad.FormatSpecification)
 
-classes = pytest.helpers.list_all_abjad_classes(
-    ignored_classes=ignored_classes
-)
+classes = pytest.helpers.list_all_abjad_classes(ignored_classes=ignored_classes)
 
 
 @pytest.mark.parametrize("class_", classes)

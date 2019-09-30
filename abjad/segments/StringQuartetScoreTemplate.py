@@ -97,9 +97,7 @@ class StringQuartetScoreTemplate(ScoreTemplate):
         class_name = "abjad.StringQuartetScoreTemplate"
 
         # make first violin voice and staff
-        first_violin_voice = abjad.Voice(
-            [], name="First_Violin_Voice", tag=class_name
-        )
+        first_violin_voice = abjad.Voice([], name="First_Violin_Voice", tag=class_name)
         first_violin_staff = abjad.Staff(
             [first_violin_voice], name="First_Violin_Staff", tag=class_name
         )
@@ -126,9 +124,7 @@ class StringQuartetScoreTemplate(ScoreTemplate):
 
         # make viola voice and staff
         viola_voice = abjad.Voice([], name="Viola_Voice", tag=class_name)
-        viola_staff = abjad.Staff(
-            [viola_voice], name="Viola_Staff", tag=class_name
-        )
+        viola_staff = abjad.Staff([viola_voice], name="Viola_Staff", tag=class_name)
         clef = abjad.Clef("alto")
         abjad.annotate(viola_staff, "default_clef", clef)
         viola = abjad.Viola()
@@ -138,9 +134,7 @@ class StringQuartetScoreTemplate(ScoreTemplate):
 
         # make cello voice and staff
         cello_voice = abjad.Voice([], name="Cello_Voice", tag=class_name)
-        cello_staff = abjad.Staff(
-            [cello_voice], name="Cello_Staff", tag=class_name
-        )
+        cello_staff = abjad.Staff([cello_voice], name="Cello_Staff", tag=class_name)
         clef = abjad.Clef("bass")
         abjad.annotate(cello_staff, "default_clef", clef)
         cello = abjad.Cello()
@@ -150,21 +144,14 @@ class StringQuartetScoreTemplate(ScoreTemplate):
 
         # make string quartet staff group
         string_quartet_staff_group = abjad.StaffGroup(
-            [
-                first_violin_staff,
-                second_violin_staff,
-                viola_staff,
-                cello_staff,
-            ],
+            [first_violin_staff, second_violin_staff, viola_staff, cello_staff],
             name="String_Quartet_Staff_Group",
             tag=class_name,
         )
 
         # make string quartet score
         string_quartet_score = abjad.Score(
-            [string_quartet_staff_group],
-            name="String_Quartet_Score",
-            tag=class_name,
+            [string_quartet_staff_group], name="String_Quartet_Score", tag=class_name
         )
 
         # return string quartet score

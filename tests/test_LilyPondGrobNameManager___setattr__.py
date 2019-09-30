@@ -386,12 +386,8 @@ def test_LilyPondGrobNameManager___setattr___15():
     """
 
     score = abjad.Score([abjad.Staff("c'8 d'8 e'8 f'8")])
-    abjad.override(
-        score
-    ).non_musical_paper_column.line_break_permission = False
-    abjad.override(
-        score
-    ).non_musical_paper_column.page_break_permission = False
+    abjad.override(score).non_musical_paper_column.line_break_permission = False
+    abjad.override(score).non_musical_paper_column.page_break_permission = False
 
     assert format(score) == abjad.String.normalize(
         r"""
@@ -742,19 +738,9 @@ def test_LilyPondGrobNameManager___setattr___30():
     """
 
     score, treble, bass = abjad.Score.make_piano_score()
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     treble.extend(notes)
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     bass.extend(notes)
     abjad.override(score).span_bar.color = "red"
     abjad.attach(abjad.Clef("treble"), treble[0])
@@ -874,9 +860,7 @@ def test_LilyPondGrobNameManager___setattr___34():
     """
 
     note = abjad.Note(0, (1, 16))
-    abjad.override(note).stem.stroke_style = abjad.Scheme(
-        "grace", force_quotes=True
-    )
+    abjad.override(note).stem.stroke_style = abjad.Scheme("grace", force_quotes=True)
 
     assert format(note) == abjad.String.normalize(
         r"""

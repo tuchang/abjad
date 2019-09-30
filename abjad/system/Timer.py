@@ -66,9 +66,7 @@ class Timer(ContextManager):
         if exit_message is not None:
             exit_message = str(exit_message)
         self._exit_message = exit_message
-        self._print_continuously_from_background = (
-            print_continuously_from_background
-        )
+        self._print_continuously_from_background = print_continuously_from_background
         self._process = None
         self._timer_process = None
         self._start_time = None
@@ -90,9 +88,7 @@ class Timer(ContextManager):
         if self.print_continuously_from_background:
             from abjad import abjad_configuration
 
-            path = os.path.join(
-                abjad_configuration.abjad_directory, "scr", "timer.py"
-            )
+            path = os.path.join(abjad_configuration.abjad_directory, "scr", "timer.py")
             interval = str(int(self.print_continuously_from_background))
             process = subprocess.Popen([path, interval], shell=False)
             self._process = process

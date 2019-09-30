@@ -346,9 +346,7 @@ class TwelveToneRow(PitchClassSegment):
 
         item = self._collection.__getitem__(argument)
         try:
-            return PitchClassSegment(
-                items=item, item_class=abjad.NumberedPitchClass
-            )
+            return PitchClassSegment(items=item, item_class=abjad.NumberedPitchClass)
         except TypeError:
             return item
 

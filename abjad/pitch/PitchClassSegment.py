@@ -1065,9 +1065,7 @@ class PitchClassSegment(Segment):
 
         """
         if self._expression:
-            return self._update_expression(
-                inspect.currentframe(), precedence=100
-            )
+            return self._update_expression(inspect.currentframe(), precedence=100)
         return super().__getitem__(argument)
 
     def __illustrate__(self, expression_markup_direction=enums.Up, **keywords):
@@ -1278,9 +1276,7 @@ class PitchClassSegment(Segment):
     def _update_expression(self, frame, precedence=None):
         import abjad
 
-        callback = abjad.Expression._frame_to_callback(
-            frame, precedence=precedence
-        )
+        callback = abjad.Expression._frame_to_callback(frame, precedence=precedence)
         return self._expression.append_callback(callback)
 
     ### PUBLIC PROPERTIES ###
@@ -2416,9 +2412,7 @@ class PitchClassSegment(Segment):
         return type(self)(items=reversed(self))
 
     @Signature(
-        is_operator=True,
-        method_name_callback="_make_rotate_method_name",
-        subscript="n",
+        is_operator=True, method_name_callback="_make_rotate_method_name", subscript="n"
     )
     def rotate(self, n=0, stravinsky=False):
         r"""

@@ -7,9 +7,7 @@ def test_Container___copy___01():
     Containers copy simultaneity flag.
     """
 
-    container_1 = abjad.Container(
-        [abjad.Voice("c'8 d'8"), abjad.Voice("c''8 b'8")]
-    )
+    container_1 = abjad.Container([abjad.Voice("c'8 d'8"), abjad.Voice("c''8 b'8")])
     container_1.simultaneous = True
     container_2 = copy.copy(container_1)
 

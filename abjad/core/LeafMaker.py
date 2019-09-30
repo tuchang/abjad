@@ -481,15 +481,11 @@ class LeafMaker(object):
             pitches = [pitches]
         if isinstance(durations, (numbers.Number, tuple)):
             durations = [durations]
-        nonreduced_fractions = Sequence(
-            [NonreducedFraction(_) for _ in durations]
-        )
+        nonreduced_fractions = Sequence([NonreducedFraction(_) for _ in durations])
         size = max(len(nonreduced_fractions), len(pitches))
         nonreduced_fractions = nonreduced_fractions.repeat_to_length(size)
         pitches = Sequence(pitches).repeat_to_length(size)
-        duration_groups = Duration._group_by_implied_prolation(
-            nonreduced_fractions
-        )
+        duration_groups = Duration._group_by_implied_prolation(nonreduced_fractions)
         result: typing.List[typing.Union[Tuplet, Leaf]] = []
         for duration_group in duration_groups:
             # get factors in denominator of duration group other than 1, 2.
@@ -515,9 +511,7 @@ class LeafMaker(object):
             else:
                 # compute tuplet prolation
                 denominator = duration_group[0].denominator
-                numerator = mathtools.greatest_power_of_two_less_equal(
-                    denominator
-                )
+                numerator = mathtools.greatest_power_of_two_less_equal(denominator)
                 multiplier = (numerator, denominator)
                 ratio = 1 / Duration(*multiplier)
                 duration_group = [
@@ -625,15 +619,10 @@ class LeafMaker(object):
             assert forbidden_duration.numerator == 1
         # find preferred numerator of written durations if necessary
         if forbidden_duration is not None and forbidden_duration <= duration:
-            denominators = [
-                2 * forbidden_duration.denominator,
-                duration.denominator,
-            ]
+            denominators = [2 * forbidden_duration.denominator, duration.denominator]
             denominator = mathtools.least_common_multiple(*denominators)
             forbidden_duration = NonreducedFraction(forbidden_duration)
-            forbidden_duration = forbidden_duration.with_denominator(
-                denominator
-            )
+            forbidden_duration = forbidden_duration.with_denominator(denominator)
             duration = NonreducedFraction(duration)
             duration = duration.with_denominator(denominator)
             forbidden_numerator = forbidden_duration.numerator
@@ -641,9 +630,7 @@ class LeafMaker(object):
             preferred_numerator = forbidden_numerator / 2
         # make written duration numerators
         numerators = []
-        parts = mathtools.partition_integer_into_canonic_parts(
-            duration.numerator
-        )
+        parts = mathtools.partition_integer_into_canonic_parts(duration.numerator)
         if forbidden_duration is not None and forbidden_duration <= duration:
             for part in parts:
                 if forbidden_numerator <= part:

@@ -148,8 +148,6 @@ class TwoStaffPianoScoreTemplate(ScoreTemplate):
 
         # SCORE
         score = Score(
-            [global_context, staff_group],
-            name="Two_Staff_Piano_Score",
-            tag=tag,
+            [global_context, staff_group], name="Two_Staff_Piano_Score", tag=tag
         )
         return score

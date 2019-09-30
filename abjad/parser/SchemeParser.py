@@ -57,7 +57,9 @@ class SchemeParser(Parser):
     # IDENTIFIER = r'({}{}*|\+|-|\.\.\.)'.format(INITIAL, SUBSEQUENT)
 
     # this has been rewritten to prevent Sphinx from complaining that it looks like bad ReST
-    IDENTIFIER = r"([A-Za-z!\$%&\*/<>\?~_\^:=][A-Za-z0-9!\$%&\*/<>\?~_\^:=\.\+-]*|[\+-]|\.\.\.)"
+    IDENTIFIER = (
+        r"([A-Za-z!\$%&\*/<>\?~_\^:=][A-Za-z0-9!\$%&\*/<>\?~_\^:=\.\+-]*|[\+-]|\.\.\.)"
+    )
 
     states = (("quote", "exclusive"),)
 
@@ -240,11 +242,7 @@ class SchemeParser(Parser):
         t.cursor_end = self.cursor
         if self.debug:
             print(
-                (
-                    "SchemeParser-{}: Illegal character {!r}".format(
-                        id(self), t.value[0]
-                    )
-                )
+                ("SchemeParser-{}: Illegal character {!r}".format(id(self), t.value[0]))
             )
         # t.lexer.skip(1)
 
@@ -659,18 +657,12 @@ class SchemeParser(Parser):
         if p:
             if self.debug:
                 print(
-                    (
-                        "SchemeParser-{}: Syntax error at {!r}".format(
-                            id(self), p.value
-                        )
-                    )
+                    ("SchemeParser-{}: Syntax error at {!r}".format(id(self), p.value))
                 )
             self._parser.errok()
         else:
             if self.debug:
-                print(
-                    ("SchemeParser-{}: Syntax error at EOF".format(id(self)))
-                )
+                print(("SchemeParser-{}: Syntax error at EOF".format(id(self))))
 
     ### PUBLIC PROPERTIES ###
 

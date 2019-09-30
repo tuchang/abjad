@@ -593,17 +593,11 @@ class ReducedLyParser(Parser):
         for leaf in leaves:
             span_events = self._get_span_events(leaf)
             for current_class, directions in span_events.items():
-                if current_class in (
-                    indicators.StartSlur,
-                    indicators.StopSlur,
-                ):
+                if current_class in (indicators.StartSlur, indicators.StopSlur):
                     indicator = current_class()
                     attach(indicator, leaf)
                     continue
-                if current_class in (
-                    indicators.StartBeam,
-                    indicators.StopBeam,
-                ):
+                if current_class in (indicators.StartBeam, indicators.StopBeam):
                     indicator = current_class()
                     attach(indicator, leaf)
                     continue

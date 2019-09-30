@@ -1,10 +1,5 @@
 import pytest
-from abjad.pitch import (
-    NumberedPitchClass,
-    NamedPitch,
-    NamedPitchClass,
-    NumberedPitch,
-)
+from abjad.pitch import NumberedPitchClass, NamedPitch, NamedPitchClass, NumberedPitch
 
 
 values = []

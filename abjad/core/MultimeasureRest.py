@@ -49,17 +49,12 @@ class MultimeasureRest(Leaf):
     ### INITIALIZER ###
 
     def __init__(
-        self,
-        *arguments,
-        multiplier: typings.DurationTyping = None,
-        tag: str = None,
+        self, *arguments, multiplier: typings.DurationTyping = None, tag: str = None
     ) -> None:
         if len(arguments) == 0:
             arguments = ((1, 4),)
         rest = Rest(*arguments)
-        Leaf.__init__(
-            self, rest.written_duration, multiplier=multiplier, tag=tag
-        )
+        Leaf.__init__(self, rest.written_duration, multiplier=multiplier, tag=tag)
 
     ### PRIVATE METHODS ###
 

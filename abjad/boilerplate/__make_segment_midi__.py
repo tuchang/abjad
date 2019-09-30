@@ -38,9 +38,7 @@ if __name__ == "__main__":
     try:
         with abjad.Timer() as timer:
             lilypond_file = maker.run(
-                metadata=metadata,
-                midi=True,
-                previous_metadata=previous_metadata,
+                metadata=metadata, midi=True, previous_metadata=previous_metadata
             )
         count = int(timer.elapsed_time)
         counter = abjad.String("second").pluralize(count)

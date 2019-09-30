@@ -355,9 +355,7 @@ class Container(Component):
                 for child in component:
                     if not isinstance(child, Leaf):
                         all_are_leaves = False
-                    child_node, child_node_order = recurse(
-                        child, this_leaf_cluster
-                    )
+                    child_node, child_node_order = recurse(child, this_leaf_cluster)
                     pending_node_order.extend(child_node_order)
                     edge = uqbar.graphs.Edge()
                     edge.attach(component_node, child_node)
@@ -447,11 +445,7 @@ class Container(Component):
         node = Component._as_graphviz_node(self)
         node[0].append(
             uqbar.graphs.TableRow(
-                [
-                    uqbar.graphs.TableCell(
-                        type(self).__name__, attributes={"border": 0}
-                    )
-                ]
+                [uqbar.graphs.TableCell(type(self).__name__, attributes={"border": 0})]
             )
         )
         return node
@@ -501,9 +495,7 @@ class Container(Component):
             else:
                 brackets_close = ["}"]
         if self.tag is not None:
-            brackets_close = LilyPondFormatManager.tag(
-                brackets_close, tag=self.tag
-            )
+            brackets_close = LilyPondFormatManager.tag(brackets_close, tag=self.tag)
         result.append([("close brackets", ""), brackets_close])
         return tuple(result)
 
@@ -529,9 +521,7 @@ class Container(Component):
 
     def _format_contents_slot(self, bundle):
         result = []
-        result.append(
-            [("contents", "_contents"), self._format_content_pieces()]
-        )
+        result.append([("contents", "_contents"), self._format_content_pieces()])
         return tuple(result)
 
     def _format_open_brackets_slot(self, bundle):
@@ -547,9 +537,7 @@ class Container(Component):
             else:
                 brackets_open = ["{"]
         if self.tag is not None:
-            brackets_open = LilyPondFormatManager.tag(
-                brackets_open, tag=self.tag
-            )
+            brackets_open = LilyPondFormatManager.tag(brackets_open, tag=self.tag)
         result.append([("open brackets", ""), brackets_open])
         return tuple(result)
 
@@ -598,9 +586,7 @@ class Container(Component):
 
     def _get_contents_duration(self):
         if self.simultaneous:
-            return max(
-                [Duration(0)] + [x._get_preprolated_duration() for x in self]
-            )
+            return max([Duration(0)] + [x._get_preprolated_duration() for x in self])
         else:
             duration = Duration(0)
             for x in self:
@@ -623,10 +609,7 @@ class Container(Component):
 
     def _get_duration_in_seconds(self):
         if self.simultaneous:
-            return max(
-                [Duration(0)]
-                + [x._get_duration(in_seconds=True) for x in self]
-            )
+            return max([Duration(0)] + [x._get_duration(in_seconds=True) for x in self])
         else:
             duration = Duration(0)
             for leaf in iterate(self).leaves():
@@ -732,13 +715,9 @@ class Container(Component):
             return False
         if len(self) != 2:
             return False
-        if isinstance(self[0], OnBeatGraceContainer) and isinstance(
-            self[1], Voice
-        ):
+        if isinstance(self[0], OnBeatGraceContainer) and isinstance(self[1], Voice):
             return True
-        if isinstance(self[0], Voice) and isinstance(
-            self[1], OnBeatGraceContainer
-        ):
+        if isinstance(self[0], Voice) and isinstance(self[1], OnBeatGraceContainer):
             return True
         return False
 
@@ -795,9 +774,7 @@ class Container(Component):
         elif user_input.startswith("rtm:"):
             parsed = rhythmtrees.parse_rtm_syntax(user_input[4:])
         else:
-            if not user_input.startswith("<<") or not user_input.endswith(
-                ">>"
-            ):
+            if not user_input.startswith("<<") or not user_input.endswith(">>"):
                 user_input = f"{{ {user_input} }}"
             parsed = parse(user_input)
             if isinstance(parsed, LilyPondFile):
@@ -900,9 +877,7 @@ class Container(Component):
         selection = select(self)
         parent, start, stop = selection._get_parent_and_start_stop_indices()
         if parent is not None:
-            parent._components.__setitem__(
-                slice(start, stop + 1), nonempty_halves
-            )
+            parent._components.__setitem__(slice(start, stop + 1), nonempty_halves)
             for part in nonempty_halves:
                 part._set_parent(parent)
         else:
@@ -988,10 +963,7 @@ class Container(Component):
                     inspect(leaf_left_of_split).parentage().root
                     is inspect(leaf_right_of_split).parentage().root
                 ):
-                    leaves_around_split = (
-                        leaf_left_of_split,
-                        leaf_right_of_split,
-                    )
+                    leaves_around_split = (leaf_left_of_split, leaf_right_of_split)
                     selection = select(leaves_around_split)
                     selection._attach_tie_to_leaves()
         # return list-wrapped halves of container
@@ -1312,8 +1284,7 @@ class Container(Component):
                 argument_.append(item)
             argument = argument_
         self.__setitem__(
-            slice(len(self), len(self)),
-            argument.__getitem__(slice(0, len(argument))),
+            slice(len(self), len(self)), argument.__getitem__(slice(0, len(argument)))
         )
 
     def index(self, component) -> int:

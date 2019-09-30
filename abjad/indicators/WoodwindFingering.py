@@ -207,9 +207,7 @@ class WoodwindFingering(object):
         left_hand: typing.Iterable = None,
         right_hand: typing.Iterable = None,
     ) -> None:
-        assert isinstance(
-            center_column, (type(None), collections.abc.Iterable)
-        )
+        assert isinstance(center_column, (type(None), collections.abc.Iterable))
         assert isinstance(left_hand, (type(None), collections.abc.Iterable))
         assert isinstance(right_hand, (type(None), collections.abc.Iterable))
         # initialize from a string and up to three lists

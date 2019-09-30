@@ -75,12 +75,7 @@ def test_Selection_are_contiguous_same_parent_02():
 
 def test_Selection_are_contiguous_same_parent_03():
 
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
 
     assert abjad.select(notes).are_contiguous_same_parent()
 

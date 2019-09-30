@@ -381,9 +381,7 @@ class LilyPondParser(Parser):
                 input_string, lexer=self._lexer, debug=self._logger
             )
         else:
-            result = self._parser._lilypond_patch_parse(
-                input_string, lexer=self._lexer
-            )
+            result = self._parser._lilypond_patch_parse(input_string, lexer=self._lexer)
         return result
 
     ### PRIVATE METHODS ###
@@ -480,9 +478,11 @@ class LilyPondParser(Parser):
             else:
                 if isinstance(x, (abjad_indicators.BarLine,)):
                     apply_backward.append(x)
-                elif isinstance(
-                    x, abjad_indicators.LilyPondLiteral
-                ) and x.argument in (r"\break", r"\breathe", r"\pageBreak"):
+                elif isinstance(x, abjad_indicators.LilyPondLiteral) and x.argument in (
+                    r"\break",
+                    r"\breathe",
+                    r"\pageBreak",
+                ):
                     apply_backward.append(x)
                 else:
                     apply_forward.append(x)
@@ -523,9 +523,7 @@ class LilyPondParser(Parser):
         # with voice separators
         else:
             for group in groups:
-                container.append(
-                    core.Voice(self._construct_sequential_music(group)[:])
-                )
+                container.append(core.Voice(self._construct_sequential_music(group)[:]))
         return container
 
     @classmethod
@@ -535,17 +533,11 @@ class LilyPondParser(Parser):
         return {
             "boolean?": lambda x: isinstance(x, bool),
             "cheap-list?": lambda x: isinstance(x, (list, tuple)),
-            "cheap-markup?": lambda x: isinstance(
-                x, abjad_markups.MarkupCommand
-            ),
-            "fraction?": lambda x: isinstance(
-                x, abjad_parser.LilyPondFraction
-            ),
+            "cheap-markup?": lambda x: isinstance(x, abjad_markups.MarkupCommand),
+            "fraction?": lambda x: isinstance(x, abjad_parser.LilyPondFraction),
             "integer?": lambda x: isinstance(x, int),
             "list?": lambda x: isinstance(x, (list, tuple)),
-            "ly:duration?": lambda x: isinstance(
-                x, abjad_parser.LilyPondDuration
-            ),
+            "ly:duration?": lambda x: isinstance(x, abjad_parser.LilyPondDuration),
             "ly:music?": lambda x: isinstance(x, core.Component),
             "ly:pitch?": lambda x: isinstance(x, abjad_pitch.NamedPitch),
             "markup?": lambda x: isinstance(x, abjad_markups.MarkupCommand),
@@ -807,9 +799,7 @@ class LilyPondParser(Parser):
         # pitch_class_name = str(abjad_pitch.NamedDiatonicPitchClass(
         #    int(new_step)))
         accidental = str(abjad_pitch.Accidental(new_alt))
-        tmp_pitch = abjad_pitch.NamedPitch(
-            pitch_class_name + accidental + octave_ticks
-        )
+        tmp_pitch = abjad_pitch.NamedPitch(pitch_class_name + accidental + octave_ticks)
         # print 'TMP(pitch): %r' % tmp_pitch
         new_alt += tmp_alt - float(tmp_pitch.number)
         # print 'NEW(alt): %f' % new_alt
@@ -823,9 +813,7 @@ class LilyPondParser(Parser):
             new_step % 7
         ]
         accidental = str(abjad_pitch.Accidental(new_alt))
-        return abjad_pitch.NamedPitch(
-            pitch_class_name + accidental + octave_ticks
-        )
+        return abjad_pitch.NamedPitch(pitch_class_name + accidental + octave_ticks)
 
     ### PUBLIC METHODS ###
 

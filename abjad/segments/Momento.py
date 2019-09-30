@@ -40,9 +40,7 @@ class Momento(object):
         self._prototype = prototype
         if value is not None:
             if not isinstance(value, (int, str, dict)):
-                assert type(value).__name__ == "PersistentOverride", repr(
-                    value
-                )
+                assert type(value).__name__ == "PersistentOverride", repr(value)
         self._value = value
 
     ### SPECIAL METHODS ###

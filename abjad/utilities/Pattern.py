@@ -147,11 +147,7 @@ class Pattern(object):
         "_template",
     )
 
-    _name_to_operator = {
-        "and": operator.and_,
-        "or": operator.or_,
-        "xor": operator.xor,
-    }
+    _name_to_operator = {"and": operator.and_, "or": operator.or_, "xor": operator.xor}
 
     _publish_storage_format = True
 
@@ -1449,10 +1445,7 @@ class Pattern(object):
         indices = indices or []
         template = Pattern._get_template(inspect.currentframe())
         return Pattern(
-            indices=indices,
-            inverted=inverted,
-            period=period,
-            template=template,
+            indices=indices, inverted=inverted, period=period, template=template
         )
 
     @staticmethod
@@ -1472,9 +1465,7 @@ class Pattern(object):
         Returns pattern.
         """
         template = Pattern._get_template(inspect.currentframe())
-        return Pattern(
-            indices=[0], inverted=inverted, period=1, template=template
-        )
+        return Pattern(indices=[0], inverted=inverted, period=1, template=template)
 
     @staticmethod
     def index_first(n, inverted=None):
@@ -2344,19 +2335,13 @@ class Pattern(object):
             return False ^ inverted
         elif len(self.patterns) == 1:
             pattern = self.patterns[0]
-            result = pattern.matches_index(
-                index, total_length, rotation=rotation
-            )
+            result = pattern.matches_index(index, total_length, rotation=rotation)
         else:
             operator_ = self._name_to_operator[self.operator]
             pattern = self.patterns[0]
-            result = pattern.matches_index(
-                index, total_length, rotation=rotation
-            )
+            result = pattern.matches_index(index, total_length, rotation=rotation)
             for pattern in self.patterns[1:]:
-                result_ = pattern.matches_index(
-                    index, total_length, rotation=rotation
-                )
+                result_ = pattern.matches_index(index, total_length, rotation=rotation)
                 result = operator_(result, result_)
         if self.inverted:
             result = not (result)

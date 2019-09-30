@@ -82,11 +82,7 @@ class Context(Container):
         self._remove_commands: typing.List[str] = []
         self.lilypond_type = lilypond_type
         Container.__init__(
-            self,
-            simultaneous=simultaneous,
-            components=components,
-            name=name,
-            tag=tag,
+            self, simultaneous=simultaneous, components=components, name=name, tag=tag
         )
 
     ### SPECIAL METHODS ###
@@ -340,9 +336,7 @@ class Context(Container):
         try:
             lilypond_context = LilyPondContext(name=self.lilypond_type)
         except AssertionError:
-            lilypond_context = LilyPondContext(
-                name=self._default_lilypond_type
-            )
+            lilypond_context = LilyPondContext(name=self._default_lilypond_type)
         return lilypond_context
 
     @property

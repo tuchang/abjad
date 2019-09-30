@@ -7,12 +7,7 @@ def test_Container___getitem___01():
     Get one container component with positive index.
     """
 
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     voice = abjad.Voice(notes)
 
     assert voice[0] is notes[0]
@@ -26,12 +21,7 @@ def test_Container___getitem___02():
     Get one container component with negative index.
     """
 
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     voice = abjad.Voice(notes)
 
     assert voice[-1] is notes[3]
@@ -45,12 +35,7 @@ def test_Container___getitem___03():
     Get slice from container.
     """
 
-    notes = [
-        abjad.Note("c'8"),
-        abjad.Note("d'8"),
-        abjad.Note("e'8"),
-        abjad.Note("f'8"),
-    ]
+    notes = [abjad.Note("c'8"), abjad.Note("d'8"), abjad.Note("e'8"), abjad.Note("f'8")]
     voice = abjad.Voice(notes)
 
     assert voice[:1] == notes[:1]

@@ -76,9 +76,7 @@ class Wellformedness(object):
 
     ### PUBLIC METHODS ###
 
-    def check_duplicate_ids(
-        self, argument=None
-    ) -> typing.Tuple[typing.List, int]:
+    def check_duplicate_ids(self, argument=None) -> typing.Tuple[typing.List, int]:
         """
         Checks duplicate IDs.
         """
@@ -89,14 +87,10 @@ class Wellformedness(object):
         if len(unique_ids) < len(total_ids):
             for current_id in unique_ids:
                 if 1 < total_ids.count(current_id):
-                    violators.extend(
-                        [_ for _ in components if id(_) == current_id]
-                    )
+                    violators.extend([_ for _ in components if id(_) == current_id])
         return violators, len(total_ids)
 
-    def check_empty_containers(
-        self, argument=None
-    ) -> typing.Tuple[typing.List, int]:
+    def check_empty_containers(self, argument=None) -> typing.Tuple[typing.List, int]:
         r"""
         Checks empty containers.
 
@@ -143,22 +137,16 @@ class Wellformedness(object):
             left = getattr(setting(leaf), "stem_left_beam_count", None)
             right = getattr(setting(leaf), "stem_right_beam_count", None)
             if left is not None:
-                if flags < left or (
-                    left < flags and right not in (flags, None)
-                ):
+                if flags < left or (left < flags and right not in (flags, None)):
                     if leaf not in violators:
                         violators.append(leaf)
             if right is not None:
-                if flags < right or (
-                    right < flags and left not in (flags, None)
-                ):
+                if flags < right or (right < flags and left not in (flags, None)):
                     if leaf not in violators:
                         violators.append(leaf)
         return violators, len(total)
 
-    def check_missing_parents(
-        self, argument=None
-    ) -> typing.Tuple[typing.List, int]:
+    def check_missing_parents(self, argument=None) -> typing.Tuple[typing.List, int]:
         """
         Checks missing parents.
         """
@@ -598,10 +586,7 @@ class Wellformedness(object):
                     command = wrapper.indicator.command
                     command = command.replace("stop", "")
                     command = command.replace("Stop", "")
-                    if (
-                        command not in open_spanners
-                        or not open_spanners[command]
-                    ):
+                    if command not in open_spanners or not open_spanners[command]:
                         violators.append(wrapper.component)
                     else:
                         open_spanners[command].pop()
@@ -735,16 +720,14 @@ class Wellformedness(object):
             wrappers.sort(key=lambda _: _.start_offset)
             for wrapper in wrappers:
                 parameter = getattr(wrapper.indicator, "parameter", None)
-                if parameter == "DYNAMIC" or isinstance(
-                    wrapper.indicator, StopHairpin
-                ):
+                if parameter == "DYNAMIC" or isinstance(wrapper.indicator, StopHairpin):
                     last_dynamic = wrapper.indicator
                     last_tag = wrapper.tag
                     if isinstance(wrapper.indicator, StartHairpin):
                         total += 1
-            if isinstance(
-                last_dynamic, StartHairpin
-            ) and "right_broken" not in str(last_tag):
+            if isinstance(last_dynamic, StartHairpin) and "right_broken" not in str(
+                last_tag
+            ):
                 violators.append(wrapper.component)
         return violators, total
 
@@ -828,10 +811,7 @@ class Wellformedness(object):
                     command = wrapper.indicator.command
                     command = command.replace("stop", "")
                     command = command.replace("Stop", "")
-                    if (
-                        command not in open_spanners
-                        or not open_spanners[command]
-                    ):
+                    if command not in open_spanners or not open_spanners[command]:
                         # unmatched stop text span
                         pass
                     else:

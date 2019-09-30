@@ -131,10 +131,7 @@ class StartHairpin(object):
     @staticmethod
     def _circled_tip():
         return LilyPondGrobOverride(
-            grob_name="Hairpin",
-            once=True,
-            property_path="circled-tip",
-            value=True,
+            grob_name="Hairpin", once=True, property_path="circled-tip", value=True
         )
 
     @staticmethod
@@ -195,9 +192,7 @@ class StartHairpin(object):
 
         abjad_tags = abjad.Tags()
         return LilyPondFormatManager.tag(
-            strings,
-            deactivate=False,
-            tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS,
+            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
         )
 
     ### PUBLIC PROPERTIES ###

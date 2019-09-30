@@ -216,9 +216,7 @@ class Dynamic(object):
 
     _format_slot = "after"
 
-    _lilypond_dynamic_commands = [
-        _ for _ in _dynamic_names if not _ == "niente"
-    ]
+    _lilypond_dynamic_commands = [_ for _ in _dynamic_names if not _ == "niente"]
 
     _lilypond_dynamic_alphabet = "fmprsz"
 
@@ -361,17 +359,10 @@ class Dynamic(object):
 
     def _format_effort_dynamic(self):
         name = self.name.strip('"')
-        before = {
-            "f": -0.4,
-            "m": -0.1,
-            "p": -0.1,
-            "r": -0.1,
-            "s": -0.3,
-            "z": -0.2,
-        }[name[0]]
-        after = {"f": -0.2, "m": -0.1, "p": -0.25, "r": 0, "s": 0, "z": -0.2}[
-            name[-1]
+        before = {"f": -0.4, "m": -0.1, "p": -0.1, "r": -0.1, "s": -0.3, "z": -0.2}[
+            name[0]
         ]
+        after = {"f": -0.2, "m": -0.1, "p": -0.25, "r": 0, "s": 0, "z": -0.2}[name[-1]]
         direction = self.direction
         direction = String.to_tridirectional_lilypond_symbol(direction)
         strings = []
@@ -379,15 +370,11 @@ class Dynamic(object):
         strings.append("    (markup")
         strings.append("        #:whiteout")
         strings.append("        #:line (")
-        strings.append(
-            '            #:general-align Y -2 #:normal-text #:larger "“"'
-        )
+        strings.append('            #:general-align Y -2 #:normal-text #:larger "“"')
         strings.append(f"            #:hspace {before}")
         strings.append(f'            #:dynamic "{name}"')
         strings.append(f"            #:hspace {after}")
-        strings.append(
-            '            #:general-align Y -2 #:normal-text #:larger "”"'
-        )
+        strings.append('            #:general-align Y -2 #:normal-text #:larger "”"')
         strings.append("            )")
         strings.append("        )")
         strings.append("    )")
@@ -430,9 +417,7 @@ class Dynamic(object):
             string = rf"\{self.name}"
             if self.direction is not None:
                 direction_ = self.direction
-                direction = String.to_tridirectional_lilypond_symbol(
-                    direction_
-                )
+                direction = String.to_tridirectional_lilypond_symbol(direction_)
                 string = f"{direction} {string}"
         return string
 
@@ -457,9 +442,7 @@ class Dynamic(object):
     @staticmethod
     def _tag_hide(strings):
         return LilyPondFormatManager.tag(
-            strings,
-            deactivate=False,
-            tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS,
+            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
         )
 
     ### PUBLIC PROPERTIES ###
@@ -1218,9 +1201,7 @@ class Dynamic(object):
         if self.name:
             name = self.name.strip('"')
         if name in self._composite_dynamic_name_to_steady_state_dynamic_name:
-            name = self._composite_dynamic_name_to_steady_state_dynamic_name[
-                name
-            ]
+            name = self._composite_dynamic_name_to_steady_state_dynamic_name[name]
         ordinal = self._dynamic_name_to_dynamic_ordinal.get(name)
         return ordinal
 
@@ -1337,9 +1318,7 @@ class Dynamic(object):
             'f'
 
         """
-        return Dynamic._composite_dynamic_name_to_steady_state_dynamic_name[
-            name
-        ]
+        return Dynamic._composite_dynamic_name_to_steady_state_dynamic_name[name]
 
     @staticmethod
     # def dynamic_name_to_dynamic_ordinal(name) -> typing.Union[
@@ -1361,9 +1340,7 @@ class Dynamic(object):
         try:
             return Dynamic._dynamic_name_to_dynamic_ordinal[name]
         except KeyError:
-            name = Dynamic.composite_dynamic_name_to_steady_state_dynamic_name(
-                name
-            )
+            name = Dynamic.composite_dynamic_name_to_steady_state_dynamic_name(name)
             return Dynamic._dynamic_name_to_dynamic_ordinal[name]
 
     @staticmethod

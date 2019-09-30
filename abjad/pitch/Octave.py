@@ -288,9 +288,7 @@ class Octave(object):
         """
         import abjad
 
-        return abjad.PitchRange(
-            "[C{}, C{})".format(self.number, self.number + 1)
-        )
+        return abjad.PitchRange("[C{}, C{})".format(self.number, self.number + 1))
 
     @property
     def ticks(self):

@@ -224,9 +224,7 @@ class GroupedRhythmicStavesScoreTemplate(ScoreTemplate):
                     if voice_count == 1:
                         voice_identifier = str(staff_number)
                     else:
-                        voice_identifier = "{}_{}".format(
-                            staff_number, voice_number
-                        )
+                        voice_identifier = "{}_{}".format(staff_number, voice_number)
                         staff.simultaneous = True
                     name = "Voice_{}".format(voice_identifier)
                     voice = abjad.Voice([], name=name, tag=tag)
@@ -275,6 +273,4 @@ class GroupedRhythmicStavesScoreTemplate(ScoreTemplate):
             OrderedDict([])
 
         """
-        return super(
-            GroupedRhythmicStavesScoreTemplate, self
-        ).voice_abbreviations
+        return super(GroupedRhythmicStavesScoreTemplate, self).voice_abbreviations

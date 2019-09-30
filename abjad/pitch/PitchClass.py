@@ -3,6 +3,7 @@ import functools
 import numbers
 from abjad import mathtools
 from . import constants
+
 try:
     from quicktions import Fraction
 except ImportError:
@@ -24,18 +25,21 @@ class PitchClass(object):
     @abc.abstractmethod
     def __init__(self, argument):
         import abjad
+
         if isinstance(argument, str):
             match = constants._comprehensive_pitch_name_regex.match(argument)
             if not match:
                 match = constants._comprehensive_pitch_class_name_regex.match(argument)
             if not match:
-                message = 'can not instantiate {} from {!r}.'
+                message = "can not instantiate {} from {!r}."
                 message = message.format(type(self).__name__, argument)
                 raise ValueError(message)
             group_dict = match.groupdict()
-            dpc_name = group_dict['diatonic_pc_name'].lower()
+            dpc_name = group_dict["diatonic_pc_name"].lower()
             dpc_number = constants._diatonic_pc_name_to_diatonic_pc_number[dpc_name]
-            alteration = abjad.Accidental(group_dict['comprehensive_accidental']).semitones
+            alteration = abjad.Accidental(
+                group_dict["comprehensive_accidental"]
+            ).semitones
             self._from_named_parts(dpc_number, alteration)
         elif isinstance(argument, numbers.Number):
             self._from_number(argument)
@@ -46,7 +50,7 @@ class PitchClass(object):
                 pitch = abjad.NamedPitch(argument)
                 self._from_pitch_or_pitch_class(pitch)
             except Exception:
-                message = 'can not instantiate {} from {!r}.'
+                message = "can not instantiate {} from {!r}."
                 message = message.format(type(self).__name__, argument)
                 raise ValueError(message)
 
@@ -60,7 +64,7 @@ class PitchClass(object):
         """
         return float(self.number)
 
-    def __format__(self, format_specification=''):
+    def __format__(self, format_specification=""):
         """
         Formats pitch-class.
 
@@ -68,7 +72,7 @@ class PitchClass(object):
 
         Returns string.
         """
-        if format_specification == 'lilypond':
+        if format_specification == "lilypond":
             return self._get_lilypond_format()
         return super().__format__(format_specification=format_specification)
 

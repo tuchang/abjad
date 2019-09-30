@@ -113,10 +113,7 @@ class Job(object):
                 else:
                     assert isinstance(self.path, str)
                     text, count, skipped = activate(
-                        text,
-                        match,
-                        skip_file_name=self.skip_file_name,
-                        skipped=True,
+                        text, match, skip_file_name=self.skip_file_name, skipped=True
                     )
         if self.deactivate_first is not True:
             if self.deactivate is not None:
@@ -232,14 +229,10 @@ class Job(object):
 
         if undo:
             return Job(
-                deactivate=(match, name),
-                path=path,
-                title="uncoloring clefs ...",
+                deactivate=(match, name), path=path, title="uncoloring clefs ..."
             )
         else:
-            return Job(
-                activate=(match, name), path=path, title="coloring clefs ..."
-            )
+            return Job(activate=(match, name), path=path, title="coloring clefs ...")
 
     @staticmethod
     def color_dynamics(path, undo=False) -> "Job":
@@ -254,16 +247,10 @@ class Job(object):
 
         if undo:
             return Job(
-                deactivate=(match, name),
-                path=path,
-                title="uncoloring dynamics ...",
+                deactivate=(match, name), path=path, title="uncoloring dynamics ..."
             )
         else:
-            return Job(
-                activate=(match, name),
-                path=path,
-                title="coloring dynamics ...",
-            )
+            return Job(activate=(match, name), path=path, title="coloring dynamics ...")
 
     @staticmethod
     def color_instruments(path, undo=False) -> "Job":
@@ -278,15 +265,11 @@ class Job(object):
 
         if undo:
             return Job(
-                deactivate=(match, name),
-                path=path,
-                title="uncoloring instruments ...",
+                deactivate=(match, name), path=path, title="uncoloring instruments ..."
             )
         else:
             return Job(
-                activate=(match, name),
-                path=path,
-                title="coloring instruments ...",
+                activate=(match, name), path=path, title="coloring instruments ..."
             )
 
     @staticmethod
@@ -308,9 +291,7 @@ class Job(object):
             )
         else:
             return Job(
-                activate=(match, name),
-                path=path,
-                title="coloring margin markup ...",
+                activate=(match, name), path=path, title="coloring margin markup ..."
             )
 
     @staticmethod
@@ -357,9 +338,7 @@ class Job(object):
         deactivate_name = "persistent indicator color suppression"
 
         def deactivate(tags):
-            tags_ = abjad_tags.persistent_indicator_color_suppression_tags(
-                path
-            )
+            tags_ = abjad_tags.persistent_indicator_color_suppression_tags(path)
             return bool(set(tags) & set(tags_))
 
         if undo:
@@ -390,15 +369,11 @@ class Job(object):
 
         if undo:
             return Job(
-                deactivate=(match, name),
-                path=path,
-                title="uncoloring staff lines ...",
+                deactivate=(match, name), path=path, title="uncoloring staff lines ..."
             )
         else:
             return Job(
-                activate=(match, name),
-                path=path,
-                title="coloring staff lines ...",
+                activate=(match, name), path=path, title="coloring staff lines ..."
             )
 
     @staticmethod
@@ -413,13 +388,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def color_time_signatures(path, undo=False) -> "Job":
@@ -440,9 +411,7 @@ class Job(object):
             )
         else:
             return Job(
-                activate=(match, name),
-                path=path,
-                title="coloring time signatures ...",
+                activate=(match, name), path=path, title="coloring time signatures ..."
             )
 
     @staticmethod
@@ -606,15 +575,11 @@ class Job(object):
 
         if undo:
             return Job(
-                activate=(match, name),
-                path=path,
-                title="showing default clefs ...",
+                activate=(match, name), path=path, title="showing default clefs ..."
             )
         else:
             return Job(
-                deactivate=(match, name),
-                path=path,
-                title="hiding default clefs ...",
+                deactivate=(match, name), path=path, title="hiding default clefs ..."
             )
 
     @staticmethod
@@ -650,13 +615,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def show_figure_name_markup(path, undo=False) -> "Job":
@@ -670,13 +631,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def show_local_measure_number_markup(path, undo=False) -> "Job":
@@ -690,13 +647,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def show_measure_number_markup(path, undo=False) -> "Job":
@@ -710,13 +663,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def show_music_annotations(path, undo=False) -> "Job":
@@ -730,15 +679,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name),
-                path=path,
-                title=f"hiding {name}s ...",
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name}s ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name}s ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name}s ...")
 
     @staticmethod
     def show_spacing_markup(path, undo=False) -> "Job":
@@ -752,13 +695,9 @@ class Job(object):
             return bool(set(tags) & set(tags_))
 
         if undo:
-            return Job(
-                deactivate=(match, name), path=path, title=f"hiding {name} ..."
-            )
+            return Job(deactivate=(match, name), path=path, title=f"hiding {name} ...")
         else:
-            return Job(
-                activate=(match, name), path=path, title=f"showing {name} ..."
-            )
+            return Job(activate=(match, name), path=path, title=f"showing {name} ...")
 
     @staticmethod
     def show_tag(

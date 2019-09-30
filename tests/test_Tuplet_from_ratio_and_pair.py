@@ -331,8 +331,7 @@ def test_Tuplet_from_ratio_and_pair_18():
 def test_Tuplet_from_ratio_and_pair_19():
 
     tuplet = abjad.Tuplet.from_ratio_and_pair(
-        abjad.NonreducedRatio((1, 1, 1, -1, -1)),
-        abjad.NonreducedFraction(5, 16),
+        abjad.NonreducedRatio((1, 1, 1, -1, -1)), abjad.NonreducedFraction(5, 16)
     )
 
     assert format(tuplet) == abjad.String.normalize(
@@ -352,8 +351,7 @@ def test_Tuplet_from_ratio_and_pair_19():
 def test_Tuplet_from_ratio_and_pair_20():
 
     tuplet = abjad.Tuplet.from_ratio_and_pair(
-        abjad.NonreducedRatio((1, 1, 1, 1, -1, -1)),
-        abjad.NonreducedFraction(6, 16),
+        abjad.NonreducedRatio((1, 1, 1, 1, -1, -1)), abjad.NonreducedFraction(6, 16)
     )
 
     assert format(tuplet) == abjad.String.normalize(

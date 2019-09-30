@@ -161,8 +161,7 @@ def graph(
     ABJADOUTPUT = abjad_configuration["abjad_output_directory"]
     system.IOManager._ensure_directory_existence(ABJADOUTPUT)
     dot_path = os.path.join(
-        ABJADOUTPUT,
-        system.IOManager.get_next_output_file_name(file_extension="dot"),
+        ABJADOUTPUT, system.IOManager.get_next_output_file_name(file_extension="dot")
     )
     img_path = os.path.join(ABJADOUTPUT, dot_path.replace("dot", "pdf"))
 

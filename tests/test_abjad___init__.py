@@ -11,9 +11,7 @@ ignored_classes = (
     abjad.Tags,
 )
 
-classes = pytest.helpers.list_all_abjad_classes(
-    ignored_classes=ignored_classes
-)
+classes = pytest.helpers.list_all_abjad_classes(ignored_classes=ignored_classes)
 
 
 @pytest.mark.parametrize("class_", classes)

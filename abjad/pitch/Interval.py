@@ -211,19 +211,17 @@ class Interval(object):
         number = round(float(number) * 4) / 4
         div, mod = divmod(number, 1)
         if mod == 0.75:
-            div += 0.75 # used to be 1
+            div += 0.75  # used to be 1
         elif mod == 0.5:
             div += 0.5
-        elif mod == 0.25: # new
-            div += 0.25 # new
+        elif mod == 0.25:  # new
+            div += 0.25  # new
         return mathtools.integer_equivalent_number_to_integer(div)
 
     @classmethod
     def _validate_quality_and_diatonic_number(cls, quality, diatonic_number):
         if quality in constants._quality_string_to_quality_abbreviation:
-            quality = constants._quality_string_to_quality_abbreviation[
-                quality
-            ]
+            quality = constants._quality_string_to_quality_abbreviation[quality]
         if quality == "aug":
             quality = "A"
         if quality == "dim":

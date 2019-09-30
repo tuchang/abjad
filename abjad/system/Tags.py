@@ -422,9 +422,7 @@ class Tags(object):
             self.REDRAWN_REDUNDANT_MARGIN_MARKUP_COLOR,
         ]
 
-    def metronome_mark_color_expression_tags(
-        self, path=None
-    ) -> typing.List[str]:
+    def metronome_mark_color_expression_tags(self, path=None) -> typing.List[str]:
         """
         Gets metronome mark color expression tags.
 
@@ -444,9 +442,7 @@ class Tags(object):
             self.REDUNDANT_METRONOME_MARK_WITH_COLOR,
         ]
 
-    def metronome_mark_color_suppression_tags(
-        self, path=None
-    ) -> typing.List[str]:
+    def metronome_mark_color_suppression_tags(self, path=None) -> typing.List[str]:
         """
         Gets metronome mark color suppression tags.
 
@@ -487,9 +483,7 @@ class Tags(object):
             const.STAGE_NUMBER,
         ]
 
-    def persistent_indicator_color_expression_tags(
-        self, path=None
-    ) -> typing.List[str]:
+    def persistent_indicator_color_expression_tags(self, path=None) -> typing.List[str]:
         """
         Gets persistent indicator color expression tags.
 

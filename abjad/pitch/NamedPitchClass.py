@@ -123,9 +123,7 @@ class NamedPitchClass(PitchClass):
         if accidental is not None:
             self._accidental = type(self._accidental)(accidental)
         if arrow is not None:
-            self._accidental = type(self._accidental)(
-                self._accidental, arrow=arrow
-            )
+            self._accidental = type(self._accidental)(self._accidental, arrow=arrow)
 
     ### SPECIAL METHODS ###
 
@@ -323,12 +321,9 @@ class NamedPitchClass(PitchClass):
 
         if isinstance(pitch_or_pitch_class, Pitch):
             pitch_or_pitch_class = pitch_or_pitch_class.pitch_class
-        self._diatonic_pc_number = (
-            pitch_or_pitch_class._get_diatonic_pc_number()
-        )
+        self._diatonic_pc_number = pitch_or_pitch_class._get_diatonic_pc_number()
         self._accidental = abjad.Accidental(
-            pitch_or_pitch_class._get_alteration(),
-            arrow=pitch_or_pitch_class.arrow,
+            pitch_or_pitch_class._get_alteration(), arrow=pitch_or_pitch_class.arrow
         )
 
     def _get_alteration(self):
@@ -356,8 +351,7 @@ class NamedPitchClass(PitchClass):
         import abjad
 
         return "{}{!s}".format(
-            self._get_diatonic_pc_name(),
-            abjad.Accidental(self._get_alteration()),
+            self._get_diatonic_pc_name(), abjad.Accidental(self._get_alteration())
         )
 
     ### PUBLIC PROPERTIES ###

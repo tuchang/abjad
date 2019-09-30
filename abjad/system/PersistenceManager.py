@@ -52,11 +52,7 @@ class PersistenceManager(object):
     ### PUBLIC METHODS ###
 
     def as_ly(
-        self,
-        ly_file_path=None,
-        illustrate_function=None,
-        strict=None,
-        **keywords,
+        self, ly_file_path=None, illustrate_function=None, strict=None, **keywords
     ):
         """
         Persists client as LilyPond file.
@@ -146,17 +142,10 @@ class PersistenceManager(object):
             extension = "mid"
         else:
             extension = "midi"
-        midi_file_path = "{}.{}".format(
-            os.path.splitext(ly_file_path)[0], extension
-        )
+        midi_file_path = "{}.{}".format(os.path.splitext(ly_file_path)[0], extension)
         if remove_ly:
             os.remove(ly_file_path)
-        return (
-            midi_file_path,
-            abjad_formatting_time,
-            lilypond_rendering_time,
-            success,
-        )
+        return (midi_file_path, abjad_formatting_time, lilypond_rendering_time, success)
 
     def as_pdf(
         self,
@@ -212,12 +201,7 @@ class PersistenceManager(object):
         lilypond_rendering_time = timer.elapsed_time
         if remove_ly:
             os.remove(ly_file_path)
-        return (
-            pdf_file_path,
-            abjad_formatting_time,
-            lilypond_rendering_time,
-            success,
-        )
+        return (pdf_file_path, abjad_formatting_time, lilypond_rendering_time, success)
 
     def as_png(
         self,
@@ -297,9 +281,7 @@ class PersistenceManager(object):
 
         timer = abjad.Timer()
         with timer:
-            success = abjad.IOManager.run_lilypond(
-                temporary_ly_file_path, flags=flags
-            )
+            success = abjad.IOManager.run_lilypond(temporary_ly_file_path, flags=flags)
         lilypond_rendering_time = timer.elapsed_time
 
         png_file_paths = []
