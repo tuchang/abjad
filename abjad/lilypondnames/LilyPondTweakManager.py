@@ -38,7 +38,7 @@ class LilyPondTweakManager(LilyPondNameManager):
         Traceback (most recent call last):
             ...
         AttributeError: LilyPondTweakManager object has no attribute 'foo'.
-        
+
     """
 
     ### INITIALIZER ###
@@ -53,7 +53,7 @@ class LilyPondTweakManager(LilyPondNameManager):
 
     def __getattr__(self, name) -> typing.Union[LilyPondNameManager, typing.Any]:
         r"""
-        Gets LilyPondNameManager (or LilyPondGrobNameManager) keyed to 
+        Gets LilyPondNameManager (or LilyPondGrobNameManager) keyed to
         ``name``.
 
         ..  container:: example
