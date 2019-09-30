@@ -1,14 +1,12 @@
 """
-Abjad's core component classes: notes, rests, chords, tuplets, measures,
-containers and contexts.
+Abjad's core component classes: notes, rests, chords, tuplets, containers and
+contexts.
 """
 
 from .Component import Component
 from .Container import Container
-from .GraceContainer import GraceContainer
-from .AcciaccaturaContainer import AcciaccaturaContainer
+from .BeforeGraceContainer import BeforeGraceContainer
 from .AfterGraceContainer import AfterGraceContainer
-from .AppoggiaturaContainer import AppoggiaturaContainer
 from .Leaf import Leaf
 from .Chord import Chord
 from .Cluster import Cluster
@@ -28,6 +26,8 @@ from .Mutation import Mutation
 from .Note import Note
 from .NoteHeadList import NoteHeadList
 from .NoteMaker import NoteMaker
+from .OnBeatGraceContainer import OnBeatGraceContainer
+from .OnBeatGraceContainer import on_beat_grace_container
 from .Parentage import Parentage
 from .Rest import Rest
 from .Score import Score

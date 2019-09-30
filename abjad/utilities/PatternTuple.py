@@ -1,3 +1,4 @@
+from .Pattern import Pattern
 from .TypedTuple import TypedTuple
 
 
@@ -278,18 +279,3 @@ class PatternTuple(TypedTuple):
         if pattern:
             payload = pattern.payload
         return payload
-
-    ### PRIVATE PROPERTIES ###
-
-    @property
-    def _item_coercer(self):
-        import abjad
-
-        def coerce_(argument):
-            if hasattr(argument, "pattern"):
-                pass
-            elif not isinstance(argument, abjad.Pattern):
-                argument = abjad.Pattern(*argument)
-            return argument
-
-        return coerce_

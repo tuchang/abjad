@@ -13,6 +13,7 @@ from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.top.inspect import inspect
 from abjad.top.iterate import iterate
 from abjad.top.override import override
+from abjad.top.select import select
 from abjad.top.tweak import tweak
 from abjad.utilities.Duration import Duration
 from abjad.utilities.Multiplier import Multiplier
@@ -32,7 +33,7 @@ class Tuplet(Container):
 
         A tuplet:
 
-        >>> tuplet = abjad.Tuplet((2, 3), "c'8 d'8 e'8")
+        >>> tuplet = abjad.Tuplet("3:2", "c'8 d'8 e'8")
         >>> abjad.show(tuplet) # doctest: +SKIP
 
         ..  docs::
@@ -48,7 +49,7 @@ class Tuplet(Container):
 
         A nested tuplet:
 
-        >>> second_tuplet = abjad.Tuplet((4, 7), "g'4. ( a'16 )")
+        >>> second_tuplet = abjad.Tuplet("7:4", "g'4. ( a'16 )")
         >>> tuplet.insert(1, second_tuplet)
         >>> abjad.show(tuplet) # doctest: +SKIP
 
@@ -73,7 +74,7 @@ class Tuplet(Container):
 
         A doubly nested tuplet:
 
-            >>> third_tuplet = abjad.Tuplet((4, 5), [])
+            >>> third_tuplet = abjad.Tuplet("5:4", [])
             >>> third_tuplet.extend("e''32 [ ef''32 d''32 cs''32 cqs''32 ]")
             >>> second_tuplet.insert(1, third_tuplet)
             >>> abjad.show(tuplet) # doctest: +SKIP
@@ -132,7 +133,12 @@ class Tuplet(Container):
         tweaks: LilyPondTweakManager = None,
     ) -> None:
         Container.__init__(self, components, tag=tag)
-        multiplier = Multiplier(multiplier)
+        if isinstance(multiplier, str) and ":" in multiplier:
+            strings = multiplier.split(":")
+            numbers = [int(_) for _ in strings]
+            multiplier = Multiplier(numbers[1], numbers[0])
+        else:
+            multiplier = Multiplier(multiplier)
         self.multiplier = multiplier
         self.denominator = denominator
         self.force_fraction = force_fraction
@@ -352,7 +358,7 @@ class Tuplet(Container):
 
             Gets preferred denominator of tuplet:
 
-            >>> tuplet = abjad.Tuplet((2, 3), "c'8 d'8 e'8")
+            >>> tuplet = abjad.Tuplet("3:2", "c'8 d'8 e'8")
             >>> tuplet.denominator is None
             True
             >>> abjad.show(tuplet) # doctest: +SKIP
@@ -370,7 +376,7 @@ class Tuplet(Container):
 
             Sets preferred denominator of tuplet:
 
-            >>> tuplet = abjad.Tuplet((2, 3), "c'8 d'8 e'8")
+            >>> tuplet = abjad.Tuplet("3:2", "c'8 d'8 e'8")
             >>> abjad.show(tuplet) # doctest: +SKIP
 
             ..  docs::
@@ -2211,6 +2217,31 @@ class Tuplet(Container):
         for component in self:
             component.written_duration *= dot_multiplier_reciprocal
 
+    def rest_filled(self) -> bool:
+        r"""
+        Is true when tuplet is rest-filled.
+
+        ..  container:: example
+
+            >>> tuplet = abjad.Tuplet((3, 2), "r4 r r")
+            >>> abjad.show(tuplet) # doctest: +SKIP
+
+            ..  container:: example
+
+                >>> abjad.f(tuplet)
+                \tweak text #tuplet-number::calc-fraction-text
+                \times 3/2 {
+                    r4
+                    r4
+                    r4
+                }
+
+            >>> tuplet.rest_filled()
+            True
+
+        """
+        return all(isinstance(_, Rest) for _ in self)
+
     def set_minimum_denominator(self, denominator) -> None:
         r"""
         Sets preferred denominator of tuplet to at least ``denominator``.
@@ -2261,6 +2292,44 @@ class Tuplet(Container):
             durations
         )
         self.denominator = nonreduced_fractions[1].numerator
+
+    def sustained(self) -> bool:
+        r"""
+        Is true when tuplet is sustained.
+
+        ..  container:: example
+
+            >>> tuplet = abjad.Tuplet((3, 2), "c'4 ~ c' ~ c'")
+            >>> abjad.show(tuplet) # doctest: +SKIP
+
+            ..  container:: example
+
+                >>> abjad.f(tuplet)
+                \tweak text #tuplet-number::calc-fraction-text
+                \times 3/2 {
+                    c'4
+                    ~
+                    c'4
+                    ~
+                    c'4
+                }
+
+            >>> tuplet.sustained()
+            True
+
+        """
+        lt_head_count = 0
+        leaves = select(self).leaves()
+        for leaf in leaves:
+            lt = leaf._get_logical_tie()
+            if lt.head is leaf:
+                lt_head_count += 1
+        if lt_head_count == 0:
+            return True
+        lt = leaves[0]._get_logical_tie()
+        if lt.head is leaves[0] and lt_head_count == 1:
+            return True
+        return False
 
     def toggle_prolation(self) -> None:
         r"""

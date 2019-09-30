@@ -20,11 +20,12 @@ from .Chord import Chord
 from .Component import Component
 from .Container import Container
 from .Descendants import Descendants
-from .GraceContainer import GraceContainer
+from .BeforeGraceContainer import BeforeGraceContainer
 from .Leaf import Leaf
 from .Lineage import Lineage
 from .LogicalTie import LogicalTie
 from .Note import Note
+from .OnBeatGraceContainer import OnBeatGraceContainer
 from .Parentage import Parentage
 from .Selection import Selection
 from .Staff import Staff
@@ -71,7 +72,7 @@ class Inspection(object):
 
     def __repr__(self) -> str:
         """
-        Gets interpreter representation.
+        Delegates to storage format manager.
         """
         return StorageFormatManager(self).get_repr_format()
 
@@ -82,13 +83,11 @@ class Inspection(object):
         self
     ) -> typing.Union[Component, typing.Iterable[Component], None]:
         r"""
-        Gets client of inspection.
+        Gets client.
 
         ..  container:: example
 
-            >>> staff = abjad.Staff()
-            >>> staff.append(abjad.Voice("c'8 d'8 e'8 f'8"))
-            >>> staff.append(abjad.Voice("g'8 a'8 b'8 c''8"))
+            >>> staff = abjad.Staff("c'4 d' e' f'")
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -96,24 +95,14 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    \new Voice
-                    {
-                        c'8
-                        d'8
-                        e'8
-                        f'8
-                    }
-                    \new Voice
-                    {
-                        g'8
-                        a'8
-                        b'8
-                        c''8
-                    }
+                    c'4
+                    d'4
+                    e'4
+                    f'4
                 }
 
             >>> abjad.inspect(staff).client
-            <Staff{2}>
+            Staff("c'4 d'4 e'4 f'4")
 
         """
         return self._client
@@ -122,16 +111,22 @@ class Inspection(object):
 
     def after_grace_container(self) -> typing.Optional[AfterGraceContainer]:
         r"""
-        Gets after grace containers attached to leaf.
+        Gets after grace containers attached to component.
 
         ..  container:: example
 
-            Get after grace container attached to note:
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> staff = abjad.Staff("c'8 d'8 e'8 f'8")
-            >>> note = abjad.Note("ds'16")
-            >>> container = abjad.AfterGraceContainer([note])
-            >>> abjad.attach(container, staff[1])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -139,18 +134,69 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'8
-                    \afterGrace
-                    d'8
+                    \context Voice = "Music_Voice"
                     {
-                        ds'16
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    e'8
-                    f'8
                 }
 
-            >>> abjad.inspect(staff[1]).after_grace_container()
-            AfterGraceContainer("ds'16")
+            >>> for component in abjad.select(staff).components():
+            ...     container = abjad.inspect(component).after_grace_container()
+            ...     print(f"{repr(component):30} {repr(container)}")
+            <Staff{1}>                     None
+            <Voice-"Music_Voice"{4}>       None
+            Note("c'4")                    None
+            BeforeGraceContainer("cs'16")        None
+            Note("cs'16")                  None
+            Note("d'4")                    None
+            <<<2>>>                        None
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") None
+            Chord("<e' g'>16")             None
+            Note("gs'16")                  None
+            Note("a'16")                   None
+            Note("as'16")                  None
+            Voice("e'4", name='Music_Voice') None
+            Note("e'4")                    None
+            Note("f'4")                    AfterGraceContainer("fs'16")
+            AfterGraceContainer("fs'16")   None
+            Note("fs'16")                  None
 
         """
         return getattr(self.client, "_after_grace_container", None)
@@ -358,7 +404,18 @@ class Inspection(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff(r"\times 2/3 { c'8 d'8 e'8 } f'4")
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -366,20 +423,162 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    \times 2/3 {
-                        c'8
-                        d'8
-                        e'8
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    f'4
                 }
 
-            >>> for component in abjad.inspect(staff).contents():
-            ...     component
-            ...
-            <Staff{2}>
-            Tuplet(Multiplier(2, 3), "c'8 d'8 e'8")
-            Note("f'4")
+            >>> for component in abjad.select(staff).components():
+            ...     contents = abjad.inspect(component).contents()
+            ...     print(f"{repr(component)}:")
+            ...     for component_ in contents:
+            ...         print(f"    {repr(component_)}")
+            <Staff{1}>:
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+            <Voice-"Music_Voice"{4}>:
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+                Note("d'4")
+                <<<2>>>
+                Note("f'4")
+            Note("c'4"):
+                Note("c'4")
+            BeforeGraceContainer("cs'16"):
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+            Note("cs'16"):
+                Note("cs'16")
+            Note("d'4"):
+                Note("d'4")
+            <<<2>>>:
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Voice("e'4", name='Music_Voice')
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16"):
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+            Chord("<e' g'>16"):
+                Chord("<e' g'>16")
+            Note("gs'16"):
+                Note("gs'16")
+            Note("a'16"):
+                Note("a'16")
+            Note("as'16"):
+                Note("as'16")
+            Voice("e'4", name='Music_Voice'):
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            Note("e'4"):
+                Note("e'4")
+            Note("f'4"):
+                Note("f'4")
+            AfterGraceContainer("fs'16"):
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            Note("fs'16"):
+                Note("fs'16")
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     contents = abjad.inspect(component).contents()
+            ...     print(f"{repr(component)}:")
+            ...     for component_ in contents:
+            ...         print(f"    {repr(component_)}")
+            <Staff{4}>:
+                <Staff{4}>
+                TremoloContainer("c'16 e'16")
+                Note("cs'4")
+                TremoloContainer("d'16 f'16")
+                Note("ds'4")
+            TremoloContainer("c'16 e'16"):
+                TremoloContainer("c'16 e'16")
+                Note("c'16")
+                Note("e'16")
+            Note("c'16"):
+                Note("c'16")
+            Note("e'16"):
+                Note("e'16")
+            Note("cs'4"):
+                Note("cs'4")
+            TremoloContainer("d'16 f'16"):
+                TremoloContainer("d'16 f'16")
+                Note("d'16")
+                Note("f'16")
+            Note("d'16"):
+                Note("d'16")
+            Note("f'16"):
+                Note("f'16")
+            Note("ds'4"):
+                Note("ds'4")
 
         """
         if not isinstance(self.client, Component):
@@ -392,7 +591,18 @@ class Inspection(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff(r"\times 2/3 { c'8 d'8 e'8 } f'4")
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -400,23 +610,133 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    \times 2/3 {
-                        c'8
-                        d'8
-                        e'8
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    f'4
                 }
 
-            >>> for component in abjad.inspect(staff).descendants():
-            ...     component
-            ...
-            <Staff{2}>
-            Tuplet(Multiplier(2, 3), "c'8 d'8 e'8")
-            Note("c'8")
-            Note("d'8")
-            Note("e'8")
-            Note("f'4")
+            >>> for component in abjad.select(staff).components():
+            ...     descendants = abjad.inspect(component).descendants()
+            ...     print(f"{repr(component)}:")
+            ...     for component_ in descendants:
+            ...         print(f"    {repr(component_)}")
+            <Staff{1}>:
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+                Note("d'4")
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+                Note("f'4")
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            <Voice-"Music_Voice"{4}>:
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+                Note("d'4")
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+                Note("f'4")
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            Note("c'4"):
+                Note("c'4")
+            BeforeGraceContainer("cs'16"):
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+            Note("cs'16"):
+                Note("cs'16")
+            Note("d'4"):
+                Note("d'4")
+            <<<2>>>:
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16"):
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+            Chord("<e' g'>16"):
+                Chord("<e' g'>16")
+            Note("gs'16"):
+                Note("gs'16")
+            Note("a'16"):
+                Note("a'16")
+            Note("as'16"):
+                Note("as'16")
+            Voice("e'4", name='Music_Voice'):
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            Note("e'4"):
+                Note("e'4")
+            Note("f'4"):
+                Note("f'4")
+            AfterGraceContainer("fs'16"):
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            Note("fs'16"):
+                Note("fs'16")
 
         """
         if isinstance(self.client, Component):
@@ -436,6 +756,134 @@ class Inspection(object):
         Gets duration.
 
         ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     duration = abjad.inspect(component).duration()
+            ...     print(f"{repr(component):30} {repr(duration)}")
+            <Staff{1}>                     Duration(1, 1)
+            <Voice-"Music_Voice"{4}>       Duration(1, 1)
+            Note("c'4")                    Duration(1, 4)
+            BeforeGraceContainer("cs'16")        Duration(1, 16)
+            Note("cs'16")                  Duration(1, 16)
+            Note("d'4")                    Duration(1, 4)
+            <<<2>>>                        Duration(1, 4)
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") Duration(1, 4)
+            Chord("<e' g'>16")             Duration(1, 16)
+            Note("gs'16")                  Duration(1, 16)
+            Note("a'16")                   Duration(1, 16)
+            Note("as'16")                  Duration(1, 16)
+            Voice("e'4", name='Music_Voice') Duration(1, 4)
+            Note("e'4")                    Duration(1, 4)
+            Note("f'4")                    Duration(1, 4)
+            AfterGraceContainer("fs'16")   Duration(1, 16)
+            Note("fs'16")                  Duration(1, 16)
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     duration = abjad.inspect(component).duration()
+            ...     print(f"{repr(component):30} {repr(duration)}")
+            <Staff{4}>                     Duration(1, 1)
+            TremoloContainer("c'16 e'16")  Duration(1, 4)
+            Note("c'16")                   Duration(1, 8)
+            Note("e'16")                   Duration(1, 8)
+            Note("cs'4")                   Duration(1, 4)
+            TremoloContainer("d'16 f'16")  Duration(1, 4)
+            Note("d'16")                   Duration(1, 8)
+            Note("f'16")                   Duration(1, 8)
+            Note("ds'4")                   Duration(1, 4)
+
+        ..  container:: example
+
+            REGRESSION. Works with selections:
 
             >>> staff = abjad.Staff("c'4 d' e' f'")
             >>> abjad.show(staff) # doctest: +SKIP
@@ -480,11 +928,19 @@ class Inspection(object):
 
         ..  container:: example
 
-            Gets effective clef:
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Clef('alto'), staff[0])
-            >>> abjad.attach(abjad.AcciaccaturaContainer("fs'16"), staff[-1])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -492,27 +948,113 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    \clef "alto"
-                    c'4
-                    d'4
-                    e'4
-                    \acciaccatura {
-                        fs'16
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    f'4
                 }
 
-            >>> for component in abjad.iterate(staff).components():
+            >>> for component in abjad.select(staff).components():
             ...     clef = abjad.inspect(component).effective(abjad.Clef)
-            ...     print(component, clef)
-            ...
-            Staff("c'4 d'4 e'4 f'4") Clef('alto')
-            c'4 Clef('alto')
-            d'4 Clef('alto')
-            e'4 Clef('alto')
-            AcciaccaturaContainer("fs'16") None
-            fs'16 Clef('alto')
-            f'4 Clef('alto')
+            ...     print(f"{repr(component):30} {repr(clef)}")
+            <Staff{1}>                     None
+            <Voice-"Music_Voice"{4}>       None
+            Note("c'4")                    None
+            BeforeGraceContainer("cs'16")        None
+            Note("cs'16")                  None
+            Note("d'4")                    None
+            <<<2>>>                        Clef('alto')
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") Clef('alto')
+            Chord("<e' g'>16")             Clef('alto')
+            Note("gs'16")                  Clef('alto')
+            Note("a'16")                   Clef('alto')
+            Note("as'16")                  Clef('alto')
+            Voice("e'4", name='Music_Voice') Clef('alto')
+            Note("e'4")                    Clef('alto')
+            Note("f'4")                    Clef('alto')
+            AfterGraceContainer("fs'16")   Clef('alto')
+            Note("fs'16")                  Clef('alto')
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> abjad.attach(abjad.Clef("alto"), staff[-1][0])
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        \clef "alto"
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     clef = abjad.inspect(component).effective(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(clef)}")
+            <Staff{4}>                     None
+            TremoloContainer("c'16 e'16")  None
+            Note("c'16")                   None
+            Note("e'16")                   None
+            Note("cs'4")                   None
+            TremoloContainer("d'16 f'16")  Clef('alto')
+            Note("d'16")                   Clef('alto')
+            Note("f'16")                   Clef('alto')
+            Note("ds'4")                   Clef('alto')
 
         ..  container:: example
 
@@ -678,26 +1220,30 @@ class Inspection(object):
             Test attributes like this:
 
             >>> voice = abjad.Voice("c'4 d' e' f'")
+            >>> staff = abjad.Staff([voice])
             >>> start_text_span = abjad.StartTextSpan()
             >>> abjad.attach(start_text_span, voice[0])
             >>> stop_text_span = abjad.StopTextSpan()
             >>> abjad.attach(stop_text_span, voice[2])
-            >>> abjad.show(voice) # doctest: +SKIP 
+            >>> abjad.show(staff) # doctest: +SKIP 
 
             ..  docs::
 
-                >>> abjad.f(voice)
-                \new Voice
+                >>> abjad.f(staff)
+                \new Staff
                 {
-                    c'4
-                    \startTextSpan
-                    d'4
-                    e'4
-                    \stopTextSpan
-                    f'4
+                    \new Voice
+                    {
+                        c'4
+                        \startTextSpan
+                        d'4
+                        e'4
+                        \stopTextSpan
+                        f'4
+                    }
                 }
 
-            >>> for note in voice:
+            >>> for note in abjad.select(staff).notes():
             ...     note, abjad.inspect(note).effective(abjad.StartTextSpan)
             ...
             (Note("c'4"), StartTextSpan(command='\\startTextSpan', concat_hspace_left=0.5))
@@ -705,7 +1251,7 @@ class Inspection(object):
             (Note("e'4"), StartTextSpan(command='\\startTextSpan', concat_hspace_left=0.5))
             (Note("f'4"), StartTextSpan(command='\\startTextSpan', concat_hspace_left=0.5))
 
-            >>> for note in voice:
+            >>> for note in abjad.select(staff).notes():
             ...     note, abjad.inspect(note).effective(abjad.StopTextSpan)
             ...
             (Note("c'4"), None)
@@ -714,7 +1260,7 @@ class Inspection(object):
             (Note("f'4"), StopTextSpan(command='\\stopTextSpan'))
 
             >>> attributes = {'parameter': 'TEXT_SPANNER'}
-            >>> for note in voice:
+            >>> for note in abjad.select(staff).notes():
             ...     indicator = abjad.inspect(note).effective(
             ...         object,
             ...         attributes=attributes,
@@ -739,8 +1285,94 @@ class Inspection(object):
         return result
 
     def effective_staff(self) -> typing.Optional[Staff]:
-        """
+        r"""
         Gets effective staff.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     staff = abjad.inspect(component).effective_staff()
+            ...     print(f"{repr(component):30} {repr(staff)}")
+            <Staff{1}>                     <Staff{1}>
+            <Voice-"Music_Voice"{4}>       <Staff{1}>
+            Note("c'4")                    <Staff{1}>
+            BeforeGraceContainer("cs'16")        <Staff{1}>
+            Note("cs'16")                  <Staff{1}>
+            Note("d'4")                    <Staff{1}>
+            <<<2>>>                        <Staff{1}>
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") <Staff{1}>
+            Chord("<e' g'>16")             <Staff{1}>
+            Note("gs'16")                  <Staff{1}>
+            Note("a'16")                   <Staff{1}>
+            Note("as'16")                  <Staff{1}>
+            Voice("e'4", name='Music_Voice') <Staff{1}>
+            Note("e'4")                    <Staff{1}>
+            Note("f'4")                    <Staff{1}>
+            AfterGraceContainer("fs'16")   <Staff{1}>
+            Note("fs'16")                  <Staff{1}>
+
         """
         if not isinstance(self.client, Component):
             raise Exception("can only get effective staff on components.")
@@ -758,11 +1390,19 @@ class Inspection(object):
 
         ..  container:: example
 
-            Gets effective clef wrapper:
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Clef('alto'), staff[0])
-            >>> abjad.attach(abjad.AcciaccaturaContainer("fs'16"), staff[-1])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -770,28 +1410,89 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    \clef "alto"
-                    c'4
-                    d'4
-                    e'4
-                    \acciaccatura {
-                        fs'16
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    f'4
                 }
 
-            >>> for component in abjad.iterate(staff).components():
+            >>> for component in abjad.select(staff).components():
             ...     inspection = abjad.inspect(component)
             ...     wrapper = inspection.effective_wrapper(abjad.Clef)
-            ...     print(component, wrapper)
-            ...
-            Staff("c'4 d'4 e'4 f'4") Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
-            c'4 Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
-            d'4 Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
-            e'4 Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
-            AcciaccaturaContainer("fs'16") None
-            fs'16 Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
-            f'4 Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            ...     print(f"{repr(component):}")
+            ...     print(f"    {repr(wrapper)}")
+            <Staff{1}>
+                None
+            <Voice-"Music_Voice"{4}>
+                None
+            Note("c'4")
+                None
+            BeforeGraceContainer("cs'16")
+                None
+            Note("cs'16")
+                None
+            Note("d'4")
+                None
+            <<<2>>>
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Chord("<e' g'>16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("gs'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("a'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("as'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Voice("e'4", name='Music_Voice')
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("e'4")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("f'4")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            AfterGraceContainer("fs'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
+            Note("fs'16")
+                Wrapper(context='Staff', indicator=Clef('alto'), tag=Tag())
 
         """
         if attributes is not None:
@@ -800,18 +1501,27 @@ class Inspection(object):
             prototype, attributes=attributes, n=n, unwrap=False
         )
 
-    def grace_container(self) -> typing.Optional[GraceContainer]:
+    def grace(self) -> bool:
         r"""
-        Gets grace container attached to leaf.
+        Is true when client is grace music.
+
+        Grace music defined equal to grace container, after-grace container and
+        contents of those containers.
 
         ..  container:: example
 
-            Get acciaccatura container attached to note:
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> staff = abjad.Staff("c'8 d'8 e'8 f'8")
-            >>> note = abjad.Note("cs'16")
-            >>> container = abjad.AcciaccaturaContainer([note])
-            >>> abjad.attach(container, staff[1])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -819,34 +1529,175 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'8
-                    \acciaccatura {
-                        cs'16
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    d'8
-                    e'8
-                    f'8
                 }
 
-            >>> abjad.inspect(staff[1]).grace_container()
-            AcciaccaturaContainer("cs'16")
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).grace()
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     False
+            <Voice-"Music_Voice"{4}>       False
+            Note("c'4")                    False
+            BeforeGraceContainer("cs'16")        True
+            Note("cs'16")                  True
+            Note("d'4")                    False
+            <<<2>>>                        False
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") True
+            Chord("<e' g'>16")             True
+            Note("gs'16")                  True
+            Note("a'16")                   True
+            Note("as'16")                  True
+            Voice("e'4", name='Music_Voice') False
+            Note("e'4")                    False
+            Note("f'4")                    False
+            AfterGraceContainer("fs'16")   True
+            Note("fs'16")                  True
+
 
         """
-        if not isinstance(self.client, Leaf):
-            raise Exception("can only get grace container on leaf.")
-        return self.client._grace_container
-
-    def grace_note(self) -> bool:
-        """
-        Is true when client is grace note.
-        """
-        if not isinstance(self.client, Leaf):
-            return False
-        prototype = (AfterGraceContainer, GraceContainer)
+        prototype = (
+            AfterGraceContainer,
+            BeforeGraceContainer,
+            OnBeatGraceContainer,
+        )
+        if isinstance(self.client, prototype):
+            return True
         for component in Inspection(self.client).parentage():
             if isinstance(component, prototype):
                 return True
         return False
+
+    def before_grace_container(self) -> typing.Optional[BeforeGraceContainer]:
+        r"""
+        Gets before-grace container attached to leaf.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     container = abjad.inspect(component).before_grace_container()
+            ...     print(f"{repr(component):30} {repr(container)}")
+            <Staff{1}>                     None
+            <Voice-"Music_Voice"{4}>       None
+            Note("c'4")                    None
+            BeforeGraceContainer("cs'16")        None
+            Note("cs'16")                  None
+            Note("d'4")                    BeforeGraceContainer("cs'16")
+            <<<2>>>                        None
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") None
+            Chord("<e' g'>16")             None
+            Note("gs'16")                  None
+            Note("a'16")                   None
+            Note("as'16")                  None
+            Voice("e'4", name='Music_Voice') None
+            Note("e'4")                    None
+            Note("f'4")                    None
+            AfterGraceContainer("fs'16")   None
+            Note("fs'16")                  None
+
+        """
+        return getattr(self.client, "_before_grace_container", None)
 
     def has_effective_indicator(
         self,
@@ -854,8 +1705,141 @@ class Inspection(object):
         *,
         attributes: typing.Dict = None,
     ) -> bool:
-        """
+        r"""
         Is true when client has effective indicator.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     inspection = abjad.inspect(component)
+            ...     result = inspection.has_effective_indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     False
+            <Voice-"Music_Voice"{4}>       False
+            Note("c'4")                    False
+            BeforeGraceContainer("cs'16")        False
+            Note("cs'16")                  False
+            Note("d'4")                    False
+            <<<2>>>                        True
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") True
+            Chord("<e' g'>16")             True
+            Note("gs'16")                  True
+            Note("a'16")                   True
+            Note("as'16")                  True
+            Voice("e'4", name='Music_Voice') True
+            Note("e'4")                    True
+            Note("f'4")                    True
+            AfterGraceContainer("fs'16")   True
+            Note("fs'16")                  True
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> abjad.attach(abjad.Clef("alto"), staff[-1][0])
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        \clef "alto"
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     inspection = abjad.inspect(component)
+            ...     result = inspection.has_effective_indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{4}>                     False
+            TremoloContainer("c'16 e'16")  False
+            Note("c'16")                   False
+            Note("e'16")                   False
+            Note("cs'4")                   False
+            TremoloContainer("d'16 f'16")  True
+            Note("d'16")                   True
+            Note("f'16")                   True
+            Note("ds'4")                   True
+
         """
         if not isinstance(self.client, Component):
             raise Exception("can only get effective indicator on component.")
@@ -875,6 +1859,140 @@ class Inspection(object):
         Is true when client has one or more indicators.
 
         ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     inspection = abjad.inspect(component)
+            ...     result = inspection.has_indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     False
+            <Voice-"Music_Voice"{4}>       False
+            Note("c'4")                    False
+            BeforeGraceContainer("cs'16")        False
+            Note("cs'16")                  False
+            Note("d'4")                    False
+            <<<2>>>                        False
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") False
+            Chord("<e' g'>16")             True
+            Note("gs'16")                  False
+            Note("a'16")                   False
+            Note("as'16")                  False
+            Voice("e'4", name='Music_Voice') False
+            Note("e'4")                    False
+            Note("f'4")                    False
+            AfterGraceContainer("fs'16")   False
+            Note("fs'16")                  False
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> abjad.attach(abjad.Clef("alto"), staff[-1][0])
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        \clef "alto"
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     inspection = abjad.inspect(component)
+            ...     result = inspection.has_indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{4}>                     False
+            TremoloContainer("c'16 e'16")  False
+            Note("c'16")                   False
+            Note("e'16")                   False
+            Note("cs'4")                   False
+            TremoloContainer("d'16 f'16")  False
+            Note("d'16")                   True
+            Note("f'16")                   False
+            Note("ds'4")                   False
+
+        ..  container:: example
+
+            Set ``attributes`` dictionary to test indicator attributes:
 
             >>> voice = abjad.Voice("c'4 c'4 c'4 c'4")
             >>> abjad.attach(abjad.Clef('treble'), voice[0])
@@ -913,6 +2031,7 @@ class Inspection(object):
             ...     )
             True
 
+
         """
         if not isinstance(self.client, Component):
             raise Exception("can only get indicator on component.")
@@ -929,8 +2048,138 @@ class Inspection(object):
         default: typing.Any = None,
         unwrap: bool = True,
     ) -> typing.Any:
-        """
+        r"""
         Gets indicator.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     None
+            <Voice-"Music_Voice"{4}>       None
+            Note("c'4")                    None
+            BeforeGraceContainer("cs'16")        None
+            Note("cs'16")                  None
+            Note("d'4")                    None
+            <<<2>>>                        None
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") None
+            Chord("<e' g'>16")             Clef('alto')
+            Note("gs'16")                  None
+            Note("a'16")                   None
+            Note("as'16")                  None
+            Voice("e'4", name='Music_Voice') None
+            Note("e'4")                    None
+            Note("f'4")                    None
+            AfterGraceContainer("fs'16")   None
+            Note("fs'16")                  None
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> abjad.attach(abjad.Clef("alto"), staff[-1][0])
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        \clef "alto"
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).indicator(abjad.Clef)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{4}>                     None
+            TremoloContainer("c'16 e'16")  None
+            Note("c'16")                   None
+            Note("e'16")                   None
+            Note("cs'4")                   None
+            TremoloContainer("d'16 f'16")  None
+            Note("d'16")                   Clef('alto')
+            Note("f'16")                   None
+            Note("ds'4")                   None
 
         Raises exception when more than one indicator of ``prototype`` attach
         to client.
@@ -961,11 +2210,22 @@ class Inspection(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Articulation('^'), staff[0])
-            >>> abjad.attach(abjad.Articulation('^'), staff[1])
-            >>> abjad.attach(abjad.Articulation('^'), staff[2])
-            >>> abjad.attach(abjad.Articulation('^'), staff[3])
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> for note in abjad.select(staff).notes():
+            ...     abjad.attach(abjad.Staccato(), note)
+
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -973,21 +2233,131 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'4
-                    - \marcato
-                    d'4
-                    - \marcato
-                    e'4
-                    - \marcato
-                    f'4
-                    - \marcato
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \staccato
+                        \grace {
+                            cs'16
+                            \staccato
+                        }
+                        d'4
+                        \staccato
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                \staccato
+                                a'16
+                                \staccato
+                                as'16
+                                )
+                                ]
+                                \staccato
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                                \staccato
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        \staccato
+                        {
+                            fs'16
+                            \staccato
+                        }
+                    }
                 }
 
-            >>> abjad.inspect(staff).indicators(abjad.Articulation)
-            []
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).indicators()
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     []
+            <Voice-"Music_Voice"{4}>       []
+            Note("c'4")                    [Staccato()]
+            BeforeGraceContainer("cs'16")        []
+            Note("cs'16")                  [Staccato()]
+            Note("d'4")                    [Staccato()]
+            <<<2>>>                        []
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") [LilyPondLiteral('\\set fontSize = #-3', format_slot='opening')]
+            Chord("<e' g'>16")             [StartBeam(), LilyPondLiteral('\\slash', format_slot='opening'), StartSlur(), LilyPondLiteral('\\voiceOne', format_slot='opening'), Clef('alto'), Articulation('>')]
+            Note("gs'16")                  [Staccato()]
+            Note("a'16")                   [Staccato()]
+            Note("as'16")                  [StopBeam(), StopSlur(), Staccato()]
+            Voice("e'4", name='Music_Voice') []
+            Note("e'4")                    [LilyPondLiteral('\\voiceTwo', format_slot='opening'), Staccato()]
+            Note("f'4")                    [LilyPondLiteral('\\oneVoice', format_slot='opening'), Staccato()]
+            AfterGraceContainer("fs'16")   []
+            Note("fs'16")                  [Staccato()]
 
-            >>> abjad.inspect(staff[0]).indicators(abjad.Articulation)
-            [Articulation('^')]
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> abjad.attach(abjad.Clef("alto"), staff[-1][0])
+            >>> staff.append("ds'4")
+            >>> for note in abjad.select(staff).notes():
+            ...     abjad.attach(abjad.Staccato(), note)
+
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        \staccato
+                        e'16
+                        \staccato
+                    }
+                    cs'4
+                    \staccato
+                    \repeat tremolo 2 {
+                        \clef "alto"
+                        d'16
+                        \staccato
+                        f'16
+                        \staccato
+                    }
+                    ds'4
+                    \staccato
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).indicators()
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{4}>                     []
+            TremoloContainer("c'16 e'16")  []
+            Note("c'16")                   [Staccato()]
+            Note("e'16")                   [Staccato()]
+            Note("cs'4")                   [Staccato()]
+            TremoloContainer("d'16 f'16")  []
+            Note("d'16")                   [Clef('alto'), Staccato()]
+            Note("f'16")                   [Staccato()]
+            Note("ds'4")                   [Staccato()]
 
         """
         # TODO: extend to any non-none client
@@ -1005,6 +2375,8 @@ class Inspection(object):
     def leaf(self, n: int = 0) -> typing.Optional[Leaf]:
         r"""
         Gets leaf ``n``.
+
+        :param n: constrained to -1, 0, 1 for previous, current, next leaf.
 
         ..  container:: example
 
@@ -1036,11 +2408,9 @@ class Inspection(object):
 
         ..  container:: example
 
-            Gets leaf ``n`` **from** client when client is a leaf.
+            Gets leaf **FROM** client when client is a leaf:
 
             >>> leaf = staff[0][1]
-            >>> leaf
-            Note("d'8")
 
             >>> abjad.inspect(leaf).leaf(-1)
             Note("c'8")
@@ -1053,26 +2423,202 @@ class Inspection(object):
 
         ..  container:: example
 
-            Gets leaf ``n`` **in** client when client is a container.
+            Gets leaf **IN** client when client is a container:
 
-            With positive indices:
+            >>> voice = staff[0]
 
-            >>> first_voice = staff[0]
-            >>> first_voice
-            Voice("c'8 d'8 e'8 f'8")
-
-            >>> abjad.inspect(first_voice).leaf(-1)
+            >>> abjad.inspect(voice).leaf(-1)
             Note("f'8")
 
-            >>> abjad.inspect(first_voice).leaf(0)
+            >>> abjad.inspect(voice).leaf(0)
             Note("c'8")
 
-            >>> abjad.inspect(first_voice).leaf(1)
+            >>> abjad.inspect(voice).leaf(1)
             Note("d'8")
 
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for current_leaf in abjad.select(staff).leaves():
+            ...     previous_leaf = abjad.inspect(current_leaf).leaf(-1)
+            ...     next_leaf = abjad.inspect(current_leaf).leaf(1)
+            ...     print(f"previous leaf: {repr(previous_leaf)}")
+            ...     print(f"current leaf:  {repr(current_leaf)}")
+            ...     print(f"next leaf:     {repr(next_leaf)}")
+            ...     print("---")
+            previous leaf: None
+            current leaf:  Note("c'4")
+            next leaf:     Note("cs'16")
+            ---
+            previous leaf: Note("c'4")
+            current leaf:  Note("cs'16")
+            next leaf:     Note("d'4")
+            ---
+            previous leaf: Note("cs'16")
+            current leaf:  Note("d'4")
+            next leaf:     Chord("<e' g'>16")
+            ---
+            previous leaf: Note("d'4")
+            current leaf:  Chord("<e' g'>16")
+            next leaf:     Note("gs'16")
+            ---
+            previous leaf: Chord("<e' g'>16")
+            current leaf:  Note("gs'16")
+            next leaf:     Note("a'16")
+            ---
+            previous leaf: Note("gs'16")
+            current leaf:  Note("a'16")
+            next leaf:     Note("as'16")
+            ---
+            previous leaf: Note("a'16")
+            current leaf:  Note("as'16")
+            next leaf:     Note("e'4")
+            ---
+            previous leaf: Note("as'16")
+            current leaf:  Note("e'4")
+            next leaf:     Note("f'4")
+            ---
+            previous leaf: Note("e'4")
+            current leaf:  Note("f'4")
+            next leaf:     Note("fs'16")
+            ---
+            previous leaf: Note("f'4")
+            current leaf:  Note("fs'16")
+            next leaf:     None
+            ---
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for current_leaf in abjad.select(staff).leaves():
+            ...     previous_leaf = abjad.inspect(current_leaf).leaf(-1)
+            ...     next_leaf = abjad.inspect(current_leaf).leaf(1)
+            ...     print(f"previous leaf: {repr(previous_leaf)}")
+            ...     print(f"current leaf:  {repr(current_leaf)}")
+            ...     print(f"next leaf:     {repr(next_leaf)}")
+            ...     print("---")
+            previous leaf: None
+            current leaf:  Note("c'16")
+            next leaf:     Note("e'16")
+            ---
+            previous leaf: Note("c'16")
+            current leaf:  Note("e'16")
+            next leaf:     Note("cs'4")
+            ---
+            previous leaf: Note("e'16")
+            current leaf:  Note("cs'4")
+            next leaf:     Note("d'16")
+            ---
+            previous leaf: Note("cs'4")
+            current leaf:  Note("d'16")
+            next leaf:     Note("f'16")
+            ---
+            previous leaf: Note("d'16")
+            current leaf:  Note("f'16")
+            next leaf:     Note("ds'4")
+            ---
+            previous leaf: Note("f'16")
+            current leaf:  Note("ds'4")
+            next leaf:     None
+            ---
+
         """
-        assert n in (-1, 0, 1), repr(n)
+        if n not in (-1, 0, 1):
+            message = "n must be -1, 0 or 1:\n"
+            message += f"   {repr(n)}"
+            raise Exception(message)
         if isinstance(self.client, Leaf):
+            candidate = self.client._get_sibling_with_graces(n)
+            if isinstance(candidate, Leaf):
+                return candidate
             return self.client._leaf(n)
         if 0 <= n:
             reverse = False
@@ -1086,16 +2632,328 @@ class Inspection(object):
         return None
 
     def lineage(self) -> Lineage:
-        """
+        r"""
         Gets lineage.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     lineage = abjad.inspect(component).lineage()
+            ...     print(f"{repr(component)}:")
+            ...     for component_ in lineage:
+            ...         print(f"    {repr(component_)}")
+            <Staff{1}>:
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+                Note("d'4")
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+                Note("f'4")
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            <Voice-"Music_Voice"{4}>:
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+                Note("d'4")
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+                Note("f'4")
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            Note("c'4"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("c'4")
+            BeforeGraceContainer("cs'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+            Note("cs'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                BeforeGraceContainer("cs'16")
+                Note("cs'16")
+            Note("d'4"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("d'4")
+            <<<2>>>:
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+                Note("gs'16")
+                Note("a'16")
+                Note("as'16")
+            Chord("<e' g'>16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Chord("<e' g'>16")
+            Note("gs'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Note("gs'16")
+            Note("a'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Note("a'16")
+            Note("as'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                Note("as'16")
+            Voice("e'4", name='Music_Voice'):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            Note("e'4"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                <<<2>>>
+                Voice("e'4", name='Music_Voice')
+                Note("e'4")
+            Note("f'4"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                Note("f'4")
+            AfterGraceContainer("fs'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+            Note("fs'16"):
+                <Staff{1}>
+                <Voice-"Music_Voice"{4}>
+                AfterGraceContainer("fs'16")
+                Note("fs'16")
+
         """
         if not isinstance(self.client, Component):
             raise Exception("can only get lineage on component.")
         return Lineage(self.client)
 
     def logical_tie(self) -> LogicalTie:
-        """
+        r"""
         Gets logical tie.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for leaf in abjad.select(staff).leaves():
+            ...     lt = abjad.inspect(leaf).logical_tie()
+            ...     print(f"{repr(leaf):30} {repr(lt)}")
+            Note("c'4")                    LogicalTie([Note("c'4")])
+            Note("cs'16")                  LogicalTie([Note("cs'16")])
+            Note("d'4")                    LogicalTie([Note("d'4")])
+            Chord("<e' g'>16")             LogicalTie([Chord("<e' g'>16")])
+            Note("gs'16")                  LogicalTie([Note("gs'16")])
+            Note("a'16")                   LogicalTie([Note("a'16")])
+            Note("as'16")                  LogicalTie([Note("as'16")])
+            Note("e'4")                    LogicalTie([Note("e'4")])
+            Note("f'4")                    LogicalTie([Note("f'4")])
+            Note("fs'16")                  LogicalTie([Note("fs'16")])
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for leaf in abjad.select(staff).leaves():
+            ...     lt = abjad.inspect(leaf).logical_tie()
+            ...     print(f"{repr(leaf):30} {repr(lt)}")
+            Note("c'16")                   LogicalTie([Note("c'16")])
+            Note("e'16")                   LogicalTie([Note("e'16")])
+            Note("cs'4")                   LogicalTie([Note("cs'4")])
+            Note("d'16")                   LogicalTie([Note("d'16")])
+            Note("f'16")                   LogicalTie([Note("f'16")])
+            Note("ds'4")                   LogicalTie([Note("ds'4")])
+
         """
         if not isinstance(self.client, Leaf):
             raise Exception("can only get logical tie on leaf.")
@@ -1113,81 +2971,476 @@ class Inspection(object):
         result = self.client._get_markup(direction=direction)
         return list(result)
 
-    def parentage(self, *, grace_notes: bool = False) -> Parentage:
+    def measure_number(self) -> int:
+        r"""
+        Gets measure number.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     measure_number = abjad.inspect(component).measure_number()
+            ...     print(f"{repr(component):30} {measure_number}")
+            <Staff{1}>                     1
+            <Voice-"Music_Voice"{4}>       1
+            Note("c'4")                    1
+            BeforeGraceContainer("cs'16")        1
+            Note("cs'16")                  1
+            Note("d'4")                    1
+            <<<2>>>                        1
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") 1
+            Chord("<e' g'>16")             1
+            Note("gs'16")                  1
+            Note("a'16")                   1
+            Note("as'16")                  1
+            Voice("e'4", name='Music_Voice') 1
+            Note("e'4")                    1
+            Note("f'4")                    1
+            AfterGraceContainer("fs'16")   1
+            Note("fs'16")                  1
+
+        ..  container:: example
+
+            REGRESSION. Measure number of score-initial grace notes is set
+            equal to 0:
+
+            >>> voice = abjad.Voice("c'4 d' e' f'")
+            >>> container = abjad.BeforeGraceContainer("b16")
+            >>> abjad.attach(container, voice[0])
+            >>> abjad.show(voice) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(voice)
+                \new Voice
+                {
+                    \grace {
+                        b16
+                    }
+                    c'4
+                    d'4
+                    e'4
+                    f'4
+                }
+
+            >>> for component in abjad.select(voice).components():
+            ...     measure_number = abjad.inspect(component).measure_number()
+            ...     print(f"{repr(component):30} {measure_number}")
+            Voice("c'4 d'4 e'4 f'4")       1
+            BeforeGraceContainer('b16')          0
+            Note('b16')                    0
+            Note("c'4")                    1
+            Note("d'4")                    1
+            Note("e'4")                    1
+            Note("f'4")                    1
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     measure_number = abjad.inspect(component).measure_number()
+            ...     print(f"{repr(component):30} {measure_number}")
+            <Staff{4}>                     1
+            TremoloContainer("c'16 e'16")  1
+            Note("c'16")                   1
+            Note("e'16")                   1
+            Note("cs'4")                   1
+            TremoloContainer("d'16 f'16")  1
+            Note("d'16")                   1
+            Note("f'16")                   1
+            Note("ds'4")                   1
+
+        """
+        if not isinstance(self.client, Component):
+            raise Exception("can only get measure number on component.")
+        self.client._update_measure_numbers()
+        assert isinstance(self.client._measure_number, int)
+        return self.client._measure_number
+
+    def parentage(self) -> Parentage:
         r"""
         Gets parentage.
 
-        .. container:: example
+        ..  container:: example
 
-            Gets parentage without grace notes:
-
-            >>> voice = abjad.Voice("c'4 d'4 e'4 f'4")
-            >>> container = abjad.GraceContainer("c'16 d'16")
-            >>> abjad.attach(container, voice[1])
-            >>> abjad.show(voice) # doctest: +SKIP
-
-            ..  docs::
-
-                >>> abjad.f(voice)
-                \new Voice
-                {
-                    c'4
-                    \grace {
-                        c'16
-                        d'16
-                    }
-                    d'4
-                    e'4
-                    f'4
-                }
-
-            >>> abjad.inspect(container[0]).parentage()
-            Parentage(component=Note("c'16"))
-
-        .. container:: example
-
-            Gets parentage with grace notes:
-
-            >>> voice = abjad.Voice("c'4 d'4 e'4 f'4")
-            >>> container = abjad.GraceContainer("c'16 d'16")
-            >>> abjad.attach(container, voice[1])
-            >>> abjad.show(voice) # doctest: +SKIP
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
 
-                >>> abjad.f(voice)
-                \new Voice
+                >>> abjad.f(staff)
+                \new Staff
                 {
-                    c'4
-                    \grace {
-                        c'16
-                        d'16
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
                     }
-                    d'4
-                    e'4
-                    f'4
                 }
 
-            >>> agent = abjad.inspect(container[0])
-            >>> parentage = agent.parentage(grace_notes=True)
-            >>> for component in parentage:
-            ...     component
-            ...
-            Note("c'16")
-            GraceContainer("c'16 d'16")
-            Note("d'4")
-            Voice("c'4 d'4 e'4 f'4")
+            >>> for component in abjad.select(staff).components():
+            ...     parentage = abjad.inspect(component).parentage()
+            ...     print(f"{repr(component)}:")
+            ...     for component_ in parentage[:]:
+            ...         print(f"    {repr(component_)}")
+            <Staff{1}>:
+                <Staff{1}>
+            <Voice-"Music_Voice"{4}>:
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("c'4"):
+                Note("c'4")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            BeforeGraceContainer("cs'16"):
+                BeforeGraceContainer("cs'16")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("cs'16"):
+                Note("cs'16")
+                BeforeGraceContainer("cs'16")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("d'4"):
+                Note("d'4")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            <<<2>>>:
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16"):
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Chord("<e' g'>16"):
+                Chord("<e' g'>16")
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("gs'16"):
+                Note("gs'16")
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("a'16"):
+                Note("a'16")
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("as'16"):
+                Note("as'16")
+                OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16")
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Voice("e'4", name='Music_Voice'):
+                Voice("e'4", name='Music_Voice')
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("e'4"):
+                Note("e'4")
+                Voice("e'4", name='Music_Voice')
+                <<<2>>>
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("f'4"):
+                Note("f'4")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            AfterGraceContainer("fs'16"):
+                AfterGraceContainer("fs'16")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+            Note("fs'16"):
+                Note("fs'16")
+                AfterGraceContainer("fs'16")
+                <Voice-"Music_Voice"{4}>
+                <Staff{1}>
+
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     parentage = abjad.inspect(component).parentage()
+            ...     print(f"{repr(component)}:")
+            ...     print(f"    {repr(parentage[:])}")
+            <Staff{4}>:
+                (<Staff{4}>,)
+            TremoloContainer("c'16 e'16"):
+                (TremoloContainer("c'16 e'16"), <Staff{4}>)
+            Note("c'16"):
+                (Note("c'16"), TremoloContainer("c'16 e'16"), <Staff{4}>)
+            Note("e'16"):
+                (Note("e'16"), TremoloContainer("c'16 e'16"), <Staff{4}>)
+            Note("cs'4"):
+                (Note("cs'4"), <Staff{4}>)
+            TremoloContainer("d'16 f'16"):
+                (TremoloContainer("d'16 f'16"), <Staff{4}>)
+            Note("d'16"):
+                (Note("d'16"), TremoloContainer("d'16 f'16"), <Staff{4}>)
+            Note("f'16"):
+                (Note("f'16"), TremoloContainer("d'16 f'16"), <Staff{4}>)
+            Note("ds'4"):
+                (Note("ds'4"), <Staff{4}>)
 
         """
         if not isinstance(self.client, Component):
             message = "can only get parentage on component"
             message += f" (not {self.client})."
             raise Exception(message)
-        return Parentage(self.client, grace_notes=grace_notes)
+        return Parentage(self.client)
 
     def pitches(self) -> typing.Optional[PitchSet]:
-        """
+        r"""
         Gets pitches.
+
+        ..  container:: example
+
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     pitches = abjad.inspect(component).pitches()
+            ...     print(f"{repr(component):30} {repr(pitches)}")
+            <Staff{1}>                     PitchSet(["c'", "cs'", "d'", "e'", "f'", "fs'", "g'", "gs'", "a'", "as'"])
+            <Voice-"Music_Voice"{4}>       PitchSet(["c'", "cs'", "d'", "e'", "f'", "fs'", "g'", "gs'", "a'", "as'"])
+            Note("c'4")                    PitchSet(["c'"])
+            BeforeGraceContainer("cs'16")        PitchSet(["cs'"])
+            Note("cs'16")                  PitchSet(["cs'"])
+            Note("d'4")                    PitchSet(["d'"])
+            <<<2>>>                        PitchSet(["e'", "g'", "gs'", "a'", "as'"])
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") PitchSet(["e'", "g'", "gs'", "a'", "as'"])
+            Chord("<e' g'>16")             PitchSet(["e'", "g'"])
+            Note("gs'16")                  PitchSet(["gs'"])
+            Note("a'16")                   PitchSet(["a'"])
+            Note("as'16")                  PitchSet(["as'"])
+            Voice("e'4", name='Music_Voice') PitchSet(["e'"])
+            Note("e'4")                    PitchSet(["e'"])
+            Note("f'4")                    PitchSet(["f'"])
+            AfterGraceContainer("fs'16")   PitchSet(["fs'"])
+            Note("fs'16")                  PitchSet(["fs'"])
+
         """
         if not self.client:
             return None
@@ -1256,20 +3509,20 @@ class Inspection(object):
 
             >>> report = abjad.inspect(container[0]).report_modifications()
             >>> print(report)
-            slot absolute before:
-            slot 1:
+            slot "absolute before":
+            slot "before":
                 grob overrides:
                     \once \override NoteHead.color = #red
                     \once \override Stem.color = #red
-            slot 3:
+            slot "opening":
                 commands:
                     \clef "alto"
-            slot 4:
+            slot "contents slot":
                 leaf body:
                     c'8
-            slot 5:
-            slot 7:
-            slot absolute after:
+            slot "closing":
+            slot "after":
+            slot "absolute after":
 
         """
         if isinstance(self.client, Container):
@@ -1297,7 +3550,7 @@ class Inspection(object):
 
     def sounding_pitch(self) -> NamedPitch:
         r"""
-        Gets sounding pitch.
+        Gets sounding pitch of note.
 
         ..  container:: example
 
@@ -1318,13 +3571,20 @@ class Inspection(object):
                     g'8
                 }
 
+            >>> for note in abjad.select(staff).notes():
+            ...     pitch = abjad.inspect(note).sounding_pitch()
+            ...     print(f"{repr(note):10} {repr(pitch)}")
+            Note("d'8") NamedPitch("d''")
+            Note("e'8") NamedPitch("e''")
+            Note("f'8") NamedPitch("f''")
+            Note("g'8") NamedPitch("g''")
+
         """
         if not isinstance(self.client, Note):
             raise Exception("can only get sounding pitch of note.")
         return self.client._get_sounding_pitch()
 
-    # TODO: return PitchSet instead of list
-    def sounding_pitches(self) -> typing.List[NamedPitch]:
+    def sounding_pitches(self) -> PitchSet:
         r"""
         Gets sounding pitches.
 
@@ -1345,16 +3605,18 @@ class Inspection(object):
                     <d' fs'>4
                 }
 
-            >>> abjad.inspect(staff[0]).sounding_pitches()
-            [NamedPitch("c'''"), NamedPitch("e'''")]
+            >>> for chord in abjad.select(staff).chords():
+            ...     pitches = abjad.inspect(chord).sounding_pitches()
+            ...     print(f"{repr(chord):20} {repr(pitches)}")
+            Chord("<c' e'>4")    PitchSet(["c'''", "e'''"])
+            Chord("<d' fs'>4")   PitchSet(["d'''", "fs'''"])
 
-        Returns tuple.
         """
         # TODO: extend to any non-none client
         if not isinstance(self.client, Chord):
             raise Exception("can only get sounding pitches of chord.")
         result = self.client._get_sounding_pitches()
-        return list(result)
+        return PitchSet(result)
 
     def tabulate_wellformedness(
         self,
@@ -1397,107 +3659,18 @@ class Inspection(object):
 
         ..  container:: example
 
-            Gets timespan of grace notes:
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> voice = abjad.Voice("c'8 [ d'8 e'8 f'8 ]")
-            >>> grace_notes = [abjad.Note("c'16"), abjad.Note("d'16")]
-            >>> container = abjad.GraceContainer(grace_notes)
-            >>> abjad.attach(container, voice[1])
-            >>> container = abjad.AfterGraceContainer("e'16 f'16")
-            >>> abjad.attach(container, voice[1])
-            >>> abjad.show(voice) # doctest: +SKIP
-
-            ..  docs::
-
-                >>> abjad.f(voice)
-                \new Voice
-                {
-                    c'8
-                    [
-                    \grace {
-                        c'16
-                        d'16
-                    }
-                    \afterGrace
-                    d'8
-                    {
-                        e'16
-                        f'16
-                    }
-                    e'8
-                    f'8
-                    ]
-                }
-
-            >>> for leaf in abjad.iterate(voice).leaves():
-            ...     timespan = abjad.inspect(leaf).timespan()
-            ...     print(str(leaf) + ':')
-            ...     abjad.f(timespan)
-            ...
-            c'8:
-            abjad.Timespan(
-                start_offset=abjad.Offset(0, 1),
-                stop_offset=abjad.Offset(1, 8),
-                )
-            c'16:
-            abjad.Timespan(
-                start_offset=abjad.Offset(
-                    (1, 8),
-                    grace_displacement=abjad.Duration(-1, 8),
-                    ),
-                stop_offset=abjad.Offset(
-                    (1, 8),
-                    grace_displacement=abjad.Duration(-1, 16),
-                    ),
-                )
-            d'16:
-            abjad.Timespan(
-                start_offset=abjad.Offset(
-                    (1, 8),
-                    grace_displacement=abjad.Duration(-1, 16),
-                    ),
-                stop_offset=abjad.Offset(1, 8),
-                )
-            d'8:
-            abjad.Timespan(
-                start_offset=abjad.Offset(1, 8),
-                stop_offset=abjad.Offset(1, 4),
-                )
-            e'16:
-            abjad.Timespan(
-                start_offset=abjad.Offset(
-                    (1, 4),
-                    grace_displacement=abjad.Duration(-1, 8),
-                    ),
-                stop_offset=abjad.Offset(
-                    (1, 4),
-                    grace_displacement=abjad.Duration(-1, 16),
-                    ),
-                )
-            f'16:
-            abjad.Timespan(
-                start_offset=abjad.Offset(
-                    (1, 4),
-                    grace_displacement=abjad.Duration(-1, 16),
-                    ),
-                stop_offset=abjad.Offset(1, 4),
-                )
-            e'8:
-            abjad.Timespan(
-                start_offset=abjad.Offset(1, 4),
-                stop_offset=abjad.Offset(3, 8),
-                )
-            f'8:
-            abjad.Timespan(
-                start_offset=abjad.Offset(3, 8),
-                stop_offset=abjad.Offset(1, 2),
-                )
-
-        ..  container:: example
-
-            >>> staff = abjad.Staff("c'8 d' e' f'")
-            >>> abjad.beam(staff[:2])
-            >>> abjad.beam(staff[2:])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -1505,24 +3678,131 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'8
-                    [
-                    d'8
-                    ]
-                    e'8
-                    [
-                    f'8
-                    ]
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        {
+                            fs'16
+                        }
+                    }
                 }
 
-            >>> abjad.inspect(staff).timespan()
-            Timespan(start_offset=Offset(0, 1), stop_offset=Offset(1, 2))
+            >>> for component in abjad.select(staff).components():
+            ...     timespan = abjad.inspect(component).timespan()
+            ...     print(f"{repr(component):30} {repr(timespan)}")
+            <Staff{1}>                     Timespan(Offset((0, 1)), Offset((1, 1)))
+            <Voice-"Music_Voice"{4}>       Timespan(Offset((0, 1)), Offset((1, 1)))
+            Note("c'4")                    Timespan(Offset((0, 1)), Offset((1, 4)))
+            BeforeGraceContainer("cs'16")        Timespan(Offset((1, 4), displacement=Duration(-1, 16)), Offset((1, 4)))
+            Note("cs'16")                  Timespan(Offset((1, 4), displacement=Duration(-1, 16)), Offset((1, 4)))
+            Note("d'4")                    Timespan(Offset((1, 4)), Offset((1, 2)))
+            <<<2>>>                        Timespan(Offset((1, 2)), Offset((3, 4)))
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") Timespan(Offset((1, 2)), Offset((1, 2), displacement=Duration(1, 4)))
+            Chord("<e' g'>16")             Timespan(Offset((1, 2)), Offset((1, 2), displacement=Duration(1, 16)))
+            Note("gs'16")                  Timespan(Offset((1, 2), displacement=Duration(1, 16)), Offset((1, 2), displacement=Duration(1, 8)))
+            Note("a'16")                   Timespan(Offset((1, 2), displacement=Duration(1, 8)), Offset((1, 2), displacement=Duration(3, 16)))
+            Note("as'16")                  Timespan(Offset((1, 2), displacement=Duration(3, 16)), Offset((1, 2), displacement=Duration(1, 4)))
+            Voice("e'4", name='Music_Voice') Timespan(Offset((1, 2)), Offset((3, 4)))
+            Note("e'4")                    Timespan(Offset((1, 2), displacement=Duration(1, 4)), Offset((3, 4)))
+            Note("f'4")                    Timespan(Offset((3, 4)), Offset((1, 1)))
+            AfterGraceContainer("fs'16")   Timespan(Offset((1, 1), displacement=Duration(-1, 16)), Offset((1, 1)))
+            Note("fs'16")                  Timespan(Offset((1, 1), displacement=Duration(-1, 16)), Offset((1, 1)))
 
-            >>> abjad.inspect(staff[0]).timespan()
-            Timespan(start_offset=Offset(0, 1), stop_offset=Offset(1, 8))
+        ..  container:: example
+
+            REGRESSSION. Works with tremolo containers:
+
+            >>> staff = abjad.Staff()
+            >>> staff.append(abjad.TremoloContainer(2, "c'16 e'"))
+            >>> staff.append("cs'4")
+            >>> staff.append(abjad.TremoloContainer(2, "d'16 f'"))
+            >>> staff.append("ds'4")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \repeat tremolo 2 {
+                        c'16
+                        e'16
+                    }
+                    cs'4
+                    \repeat tremolo 2 {
+                        d'16
+                        f'16
+                    }
+                    ds'4
+                }
+
+            >>> for component in abjad.select(staff).components():
+            ...     timespan = abjad.inspect(component).timespan()
+            ...     print(f"{repr(component):30} {repr(timespan)}")
+            <Staff{4}>                     Timespan(Offset((0, 1)), Offset((1, 1)))
+            TremoloContainer("c'16 e'16")  Timespan(Offset((0, 1)), Offset((1, 4)))
+            Note("c'16")                   Timespan(Offset((0, 1)), Offset((1, 8)))
+            Note("e'16")                   Timespan(Offset((1, 8)), Offset((1, 4)))
+            Note("cs'4")                   Timespan(Offset((1, 4)), Offset((1, 2)))
+            TremoloContainer("d'16 f'16")  Timespan(Offset((1, 2)), Offset((3, 4)))
+            Note("d'16")                   Timespan(Offset((1, 2)), Offset((5, 8)))
+            Note("f'16")                   Timespan(Offset((5, 8)), Offset((3, 4)))
+            Note("ds'4")                   Timespan(Offset((3, 4)), Offset((1, 1)))
+
+        ..  container:: example
+
+            REGRESION. Works with selection:
+
+            >>> staff = abjad.Staff("c'4 d' e' f'")
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    c'4
+                    d'4
+                    e'4
+                    f'4
+                }
 
             >>> abjad.inspect(staff[:3]).timespan()
-            Timespan(start_offset=Offset(0, 1), stop_offset=Offset(3, 8))
+            Timespan(Offset((0, 1)), Offset((3, 4)))
 
         """
         if isinstance(self.client, Component):
@@ -1546,78 +3826,6 @@ class Inspection(object):
             if stop_offset < timespan.stop_offset:
                 stop_offset = timespan.stop_offset
         return Timespan(start_offset, stop_offset)
-
-    def tuplet(self, n: int = 0) -> typing.Optional[Tuplet]:
-        r"""
-        Gets tuplet ``n``.
-
-        ..  container:: example
-
-            >>> staff = abjad.Staff()
-            >>> staff.append(abjad.Tuplet((2, 3), "c'8 d' e'"))
-            >>> staff.append(abjad.Tuplet((2, 3), "d'8 e' f'"))
-            >>> staff.append(abjad.Tuplet((2, 3), "e'8 f' g'"))
-            >>> staff.append(abjad.Tuplet((2, 3), "f'8 g' a'"))
-            >>> abjad.show(staff) # doctest: +SKIP
-
-            ..  docs::
-
-                >>> abjad.f(staff)
-                \new Staff
-                {
-                    \times 2/3 {
-                        c'8
-                        d'8
-                        e'8
-                    }
-                    \times 2/3 {
-                        d'8
-                        e'8
-                        f'8
-                    }
-                    \times 2/3 {
-                        e'8
-                        f'8
-                        g'8
-                    }
-                    \times 2/3 {
-                        f'8
-                        g'8
-                        a'8
-                    }
-                }
-
-        ..  container:: example
-
-            >>> for n in range(4):
-            ...     tuplet = abjad.inspect(staff).tuplet(n)
-            ...     print(n, tuplet)
-            ...
-            0 Tuplet(Multiplier(2, 3), "c'8 d'8 e'8")
-            1 Tuplet(Multiplier(2, 3), "d'8 e'8 f'8")
-            2 Tuplet(Multiplier(2, 3), "e'8 f'8 g'8")
-            3 Tuplet(Multiplier(2, 3), "f'8 g'8 a'8")
-
-            >>> for n in range(-1, -5, -1):
-            ...     tuplet = abjad.inspect(staff).tuplet(n)
-            ...     print(n, tuplet)
-            ...
-            -1 Tuplet(Multiplier(2, 3), "f'8 g'8 a'8")
-            -2 Tuplet(Multiplier(2, 3), "e'8 f'8 g'8")
-            -3 Tuplet(Multiplier(2, 3), "d'8 e'8 f'8")
-            -4 Tuplet(Multiplier(2, 3), "c'8 d'8 e'8")
-
-        """
-        if 0 <= n:
-            reverse = False
-        else:
-            reverse = True
-            n = abs(n) - 1
-        tuplets = iterate(self.client).components(Tuplet, reverse=reverse)
-        for i, tuplet in enumerate(tuplets):
-            if i == n:
-                return tuplet
-        return None
 
     def wellformed(
         self,
@@ -1661,11 +3869,20 @@ class Inspection(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Articulation('^'), staff[0])
-            >>> abjad.attach(abjad.Articulation('^'), staff[1])
-            >>> abjad.attach(abjad.Articulation('^'), staff[2])
-            >>> abjad.attach(abjad.Articulation('^'), staff[3])
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> for note in abjad.select(staff).notes():
+            ...     abjad.attach(abjad.Staccato(), note)
+
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -1673,21 +3890,81 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'4
-                    - \marcato
-                    d'4
-                    - \marcato
-                    e'4
-                    - \marcato
-                    f'4
-                    - \marcato
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \staccato
+                        \grace {
+                            cs'16
+                            \staccato
+                        }
+                        d'4
+                        \staccato
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                \staccato
+                                a'16
+                                \staccato
+                                as'16
+                                )
+                                ]
+                                \staccato
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                                \staccato
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        \staccato
+                        {
+                            fs'16
+                            \staccato
+                        }
+                    }
                 }
 
-            >>> abjad.inspect(staff).wrapper(abjad.Articulation) is None
-            True
+            REGRESSION. Works with grace notes (and containers):
 
-            >>> abjad.inspect(staff[0]).wrapper(abjad.Articulation)
-            Wrapper(indicator=Articulation('^'), tag=Tag())
+            >>> for component in abjad.select(staff).components():
+            ...     wrapper = abjad.inspect(component).wrapper(abjad.Staccato)
+            ...     print(f"{repr(component):30} {repr(wrapper)}")
+            <Staff{1}>                     None
+            <Voice-"Music_Voice"{4}>       None
+            Note("c'4")                    Wrapper(indicator=Staccato(), tag=Tag())
+            BeforeGraceContainer("cs'16")        None
+            Note("cs'16")                  Wrapper(indicator=Staccato(), tag=Tag())
+            Note("d'4")                    Wrapper(indicator=Staccato(), tag=Tag())
+            <<<2>>>                        None
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") None
+            Chord("<e' g'>16")             None
+            Note("gs'16")                  Wrapper(indicator=Staccato(), tag=Tag())
+            Note("a'16")                   Wrapper(indicator=Staccato(), tag=Tag())
+            Note("as'16")                  Wrapper(indicator=Staccato(), tag=Tag())
+            Voice("e'4", name='Music_Voice') None
+            Note("e'4")                    Wrapper(indicator=Staccato(), tag=Tag())
+            Note("f'4")                    Wrapper(indicator=Staccato(), tag=Tag())
+            AfterGraceContainer("fs'16")   None
+            Note("fs'16")                  Wrapper(indicator=Staccato(), tag=Tag())
 
         Raises exception when more than one indicator of ``prototype`` attach
         to client.
@@ -1707,11 +3984,22 @@ class Inspection(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Articulation('^'), staff[0])
-            >>> abjad.attach(abjad.Articulation('^'), staff[1])
-            >>> abjad.attach(abjad.Articulation('^'), staff[2])
-            >>> abjad.attach(abjad.Articulation('^'), staff[3])
+            REGRESSION. Works with grace notes (and containers):
+
+            >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[1])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[2:3]
+            ... )
+            >>> abjad.attach(abjad.Clef("alto"), container[0])
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[3])
+            >>> staff = abjad.Staff([music_voice])
+            >>> for note in abjad.select(staff).notes():
+            ...     abjad.attach(abjad.Staccato(), note)
+
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -1719,21 +4007,79 @@ class Inspection(object):
                 >>> abjad.f(staff)
                 \new Staff
                 {
-                    c'4
-                    - \marcato
-                    d'4
-                    - \marcato
-                    e'4
-                    - \marcato
-                    f'4
-                    - \marcato
+                    \context Voice = "Music_Voice"
+                    {
+                        c'4
+                        \staccato
+                        \grace {
+                            cs'16
+                            \staccato
+                        }
+                        d'4
+                        \staccato
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3
+                                \clef "alto"
+                                \slash
+                                \voiceOne
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                \staccato
+                                a'16
+                                \staccato
+                                as'16
+                                )
+                                ]
+                                \staccato
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo
+                                e'4
+                                \staccato
+                            }
+                        >>
+                        \oneVoice
+                        \afterGrace
+                        f'4
+                        \staccato
+                        {
+                            fs'16
+                            \staccato
+                        }
+                    }
                 }
 
-            >>> abjad.inspect(staff).wrappers(abjad.Articulation)
-            []
-
-            >>> abjad.inspect(staff[0]).wrappers(abjad.Articulation)
-            [Wrapper(indicator=Articulation('^'), tag=Tag())]
+            >>> for component in abjad.select(staff).components():
+            ...     result = abjad.inspect(component).wrappers(abjad.Staccato)
+            ...     print(f"{repr(component):30} {repr(result)}")
+            <Staff{1}>                     []
+            <Voice-"Music_Voice"{4}>       []
+            Note("c'4")                    [Wrapper(indicator=Staccato(), tag=Tag())]
+            BeforeGraceContainer("cs'16")        []
+            Note("cs'16")                  [Wrapper(indicator=Staccato(), tag=Tag())]
+            Note("d'4")                    [Wrapper(indicator=Staccato(), tag=Tag())]
+            <<<2>>>                        []
+            OnBeatGraceContainer("<e' g'>16 gs'16 a'16 as'16") []
+            Chord("<e' g'>16")             []
+            Note("gs'16")                  [Wrapper(indicator=Staccato(), tag=Tag())]
+            Note("a'16")                   [Wrapper(indicator=Staccato(), tag=Tag())]
+            Note("as'16")                  [Wrapper(indicator=Staccato(), tag=Tag())]
+            Voice("e'4", name='Music_Voice') []
+            Note("e'4")                    [Wrapper(indicator=Staccato(), tag=Tag())]
+            Note("f'4")                    [Wrapper(indicator=Staccato(), tag=Tag())]
+            AfterGraceContainer("fs'16")   []
+            Note("fs'16")                  [Wrapper(indicator=Staccato(), tag=Tag())]
 
         """
         if attributes is not None:

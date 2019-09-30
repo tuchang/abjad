@@ -38,6 +38,17 @@ class PersistenceManager(object):
         """
         return StorageFormatManager(self).get_repr_format()
 
+    ### PUBLIC PROPERTIES ###
+
+    @property
+    def client(self):
+        """
+        Client of persistence manager.
+
+        Returns component or selection.
+        """
+        return self._client
+
     ### PUBLIC METHODS ###
 
     def as_ly(
@@ -210,9 +221,12 @@ class PersistenceManager(object):
 
     def as_png(
         self,
-        png_file_path=None,
-        remove_ly=False,
+        flags="--png",
         illustrate_function=None,
+        png_file_path=None,
+        preview=False,
+        remove_ly=False,
+        resolution=False,
         **keywords,
     ):
         """
@@ -275,10 +289,16 @@ class PersistenceManager(object):
         )
         shutil.copy(original_ly_file_path, temporary_ly_file_path)
 
+        # render lilypond flags
+        if preview:
+            flags = "-dpreview"
+        if resolution and isinstance(resolution, int):
+            flags += " -dresolution={}".format(resolution)
+
         timer = abjad.Timer()
         with timer:
             success = abjad.IOManager.run_lilypond(
-                temporary_ly_file_path, flags="--png"
+                temporary_ly_file_path, flags=flags
             )
         lilypond_rendering_time = timer.elapsed_time
 
@@ -306,14 +326,3 @@ class PersistenceManager(object):
             lilypond_rendering_time,
             success,
         )
-
-    ### PRIVATE PROPERTIES ###
-
-    @property
-    def client(self):
-        """
-        Client of persistence manager.
-
-        Returns component or selection.
-        """
-        return self._client

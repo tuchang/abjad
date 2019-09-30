@@ -205,7 +205,7 @@ class LilyPondFormatManager(object):
         ):
             for wrapper in wrappers:
                 if wrapper.indicator.direction is None:
-                    markup = abjad.Markup(wrapper.indicator, direction="-")
+                    markup = abjad.new(wrapper.indicator, direction="-")
                 else:
                     markup = wrapper.indicator
                 format_pieces = markup._get_format_pieces()
@@ -250,11 +250,12 @@ class LilyPondFormatManager(object):
     ### PUBLIC METHODS ###
 
     @staticmethod
-    def align_tags(string, n) -> str:
+    def align_tags(string: str, n: int) -> str:
         """
         Line-breaks ``string`` and aligns tags starting a column ``n``.
         """
-        assert isinstance(n, int), repr(n)
+        if not isinstance(n, int):
+            raise Exception(f"must be integer:\n    {repr(n)}")
         lines = []
         for line in string.split("\n"):
             if "%!" not in line:

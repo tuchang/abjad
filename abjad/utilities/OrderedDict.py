@@ -1,4 +1,6 @@
 import collections
+from abjad.system.FormatSpecification import FormatSpecification
+from abjad.system.StorageFormatManager import StorageFormatManager
 from .TypedCollection import TypedCollection
 
 
@@ -114,7 +116,7 @@ class OrderedDict(TypedCollection, collections.abc.MutableMapping):
         for item in items:
             assert len(item) == 2, repr(item)
             key = item[0]
-            value = self._item_coercer(item[1])
+            value = self._coerce_item(item[1])
             the_item = (key, value)
             the_items.append(the_item)
         self._collection = collections.OrderedDict(the_items)
@@ -207,20 +209,18 @@ class OrderedDict(TypedCollection, collections.abc.MutableMapping):
 
         Returns none.
         """
-        new_item = self._item_coercer(argument)
+        new_item = self._coerce_item(argument)
         self._collection[i] = new_item
 
     ### PRIVATE METHODS ###
 
     def _get_format_specification(self):
-        import abjad
-
-        manager = abjad.StorageFormatManager(self)
+        manager = StorageFormatManager(self)
         names = list(manager.signature_keyword_names)
         if "items" in names:
             names.remove("items")
         values = [list(self._collection.items())]
-        return abjad.FormatSpecification(
+        return FormatSpecification(
             self,
             repr_is_indented=False,
             storage_format_args_values=values,

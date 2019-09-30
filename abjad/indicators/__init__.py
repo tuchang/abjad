@@ -1,5 +1,6 @@
 """
-Tools for modeling indicators.
+Indicator classes to be attached to note, rests and chords: articulations, bar
+lines, key signatures, LilyPond markup, etc.
 """
 
 from .Arpeggio import Arpeggio
@@ -51,6 +52,6 @@ from .StopSlur import StopSlur
 from .StopTextSpan import StopTextSpan
 from .StopTrillSpan import StopTrillSpan
 from .StringContactPoint import StringContactPoint
-from .TieIndicator import TieIndicator
+from .Tie import Tie
 from .TimeSignature import TimeSignature
 from .WoodwindFingering import WoodwindFingering

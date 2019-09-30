@@ -11,14 +11,14 @@ from abjad.utilities.String import String
 abjad_tags = Tags()
 
 
-class TieIndicator(object):
+class Tie(object):
     r"""
     LilyPond ``~`` command.
 
     ..  container:: example
 
         >>> staff = abjad.Staff("c'4 c' d' d'")
-        >>> tie = abjad.TieIndicator()
+        >>> tie = abjad.Tie()
         >>> abjad.tweak(tie).color = 'blue'
         >>> abjad.attach(tie, staff[0])
         >>> abjad.show(staff) # doctest: +SKIP
@@ -152,7 +152,7 @@ class TieIndicator(object):
 
         ..  container:: example
 
-            >>> abjad.TieIndicator().context
+            >>> abjad.Tie().context
             'Voice'
 
         Class constant.
@@ -168,10 +168,11 @@ class TieIndicator(object):
 
         ..  container:: example
 
-            >>> staff = abjad.Staff("c'4 c' d' d'")
-            >>> tie = abjad.TieIndicator(direction=abjad.Up)
-            >>> abjad.tweak(tie).color = 'blue'
-            >>> abjad.attach(tie, staff[0])
+            With ``direction`` unset:
+
+            >>> staff = abjad.Staff("c'4 c' c'' c''")
+            >>> abjad.attach(abjad.Tie(), staff[0])
+            >>> abjad.attach(abjad.Tie(), staff[2])
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
@@ -180,11 +181,51 @@ class TieIndicator(object):
                 \new Staff
                 {
                     c'4
-                    - \tweak color #blue
+                    ~
+                    c'4
+                    c''4
+                    ~
+                    c''4
+                }
+
+            With ``direction=abjad.Up``:
+
+            >>> staff = abjad.Staff("c'4 c' c'' c''")
+            >>> abjad.attach(abjad.Tie(direction=abjad.Up), staff[0])
+            >>> abjad.attach(abjad.Tie(direction=abjad.Up), staff[2])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    c'4
                     ^ ~
                     c'4
-                    d'4
-                    d'4
+                    c''4
+                    ^ ~
+                    c''4
+                }
+
+            With ``direction=abjad.Down``:
+
+            >>> staff = abjad.Staff("c'4 c' c'' c''")
+            >>> abjad.attach(abjad.Tie(direction=abjad.Down), staff[0])
+            >>> abjad.attach(abjad.Tie(direction=abjad.Down), staff[2])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    c'4
+                    _ ~
+                    c'4
+                    c''4
+                    _ ~
+                    c''4
                 }
 
         """
@@ -197,7 +238,7 @@ class TieIndicator(object):
 
         ..  container:: example
 
-            >>> abjad.TieIndicator().persistent
+            >>> abjad.Tie().persistent
             True
 
         Class constant.
@@ -212,7 +253,7 @@ class TieIndicator(object):
         ..  container:: example
 
             >>> staff = abjad.Staff("c'4 c' d' d'")
-            >>> tie = abjad.TieIndicator(right_broken=True)
+            >>> tie = abjad.Tie(right_broken=True)
             >>> abjad.tweak(tie).color = 'blue'
             >>> abjad.attach(tie, staff[0])
             >>> abjad.show(staff) # doctest: +SKIP
@@ -239,7 +280,7 @@ class TieIndicator(object):
         ..  container:: example
 
             >>> staff = abjad.Staff("c'4 c' d' d'")
-            >>> tie = abjad.TieIndicator()
+            >>> tie = abjad.Tie()
             >>> abjad.tweak(tie).color = 'blue'
             >>> abjad.attach(tie, staff[0])
             >>> abjad.show(staff) # doctest: +SKIP

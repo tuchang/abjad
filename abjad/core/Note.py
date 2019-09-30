@@ -133,13 +133,11 @@ class Note(Leaf):
     ### PRIVATE METHODS ###
 
     def _get_body(self):
-        formatted_duration = self._get_formatted_duration()
+        duration = self._get_formatted_duration()
         if self.note_head is not None:
-            string = self.note_head._get_lilypond_format(
-                formatted_duration=formatted_duration
-            )
+            string = self.note_head._get_lilypond_format(duration=duration)
         else:
-            string = formatted_duration
+            string = duration
         return [string]
 
     def _get_compact_representation(self):

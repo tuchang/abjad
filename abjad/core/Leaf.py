@@ -6,7 +6,7 @@ from abjad import enums
 from abjad import exceptions
 from abjad.indicators.MetronomeMark import MetronomeMark
 from abjad.indicators.RepeatTie import RepeatTie
-from abjad.indicators.TieIndicator import TieIndicator
+from abjad.indicators.Tie import Tie
 from abjad.mathtools import NonreducedFraction
 from abjad.mathtools import Ratio
 from abjad.system.FormatSpecification import FormatSpecification
@@ -43,8 +43,7 @@ class Leaf(Component):
 
     __slots__ = (
         "_after_grace_container",
-        "_grace_container",
-        "_leaf_index",
+        "_before_grace_container",
         "_multiplier",
         "_written_duration",
     )
@@ -57,8 +56,7 @@ class Leaf(Component):
     ) -> None:
         Component.__init__(self, tag=tag)
         self._after_grace_container = None
-        self._grace_container = None
-        self._leaf_index = None
+        self._before_grace_container = None
         self.multiplier = multiplier
         self.written_duration = written_duration
 
@@ -67,14 +65,12 @@ class Leaf(Component):
     def __copy__(self, *arguments):
         """
         Shallow copies leaf.
-
-        Returns new leaf.
         """
         new = Component.__copy__(self, *arguments)
         new.multiplier = self.multiplier
-        grace_container = self._grace_container
-        if grace_container is not None:
-            new_grace_container = grace_container._copy_with_children()
+        before_grace_container = self._before_grace_container
+        if before_grace_container is not None:
+            new_grace_container = before_grace_container._copy_with_children()
             attach(new_grace_container, new)
         after_grace_container = self._after_grace_container
         if after_grace_container is not None:
@@ -92,11 +88,9 @@ class Leaf(Component):
         """
         return (self.written_duration,)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Gets string representation of leaf.
-
-        Returns string.
         """
         return self._get_compact_representation()
 
@@ -140,29 +134,18 @@ class Leaf(Component):
         for new_wrapper in new_wrappers:
             attach(new_wrapper, self)
 
-    def _detach_after_grace_container(self):
-        if self._after_grace_container is not None:
-            return detach(self._after_grace_container, self)
-
-    def _detach_grace_container(self):
-        if self._grace_container is not None:
-            return detach(self._grace_container, self)
-
     def _format_after_grace_body(self):
         result = []
-        if self._after_grace_container is not None:
-            after_grace = self._after_grace_container
-            if len(after_grace):
-                result.append(format(after_grace))
-        return ["after grace body", result]
+        container = self._after_grace_container
+        if container is not None:
+            result.append(format(container))
+        return result
 
-    def _format_after_grace_opening(self):
+    def _format_after_grace_command(self):
         result = []
-        if self._after_grace_container is not None and len(
-            self._after_grace_container
-        ):
+        if self._after_grace_container is not None:
             result.append(r"\afterGrace")
-        return ["after grace opening", result]
+        return result
 
     def _format_after_slot(self, bundle):
         result = []
@@ -182,13 +165,13 @@ class Leaf(Component):
         )
         result.append(("commands", bundle.after.commands))
         result.append(("commands", bundle.after.leaks))
-        result.append(self._format_after_grace_body())
+        result.append(("after grace body", self._format_after_grace_body()))
         result.append(("comments", bundle.after.comments))
         return result
 
     def _format_before_slot(self, bundle):
         result = []
-        result.append(self._format_grace_body())
+        result.append(("grace body", self._format_grace_body()))
         result.append(("comments", bundle.before.comments))
         result.append(("commands", bundle.before.commands))
         result.append(("indicators", bundle.before.indicators))
@@ -196,11 +179,7 @@ class Leaf(Component):
         result.append(("grob overrides", bundle.grob_overrides))
         result.append(("context settings", bundle.context_settings))
         result.append(("spanners", bundle.before.spanners))
-        result.append(self._format_after_grace_opening())
         return result
-
-    def _format_close_brackets_slot(self, bundle):
-        return []
 
     def _format_closing_slot(self, bundle):
         result = []
@@ -212,30 +191,26 @@ class Leaf(Component):
 
     def _format_contents_slot(self, bundle):
         result = []
-        result.append(self._format_leaf_body(bundle))
+        result.append(("leaf body", self._format_leaf_body(bundle)))
         return result
 
     def _format_grace_body(self):
         result = []
-        if self._grace_container is not None:
-            grace = self._grace_container
-            if len(grace):
-                result.append(format(grace))
-        return ["grace body", result]
+        container = self._before_grace_container
+        if container is not None:
+            result.append(format(container))
+        return result
 
     def _format_leaf_body(self, bundle):
-        result = self._format_leaf_nucleus()[1]
-        return ["self body", result]
+        result = self._format_leaf_nucleus()
+        return result
 
     def _format_leaf_nucleus(self):
         strings = self._get_body()
         if self.tag:
             tag = Tag(self.tag)
             strings = LilyPondFormatManager.tag(strings, tag=tag)
-        return ["nucleus", strings]
-
-    def _format_open_brackets_slot(self, bundle):
-        return []
+        return strings
 
     def _format_opening_slot(self, bundle):
         result = []
@@ -243,6 +218,10 @@ class Leaf(Component):
         result.append(("indicators", bundle.opening.indicators))
         result.append(("commands", bundle.opening.commands))
         result.append(("spanners", bundle.opening.spanners))
+        # IMPORTANT: LilyPond \afterGrace must appear IMMEDIATELY before leaf!
+        result.append(
+            ("after grace command", self._format_after_grace_command())
+        )
         return result
 
     def _get_compact_representation(self):
@@ -275,11 +254,15 @@ class Leaf(Component):
         )
 
     def _get_formatted_duration(self):
-        duration_string = self.written_duration.lilypond_duration_string
+        strings = []
+        strings.append(self.written_duration.lilypond_duration_string)
         if self.multiplier is not None:
-            result = f"{duration_string} * {self.multiplier!s}"
-        else:
-            result = duration_string
+            strings.append(str(self.multiplier))
+        if hasattr(self._parent, "_leaf_multiplier"):
+            multiplier = self._parent._leaf_multiplier()
+            if multiplier is not None:
+                strings.append(str(multiplier))
+        result = " * ".join(strings)
         return result
 
     def _get_logical_tie(self):
@@ -293,7 +276,7 @@ class Leaf(Component):
                 break
             if inspect(current_leaf).has_indicator(RepeatTie) or inspect(
                 previous_leaf
-            ).has_indicator(TieIndicator):
+            ).has_indicator(Tie):
                 leaves_before.insert(0, previous_leaf)
             else:
                 break
@@ -303,7 +286,7 @@ class Leaf(Component):
             next_leaf = inspect(current_leaf).leaf(1)
             if next_leaf is None:
                 break
-            if inspect(current_leaf).has_indicator(TieIndicator) or inspect(
+            if inspect(current_leaf).has_indicator(Tie) or inspect(
                 next_leaf
             ).has_indicator(RepeatTie):
                 leaves_after.append(next_leaf)
@@ -324,6 +307,9 @@ class Leaf(Component):
         return self._get_multiplied_duration()
 
     def _leaf(self, n):
+        from .Container import Container
+        from .OnBeatGraceContainer import OnBeatGraceContainer
+
         assert n in (-1, 0, 1), repr(n)
         if n == 0:
             return self
@@ -333,6 +319,17 @@ class Leaf(Component):
         if n == 1:
             components = sibling._get_descendants_starting_with()
         else:
+            assert n == -1
+            if (
+                isinstance(sibling, Container)
+                and len(sibling) == 2
+                and any(isinstance(_, OnBeatGraceContainer) for _ in sibling)
+            ):
+                if isinstance(sibling[0], OnBeatGraceContainer):
+                    main_voice = sibling[1]
+                else:
+                    main_voice = sibling[0]
+                return main_voice[-1]
             components = sibling._get_descendants_stopping_with()
         for component in components:
             if not isinstance(component, Leaf):
@@ -361,26 +358,26 @@ class Leaf(Component):
         indent = manager.indent
         bundle = manager.bundle_format_contributions(self)
         report = ""
-        report += "slot absolute before:\n"
+        report += 'slot "absolute before":\n'
         packet = self._format_absolute_before_slot(bundle)
         report += self._process_contribution_packet(packet)
-        report += "slot 1:\n"
+        report += 'slot "before":\n'
         packet = self._format_before_slot(bundle)
         report += self._process_contribution_packet(packet)
-        report += "slot 3:\n"
+        report += 'slot "opening":\n'
         packet = self._format_opening_slot(bundle)
         report += self._process_contribution_packet(packet)
-        report += "slot 4:\n"
+        report += 'slot "contents slot":\n'
         report += indent + "leaf body:\n"
         string = self._format_contents_slot(bundle)[0][1][0]
         report += (2 * indent) + string + "\n"
-        report += "slot 5:\n"
+        report += 'slot "closing":\n'
         packet = self._format_closing_slot(bundle)
         report += self._process_contribution_packet(packet)
-        report += "slot 7:\n"
+        report += 'slot "after":\n'
         packet = self._format_after_slot(bundle)
         report += self._process_contribution_packet(packet)
-        report += "slot absolute after:\n"
+        report += 'slot "absolute after":\n'
         packet = self._format_absolute_after_slot(bundle)
         report += self._process_contribution_packet(packet)
         while report[-1] == "\n":
@@ -391,7 +388,7 @@ class Leaf(Component):
         new_duration = multiplier * self._get_duration()
         self._set_duration(new_duration)
 
-    def _set_duration(self, new_duration, repeat_ties=False):
+    def _set_duration(self, new_duration):
         from .Chord import Chord
         from .Note import Note
         from .NoteMaker import NoteMaker
@@ -408,7 +405,7 @@ class Leaf(Component):
             return select(self)
         except exceptions.AssignabilityError:
             pass
-        maker = NoteMaker(repeat_ties=repeat_ties)
+        maker = NoteMaker()
         components = maker(0, new_duration)
         new_leaves = select(components).leaves()
         following_leaf_count = len(new_leaves) - 1
@@ -419,7 +416,7 @@ class Leaf(Component):
         logical_tie = self._get_logical_tie()
         logical_tie_leaves = list(logical_tie.leaves)
         for leaf in logical_tie:
-            detach(TieIndicator, leaf)
+            detach(Tie, leaf)
             detach(RepeatTie, leaf)
         if self._parent is not None:
             index = self._parent.index(self)
@@ -441,10 +438,8 @@ class Leaf(Component):
             mutate(all_leaves).wrap(tuplet)
             return select(tuplet)
 
-    def _split_by_durations(self, durations, cyclic=False, repeat_ties=False):
-        from .AfterGraceContainer import AfterGraceContainer
+    def _split_by_durations(self, durations, cyclic=False):
         from .Chord import Chord
-        from .GraceContainer import GraceContainer
         from .Note import Note
         from .Selection import Selection
         from .Tuplet import Tuplet
@@ -460,22 +455,26 @@ class Leaf(Component):
             durations.append(last_duration)
             durations = Sequence(durations)
         durations = durations.truncate(weight=leaf_duration)
-        originally_tied = inspect(self).has_indicator(TieIndicator)
+        originally_tied = inspect(self).has_indicator(Tie)
         originally_repeat_tied = inspect(self).has_indicator(RepeatTie)
         result_selections = []
-        grace_container = self._detach_grace_container()
-        after_grace_container = self._detach_after_grace_container()
+        # detach grace containers
+        before_grace_container = self._before_grace_container
+        if before_grace_container is not None:
+            detach(before_grace_container, self)
+        after_grace_container = self._after_grace_container
+        if after_grace_container is not None:
+            detach(after_grace_container, self)
+        # do other things
         leaf_prolation = inspect(self).parentage().prolation
         for duration in durations:
             new_leaf = copy.copy(self)
             preprolated_duration = duration / leaf_prolation
-            selection = new_leaf._set_duration(
-                preprolated_duration, repeat_ties=repeat_ties
-            )
+            selection = new_leaf._set_duration(preprolated_duration)
             result_selections.append(selection)
         result_components = Sequence(result_selections).flatten(depth=-1)
         result_components = select(result_components)
-        result_leaves = select(result_components).leaves(grace_notes=False)
+        result_leaves = select(result_components).leaves(grace=False)
         assert all(isinstance(_, Selection) for _ in result_selections)
         assert all(isinstance(_, Component) for _ in result_components)
         assert result_leaves.are_leaves()
@@ -497,29 +496,25 @@ class Leaf(Component):
                 attach(indicator, last_result_leaf)
             else:
                 raise ValueError(direction)
-        # move grace containers
-        if grace_container is not None:
-            container = grace_container[0]
-            assert isinstance(container, GraceContainer), repr(container)
-            attach(container, first_result_leaf)
+        # reattach grace containers
+        if before_grace_container is not None:
+            attach(before_grace_container, first_result_leaf)
         if after_grace_container is not None:
-            container = after_grace_container[0]
-            prototype = AfterGraceContainer
-            assert isinstance(container, prototype), repr(container)
-            attach(container, last_result_leaf)
+            attach(after_grace_container, last_result_leaf)
+        # fuse tuplets
         if isinstance(result_components[0], Tuplet):
             mutate(result_components).fuse()
         # tie split notes
         if isinstance(self, (Note, Chord)) and 1 < len(result_leaves):
-            result_leaves._attach_tie_to_leaves(repeat_ties=repeat_ties)
+            result_leaves._attach_tie_to_leaves()
         if originally_repeat_tied and not inspect(
             result_leaves[0]
         ).has_indicator(RepeatTie):
             attach(RepeatTie(), result_leaves[0])
         if originally_tied and not inspect(result_leaves[-1]).has_indicator(
-            TieIndicator
+            Tie
         ):
-            attach(TieIndicator(), result_leaves[-1])
+            attach(Tie(), result_leaves[-1])
         assert isinstance(result_leaves, Selection)
         assert all(isinstance(_, Leaf) for _ in result_leaves)
         return result_leaves
@@ -529,7 +524,7 @@ class Leaf(Component):
     @property
     def multiplier(self) -> typing.Union[Multiplier, NonreducedFraction, None]:
         """
-        Gets duration multiplier.
+        Gets multiplier.
         """
         return self._multiplier
 
@@ -544,7 +539,7 @@ class Leaf(Component):
     @property
     def written_duration(self) -> Duration:
         """
-        Gets written duration of leaf.
+        Gets written duration.
         """
         return self._written_duration
 

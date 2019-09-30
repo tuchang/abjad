@@ -1,4 +1,5 @@
 import abc
+from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
 
 
@@ -31,7 +32,7 @@ class TypedCollection(object):
         Returns true or false.
         """
         try:
-            item = self._item_coercer(item)
+            item = self._coerce_item(item)
         except ValueError:
             return False
         return self._collection.__contains__(item)
@@ -85,29 +86,24 @@ class TypedCollection(object):
         """
         return StorageFormatManager(self).get_repr_format()
 
-    ### PRIVATE PROPERTIES ###
+    ### PRIVATE METHODS ###
 
-    @property
-    def _item_coercer(self):
+    def _coerce_item(self, item):
         def coerce_(x):
             if isinstance(x, self._item_class):
                 return x
             return self._item_class(x)
 
         if self._item_class is None:
-            return lambda x: x
-        return coerce_
-
-    ### PRIVATE METHODS ###
+            return item
+        return coerce_(item)
 
     def _get_format_specification(self):
-        import abjad
-
-        manager = abjad.StorageFormatManager(self)
+        manager = StorageFormatManager(self)
         names = list(manager.signature_keyword_names)
         if "items" in names:
             names.remove("items")
-        return abjad.FormatSpecification(
+        return FormatSpecification(
             self,
             repr_is_indented=False,
             storage_format_args_values=[self._collection],
