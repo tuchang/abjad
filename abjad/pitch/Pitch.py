@@ -6,6 +6,10 @@ import typing
 from abjad import mathtools
 from abjad.system.StorageFormatManager import StorageFormatManager
 from . import constants
+try:
+    from quicktions import Fraction
+except ImportError:
+    from fractions import Fraction
 
 
 @functools.total_ordering
@@ -16,37 +20,29 @@ class Pitch(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = ("_pitch_class", "_octave")
-
-    _is_abstract = True
+    __slots__ = (
+        '_pitch_class',
+        '_octave',
+        )
 
     ### INITIALIZER ###
 
     @abc.abstractmethod
     def __init__(self, argument, accidental=None, arrow=None, octave=None):
         import abjad
-
         if isinstance(argument, str):
             match = constants._comprehensive_pitch_name_regex.match(argument)
             if not match:
-                match = constants._comprehensive_pitch_class_name_regex.match(
-                    argument
-                )
+                match = constants._comprehensive_pitch_class_name_regex.match(argument)
             if not match:
-                message = "can not instantiate {} from {!r}."
+                message = 'can not instantiate {} from {!r}.'
                 message = message.format(type(self).__name__, argument)
                 raise ValueError(message)
             group_dict = match.groupdict()
-            _dpc_name = group_dict["diatonic_pc_name"].lower()
-            _dpc_number = constants._diatonic_pc_name_to_diatonic_pc_number[
-                _dpc_name
-            ]
-            _alteration = abjad.Accidental(
-                group_dict["comprehensive_accidental"]
-            ).semitones
-            _octave = abjad.Octave(
-                group_dict.get("comprehensive_octave", "")
-            ).number
+            _dpc_name = group_dict['diatonic_pc_name'].lower()
+            _dpc_number = constants._diatonic_pc_name_to_diatonic_pc_number[_dpc_name]
+            _alteration = abjad.Accidental(group_dict['comprehensive_accidental']).semitones
+            _octave = abjad.Octave(group_dict.get('comprehensive_octave', '')).number
             self._from_named_parts(_dpc_number, _alteration, _octave)
         elif isinstance(argument, numbers.Number):
             self._from_number(argument)
@@ -60,35 +56,30 @@ class Pitch(object):
                 _pitch_class._get_alteration(),
                 _octave.number,
             )
-        elif hasattr(argument, "written_pitch"):
+        elif hasattr(argument, 'written_pitch'):
             self._from_pitch_or_pitch_class(argument.written_pitch)
         elif isinstance(argument, abjad.Chord) and len(argument.note_heads):
             self._from_pitch_or_pitch_class(argument.note_heads[0])
         else:
-            message = "can not instantiate {} from {!r}."
+            message = 'can not instantiate {} from {!r}.'
             message = message.format(type(self).__name__, argument)
             raise ValueError(message)
         if accidental is not None:
             accidental = abjad.Accidental(accidental)
             self._pitch_class = type(self._pitch_class)(
-                self._pitch_class, accidental=accidental
-            )
+                self._pitch_class,
+                accidental=accidental,
+                )
         if arrow is not None:
             self._pitch_class = type(self._pitch_class)(
-                self._pitch_class, arrow=arrow
-            )
+                self._pitch_class,
+                arrow=arrow,
+                )
         if octave is not None:
             octave = abjad.Octave(octave)
             self._octave = octave
 
     ### SPECIAL METHODS ###
-
-    def __eq__(self, argument) -> bool:
-        """
-        Is true when all initialization values of Abjad value object equal
-        the initialization values of ``argument``.
-        """
-        return StorageFormatManager.compare_objects(self, argument)
 
     def __float__(self):
         """
@@ -98,7 +89,7 @@ class Pitch(object):
         """
         return float(self.number)
 
-    def __format__(self, format_specification=""):
+    def __format__(self, format_specification=''):
         """
         Formats pitch.
 
@@ -106,22 +97,11 @@ class Pitch(object):
 
         Returns string.
         """
-        if format_specification in ("", "lilypond"):
+        if format_specification in ('', 'lilypond'):
             return self._get_lilypond_format()
-        elif format_specification == "storage":
+        elif format_specification == 'storage':
             return StorageFormatManager(self).get_storage_format()
         return str(self)
-
-    def __hash__(self) -> int:
-        """
-        Hashes Abjad value object.
-        """
-        hash_values = StorageFormatManager(self).get_hash_values()
-        try:
-            result = hash(hash_values)
-        except TypeError:
-            raise TypeError(f"unhashable type: {self}")
-        return result
 
     def __illustrate__(self):
         """
@@ -130,9 +110,9 @@ class Pitch(object):
         Returns LilyPond file.
         """
         import abjad
-
         pitch = abjad.NamedPitch(self)
-        note = abjad.Note(pitch, 1, multiplier=(1, 4))
+        note = abjad.Note(pitch, 1)
+        abjad.attach(abjad.Multiplier(1, 4), note)
         clef = abjad.Clef.from_selection([pitch])
         abjad.attach(clef, note)
         staff = abjad.Staff()
@@ -149,12 +129,6 @@ class Pitch(object):
         Returns true or false.
         """
         raise NotImplementedError
-
-    def __repr__(self) -> str:
-        """
-        Gets interpreter representation.
-        """
-        return StorageFormatManager(self).get_repr_format()
 
     ### PRIVATE PROPERTIES ###
 
@@ -173,21 +147,25 @@ class Pitch(object):
             return pitch_number - down
 
     @staticmethod
-    def _to_nearest_eighth_tone(number):
+    def _to_nearest_quarter_tone(number):
         number = round(float(number) * 4) / 4
         div, mod = divmod(number, 1)
         if mod == 0.75:
-            div += 0.75 # used to be 1
+            div += 1
         elif mod == 0.5:
             div += 0.5
-        elif mod == 0.25: # new
-            div += 0.25 # new
         return mathtools.integer_equivalent_number_to_integer(div)
+
+    @staticmethod
+    def _to_nearest_twelfth_tone(number):
+        semitones = Fraction(int(round(12 * number)), 12)
+        if semitones.denominator == 12:
+            semitones = Fraction(int(round(6 * number)), 6)
+        return mathtools.integer_equivalent_number_to_integer(semitones)
 
     @staticmethod
     def _to_pitch_class_item_class(item_class):
         import abjad
-
         item_class = item_class or abjad.NumberedPitch
         if item_class in (abjad.NamedPitchClass, abjad.NumberedPitchClass):
             return item_class
@@ -201,7 +179,6 @@ class Pitch(object):
     @staticmethod
     def _to_pitch_item_class(item_class):
         import abjad
-
         item_class = item_class or abjad.NumberedPitch
         if item_class in (abjad.NamedPitch, abjad.NumberedPitch):
             return item_class
@@ -228,7 +205,7 @@ class Pitch(object):
 
         Returns float.
         """
-        hertz = pow(2.0, (float(self.number) - 9.0) / 12.0) * 440.0
+        hertz = pow(2., (float(self.number) - 9.) / 12.) * 440.
         return hertz
 
     @abc.abstractproperty
@@ -277,7 +254,7 @@ class Pitch(object):
 
         Returns new pitch.
         """
-        midi = 9.0 + (12.0 * math.log(float(hertz) / 440.0, 2))
+        midi = 9. + (12. * math.log(float(hertz) / 440., 2))
         pitch = class_(midi)
         return pitch
 
@@ -300,7 +277,6 @@ class Pitch(object):
         Returns new pitch.
         """
         import abjad
-
         axis = axis or abjad.NamedPitch("c'")
         axis = type(self)(axis)
         interval = self - axis

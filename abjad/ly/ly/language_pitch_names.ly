@@ -1,22 +1,39 @@
 \version "2.19.24"
 
 %%% DEFINITIONS %%%
-%%% Greg defined the eighth tones %%%
 #(define alterations '(
   (-1 . "ff")
+  (-11/12 . "etf")
+  (-7/8 . "sef")
+  (-5/6 . "fxf")
   (-3/4 . "tqf")
+  (-2/3 . "trf")
   (-5/8 . "fef")
+  (-7/12 . "stf")
   (-1/2 . "f")
+  (-5/12 . "ftf")
   (-3/8 . "tef")
+  (-1/3 . "rf")
   (-1/4 . "qf")
+  (-1/6 . "xf")
   (-1/8 . "ef")
+  (-1/12 . "tf")
   (0 . "")
+  (1/12 . "ts")
   (1/8 . "es")
+  (1/6 . "xs")
   (1/4 . "qs")
+  (1/3 . "rs")
   (3/8 . "tes")
+  (5/12 . "fts")
   (1/2 . "s")
+  (7/12 . "sts")
   (5/8 . "fes")
+  (2/3 . "trs")
   (3/4 . "tqs")
+  (5/6 . "fxs")
+  (7/8 . "ses")
+  (11/12 . "ets")
   (1 . "ss")))
 
 #(define notenames '(

@@ -72,12 +72,23 @@ class NumberedPitch(Pitch):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = ("_number",)
+    __slots__ = (
+        '_number',
+        )
 
     ### INITIALIZER ###
 
-    def __init__(self, number=0, *, arrow=None, octave=None):
-        super().__init__(number or 0, arrow=arrow, octave=octave)
+    def __init__(
+        self,
+        number=0, *,
+        arrow=None,
+        octave=None,
+    ):
+        super().__init__(
+            number or 0,
+            arrow=arrow,
+            octave=octave,
+            )
 
     ### SPECIAL METHODS ###
 
@@ -199,9 +210,9 @@ class NumberedPitch(Pitch):
         Returns numbered interval.
         """
         import abjad
-
         if isinstance(argument, type(self)):
-            return abjad.NumberedInterval.from_pitch_carriers(self, argument)
+            return abjad.NumberedInterval.from_pitch_carriers(
+                self, argument)
         interval = abjad.NumberedInterval(argument)
         interval = -interval
         return interval.transpose(self)
@@ -210,41 +221,36 @@ class NumberedPitch(Pitch):
 
     def _apply_accidental(self, accidental=None):
         import abjad
-
         accidental = abjad.Accidental(accidental)
         semitones = self.number + accidental.semitones
         return type(self)(semitones)
 
     def _from_named_parts(self, dpc_number, alteration, octave):
         import abjad
-
-        pc_number = constants._diatonic_pc_number_to_pitch_class_number[
-            dpc_number
-        ]
+        pc_number = constants._diatonic_pc_number_to_pitch_class_number[dpc_number]
         pc_number += alteration
         pc_number += (octave - 4) * 12
-        self._number = mathtools.integer_equivalent_number_to_integer(
-            pc_number
-        )
+        self._number = mathtools.integer_equivalent_number_to_integer(pc_number)
         octave_number, pc_number = divmod(self._number, 12)
         self._pitch_class = abjad.NumberedPitchClass(pc_number)
         self._octave = abjad.Octave(octave_number + 4)
 
     def _from_number(self, number):
         import abjad
-        self._number = self._to_nearest_eighth_tone(number)
+        self._number = self._to_nearest_twelfth_tone(number)
         octave_number, pc_number = divmod(self._number, 12)
         self._octave = abjad.Octave(octave_number + 4)
         self._pitch_class = abjad.NumberedPitchClass(pc_number)
 
     def _from_pitch_or_pitch_class(self, pitch_or_pitch_class):
         import abjad
-        self._number = self._to_nearest_eighth_tone(float(pitch_or_pitch_class))
+        self._number = self._to_nearest_twelfth_tone(pitch_or_pitch_class.number)
         octave_number, pc_number = divmod(self._number, 12)
         self._octave = abjad.Octave(octave_number + 4)
         self._pitch_class = abjad.NumberedPitchClass(
-            pc_number, arrow=pitch_or_pitch_class.arrow
-        )
+            pc_number,
+            arrow=pitch_or_pitch_class.arrow,
+            )
 
     def _get_diatonic_pc_name(self):
         return self.pitch_class._get_diatonic_pc_name()
@@ -264,8 +270,8 @@ class NumberedPitch(Pitch):
             repr_is_indented=False,
             storage_format_is_indented=False,
             storage_format_args_values=[self.number],
-            storage_format_kwargs_names=["arrow"],
-        )
+            storage_format_kwargs_names=['arrow'],
+            )
 
     def _get_lilypond_format(self):
         return self.name
@@ -280,7 +286,7 @@ class NumberedPitch(Pitch):
         ..  container:: example
 
             >>> abjad.NumberedPitchClass(13).accidental
-            Accidental('sharp')
+            Accidental('s')
 
         Returns accidental.
         """
@@ -348,7 +354,10 @@ class NumberedPitch(Pitch):
 
         Returns string
         """
-        return "{}{}".format(self.pitch_class.name, self.octave.ticks)
+        return '{}{}'.format(
+            self.pitch_class.name,
+            self.octave.ticks,
+            )
 
     @property
     def number(self):
@@ -362,11 +371,11 @@ class NumberedPitch(Pitch):
 
         Returns number.
         """
-        pc_number = float(self.pitch_class)
+        pc_number = self.pitch_class.number
         octave_base_pitch = (self.octave.number - 4) * 12
         return mathtools.integer_equivalent_number_to_integer(
             pc_number + octave_base_pitch
-        )
+            )
 
     @property
     def octave(self):
@@ -436,7 +445,6 @@ class NumberedPitch(Pitch):
         Returns string.
         """
         import abjad
-
         return abjad.NamedPitch(self).get_name(locale=locale)
 
     def interpolate(self, stop_pitch, fraction):
@@ -482,7 +490,6 @@ class NumberedPitch(Pitch):
         Returns new numbered pitch.
         """
         import abjad
-
         assert 0 <= fraction <= 1, repr(fraction)
         stop_pitch = type(self)(stop_pitch)
         distance = stop_pitch - self
@@ -562,6 +569,5 @@ class NumberedPitch(Pitch):
         Returns new numbered pitch.
         """
         import abjad
-
         interval = abjad.NumberedInterval(n)
         return type(self)(float(self) + float(interval))
