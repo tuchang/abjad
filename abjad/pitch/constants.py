@@ -619,14 +619,14 @@ _symbolic_accidental_regex_atom = (
     "|[b]+[~]?"
     "|[+]"
     "|[~]"
-    "|[3681][2]?[\^_]+" # does not initialize specific accidentals
+    "|[3681][2]?[\^_]+" # Does not initialize specific accidentals. Only a blank ''.
     "|"
     ")"
 )
 
 _ekmelily_accidental_regex_atom = (
     "(?P<ekmelily_accidental>"
-    "|[fset]?[rxet][fs]" # does not initialize ts
+    "|[fset]?[rxet][fs]" # Does not initialize 'ts'. Only a blank ''.
     "|"
     ")"
 )
