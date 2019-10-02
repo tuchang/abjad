@@ -624,12 +624,7 @@ _symbolic_accidental_regex_atom = (
     ")"
 )
 
-_ekmelily_accidental_regex_atom = (
-    "(?P<ekmelily_accidental>"
-    "[fset]?[rxet][fs]"
-    "|"
-    ")"
-)
+_ekmelily_accidental_regex_atom = "(?P<ekmelily_accidental>" "[fset]?[rxet][fs]" "|" ")"
 
 _octave_number_regex_atom = "(?P<octave_number>{}|)".format(_integer_regex_atom)
 
