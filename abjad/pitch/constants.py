@@ -610,22 +610,7 @@ _stop_punctuation_to_inclusivity_string = {"]": "inclusive", ")": "exclusive"}
 _integer_regex_atom = r"-?\d+"
 
 _alphabetic_accidental_regex_atom = (
-    "(?P<alphabetic_accidental>"
-    "[s]*(qs)?"
-    "|[s]*(es)?"
-    "|[f]*(es)?"
-    "|[f]*(qf)?"
-    "|[f]*(ef)?"
-    "|[sft]?[qe]?[sf]?"
-        # "s*" # this attempt works with f, s, qf, qs and nothing else
-        # "|f*"
-        # "|[t]?q[sf]"
-        # "|[tf]?r[sf]"
-        # "|[fs]?x[sf]"
-        # "|[tfs]?e[sf]"
-        # "|[fset]?t[sf]"
-    "|"
-    ")"
+    "(?P<alphabetic_accidental>" "[s]*(qs)?" "|[f]*(qf)?" "|t?q?[fs]" "|" ")"
 )
 
 _symbolic_accidental_regex_atom = (
@@ -634,26 +619,14 @@ _symbolic_accidental_regex_atom = (
     "|[b]+[~]?"
     "|[+]"
     "|[~]"
-    "|[_]"
-    "|[^]"
-    "|[8]_+" # this one absolutely does not work for some reason. errors
-    "|[8]\^+" #
-    "|[3]_+" # does not initialize rs or rf accidentals
-    "|[3]\^+" #
-    "|[6]_+" # does not initialize xs or xf accidentals
-    "|[6]\^+" #
-    "|[(12)]_+" # does not initialize ts or tf accidentals
-    "|[(12)]\^+" # also maybe simplify to [(12)][\^_]+
+    "|[3681][2]?[\^_]+" # does not initialize specific accidentals
     "|"
     ")"
 )
 
 _ekmelily_accidental_regex_atom = (
     "(?P<ekmelily_accidental>"
-    "[tf]?r[fs]"
-    "|[fs]?x[fs]"
-    "|[tfs]?e[fs]" # does not initialize es or ef accidentals
-    "|[fset]?t[fs]" # does not initialize ts or tf accidentals
+    "|[fset]?[rxet][fs]" # does not initialize ts
     "|"
     ")"
 )
