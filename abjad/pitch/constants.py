@@ -626,7 +626,7 @@ _symbolic_accidental_regex_atom = (
 
 _ekmelily_accidental_regex_atom = (
     "(?P<ekmelily_accidental>"
-    "|[fset]?[rxet][fs]" # Does not initialize 'ts'. Only a blank ''.
+    "[fset]?[rxet][fs]" # Does not initialize 'ts'. Only a blank ''. Check approximation.
     "|"
     ")"
 )
