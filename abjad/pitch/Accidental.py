@@ -78,19 +78,9 @@ class Accidental(object):
             else:
                 group_dict = match.groupdict()
                 if group_dict["alphabetic_accidental"]:
-                    prefix, _, suffix = name.partition("q")
-                    if prefix.startswith("s"):
-                        semitones += len(prefix)
-                    elif prefix.startswith("f"):
-                        semitones -= len(prefix)
-                    if suffix == "s":
-                        semitones += Fraction(1, 2)
-                        if prefix == "t":
-                            semitones += 1
-                    elif suffix == "f":
-                        semitones -= Fraction(1, 2)
-                        if prefix == "t":
-                            semitones -= 1
+                    semitones = constants._accidental_abbreviation_to_semitones[
+                        group_dict["alphabetic_accidental"]
+                    ]
                 elif group_dict["symbolic_accidental"]:
                     semitones += name.count("#")
                     semitones -= name.count("b")
@@ -98,6 +88,10 @@ class Accidental(object):
                         semitones += Fraction(1, 2)
                     elif name.endswith("~"):
                         semitones -= Fraction(1, 2)
+                    else:
+                        semitones = constants._symbolic_accidental_to_semitones[
+                            group_dict["symbolic_accidental"]
+                        ]
                 elif group_dict["ekmelily_accidental"]:
                     semitones = constants._accidental_abbreviation_to_semitones[
                         group_dict["ekmelily_accidental"]
