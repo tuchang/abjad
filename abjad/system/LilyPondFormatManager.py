@@ -1,8 +1,9 @@
 import typing
+
 from abjad import enums
-from abjad.scheme import Scheme
-from abjad.scheme import SchemePair
+from abjad.scheme import Scheme, SchemePair
 from abjad.utilities.String import String
+
 from .LilyPondFormatBundle import LilyPondFormatBundle
 from .StorageFormatManager import StorageFormatManager
 
@@ -347,7 +348,7 @@ class LilyPondFormatManager(object):
             pass
         elif argument in (True, False):
             argument = Scheme(argument)
-        elif argument in (enums.Up, enums.Down, enums.Left, enums.Right, enums.Center):
+        elif argument in (enums.Up, enums.Down, enums.Left, enums.Right, enums.Center,):
             argument = Scheme(repr(argument).lower())
         elif isinstance(argument, int) or isinstance(argument, float):
             argument = Scheme(argument)
@@ -439,11 +440,11 @@ class LilyPondFormatManager(object):
         return result
 
     @staticmethod
-    def make_lilypond_tweak_string(attribute, value, directed=True, grob=None) -> str:
+    def make_lilypond_tweak_string(
+        attribute, value, *, directed=True, grob=None, literal=None
+    ) -> str:
         r"""
         Makes Lilypond \tweak string.
-
-        Returns string.
         """
         if grob is not None:
             grob = String(grob).to_upper_camel_case()
@@ -451,7 +452,8 @@ class LilyPondFormatManager(object):
         else:
             grob = ""
         attribute = LilyPondFormatManager.format_lilypond_attribute(attribute)
-        value = LilyPondFormatManager.format_lilypond_value(value)
+        if not literal:
+            value = LilyPondFormatManager.format_lilypond_value(value)
         string = rf"\tweak {grob}{attribute} {value}"
         if directed:
             string = "- " + string

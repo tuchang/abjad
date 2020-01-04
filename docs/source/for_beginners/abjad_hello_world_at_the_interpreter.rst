@@ -1,7 +1,6 @@
 Abjad "hello, world" (at the interpreter)
 =========================================
 
-
 Starting the interpreter
 ------------------------
 
@@ -28,25 +27,23 @@ If Abjad is installed on your system then Python will silently load Abjad.
 If Abjad isn't installed on your system then Python will raise
 an import error.
 
-Go to http://projectabjad.org/ and follow the instructions there
+Go to https://abjad.github.io/ and follow the instructions there
 to install Abjad if necessary.
-
 
 Entering commands
 -----------------
 
 After you've imported Abjad you can create a note like this:
 
-..  abjad::
+::
 
-    note = Note("c'4")
+    >>> note = Note("c'4")
 
 And you can show the note like this:
 
-..  abjad::
+::
 
-    show(note)
-
+    >>> show(note)
 
 Stopping the interpreter
 ------------------------

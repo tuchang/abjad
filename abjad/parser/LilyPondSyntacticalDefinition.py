@@ -1,13 +1,12 @@
 from ply import lex  # type: ignore
-from abjad import Fraction
-from abjad import utilities
+
+from abjad import Fraction, core, exceptions
 from abjad import indicators as abjad_indicators
 from abjad import lilypondfile as abjad_lilypondfile
 from abjad import markups as abjad_markups
-from abjad import core
-from abjad import exceptions
 from abjad import pitch as abjad_pitch
 from abjad import scheme as abjad_scheme
+from abjad import utilities
 from abjad.top import attach
 
 
@@ -345,11 +344,11 @@ class LilyPondSyntacticalDefinition(object):
 
         if p[1] not in drums:
             note_head = core.NoteHead(
-                written_pitch=p[1], is_cautionary=bool(p[3]), is_forced=bool(p[2])
+                written_pitch=p[1], is_cautionary=bool(p[3]), is_forced=bool(p[2]),
             )
         else:
             note_head = core.DrumNoteHead(
-                written_pitch=p[1], is_cautionary=bool(p[3]), is_forced=bool(p[2])
+                written_pitch=p[1], is_cautionary=bool(p[3]), is_forced=bool(p[2]),
             )
         p[0] = abjad_parser.SyntaxNode("chord_body_element", (note_head, p[5]))
 

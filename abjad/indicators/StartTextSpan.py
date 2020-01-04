@@ -1,7 +1,6 @@
 import typing
-from abjad import enums
-from abjad import markups
-from abjad import typings
+
+from abjad import enums, markups, typings
 from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
@@ -88,9 +87,11 @@ class StartTextSpan(object):
     _styles = (
         "dashed-line-with-arrow",
         "dashed-line-with-hook",
+        "dashed-line-with-up-hook",
         "invisible-line",
         "solid-line-with-arrow",
         "solid-line-with-hook",
+        "solid-line-with-up-hook",
     )
 
     ### INITIALIZER ###
@@ -746,7 +747,7 @@ class StartTextSpan(object):
                 command='\\startTextSpan',
                 concat_hspace_left=0.5,
                 style='dashed-line-with-arrow',
-                tweaks=LilyPondTweakManager(('color', 'blue'), ('staff_padding', 2.5)),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue'), ('staff_padding', 2.5)),
                 )
 
             >>> start_text_span_2 = copy.copy(start_text_span)
@@ -755,7 +756,7 @@ class StartTextSpan(object):
                 command='\\startTextSpan',
                 concat_hspace_left=0.5,
                 style='dashed-line-with-arrow',
-                tweaks=LilyPondTweakManager(('color', 'blue'), ('staff_padding', 2.5)),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue'), ('staff_padding', 2.5)),
                 )
 
         """

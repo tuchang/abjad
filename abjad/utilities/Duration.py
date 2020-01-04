@@ -2,8 +2,8 @@ import copy
 import math
 import re
 import typing
-from abjad import exceptions
-from abjad import mathtools
+
+from abjad import exceptions, mathtools
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
 

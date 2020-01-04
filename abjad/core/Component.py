@@ -2,12 +2,11 @@ import abc
 import bisect
 import copy
 import typing
+
 import uqbar.graphs
-from abjad import enums
-from abjad import exceptions
-from abjad import mathtools
+
+from abjad import enums, exceptions, mathtools
 from abjad.indicators.StaffChange import StaffChange
-from abjad.indicators.TimeSignature import TimeSignature
 from abjad.markups import Markup
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
@@ -15,17 +14,14 @@ from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.system.Tag import Tag
 from abjad.system.UpdateManager import UpdateManager
 from abjad.system.Wrapper import Wrapper
+from abjad.timespans import Timespan
 from abjad.top.attach import attach
 from abjad.top.detach import detach
 from abjad.top.inspect import inspect
-from abjad.top.iterate import iterate
 from abjad.top.mutate import mutate
 from abjad.top.override import override
 from abjad.top.select import select
 from abjad.top.setting import setting
-from abjad.timespans import Timespan
-from abjad.utilities.Duration import Duration
-from .VerticalMoment import VerticalMoment
 
 
 class Component(object):
@@ -58,7 +54,7 @@ class Component(object):
     ### INITIALIZER ###
 
     @abc.abstractmethod
-    def __init__(self, name: str = None, tag: str = None) -> None:
+    def __init__(self, name: str = None, tag: Tag = None) -> None:
         self._indicators_are_current = False
         self._is_forbidden_to_update = False
         self._measure_number = None
@@ -72,7 +68,7 @@ class Component(object):
         self._stop_offset = None
         self._stop_offset_in_seconds = None
         if tag is not None:
-            assert isinstance(tag, str), repr(tag)
+            assert isinstance(tag, Tag), repr(tag)
         self._tag = tag
         self._timespan = Timespan()
         self._wrappers: typing.List[Wrapper] = []
@@ -442,7 +438,7 @@ class Component(object):
         if summary:
             values.append(summary)
         return FormatSpecification(
-            client=self, repr_args_values=values, storage_format_kwargs_names=[]
+            client=self, repr_args_values=values, storage_format_kwargs_names=[],
         )
 
     def _get_indicator(self, prototype=None, *, attributes=None, unwrap=True):
@@ -591,7 +587,6 @@ class Component(object):
         if n == -1 and getattr(self, "_before_grace_container", None):
             return self._before_grace_container[-1]
         index = self._parent.index(self) + n
-        result = None
         if not (0 <= index < len(self._parent)):
             return None
         candidate = self._parent[index]
@@ -735,7 +730,7 @@ class Component(object):
     ### PUBLIC PROPERTIES ###
 
     @property
-    def tag(self):
+    def tag(self) -> typing.Optional[Tag]:
         """
         Gets component tag.
         """

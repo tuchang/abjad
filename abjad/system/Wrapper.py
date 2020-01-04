@@ -1,5 +1,6 @@
 import copy
 import typing
+
 from .FormatSpecification import FormatSpecification
 from .LilyPondFormatManager import LilyPondFormatManager
 from .StorageFormatManager import StorageFormatManager
@@ -205,7 +206,7 @@ class Wrapper(object):
             }
 
             >>> leaf = new_staff[0]
-            >>> abjad.inspect(leaf).annotation('bow_direction')
+            >>> abjad.inspect(leaf).annotation("bow_direction")
             Down
 
         ..  container:: example
@@ -213,8 +214,8 @@ class Wrapper(object):
             Preserves tag:
 
             >>> old_staff = abjad.Staff("c'4 d'4 e'4 f'4")
-            >>> clef = abjad.Clef('alto')
-            >>> abjad.attach(clef, old_staff[0], tag='RED:M1')
+            >>> clef = abjad.Clef("alto")
+            >>> abjad.attach(clef, old_staff[0], tag=abjad.Tag("RED:M1"))
             >>> abjad.f(old_staff)
             \new Staff {
                 \clef "alto" %! RED:M1
@@ -261,7 +262,7 @@ class Wrapper(object):
             ...     abjad.Clef('alto'),
             ...     old_staff[0],
             ...     deactivate=True,
-            ...     tag='RED:M1',
+            ...     tag=abjad.Tag("RED:M1"),
             ...     )
             >>> abjad.f(old_staff)
             \new Staff {
@@ -303,7 +304,7 @@ class Wrapper(object):
                 )
 
         Copies all properties except component.
-        
+
         Copy operations must supply component after wrapper copy.
         """
         new = type(self)(
@@ -485,11 +486,16 @@ class Wrapper(object):
         wrapper = abjad.inspect(component).effective_wrapper(
             prototype, attributes={"command": command}
         )
+        wrapper_format_slot = None
+        if wrapper is not None:
+            wrapper_format_slot = getattr(wrapper.indicator, "format_slot", None)
+        my_format_slot = getattr(self.indicator, "format_slot", None)
         if (
             wrapper is None
             or wrapper.context is None
             or wrapper.deactivate is True
             or wrapper.start_offset != self.start_offset
+            or wrapper_format_slot != my_format_slot
         ):
             return
         my_leak = getattr(self.indicator, "leak", None)
@@ -575,6 +581,61 @@ class Wrapper(object):
         Gets indicator.
         """
         return self._indicator
+
+    @property
+    def leaked_start_offset(self):
+        r"""
+        Gets start offset and checks to see whether indicator leaks to the
+        right.
+
+        This is either the wrapper's synthetic offset (if set); or the START
+        offset of the wrapper's component (if indicator DOES NOT leak); or else
+        the STOP offset of the wrapper's component (if indicator DOES leak).
+
+        ..  container:: example
+
+            Start- and stop-text-spans attach to the same leaf. But
+            stop-text-span leaks to the right:
+
+            >>> voice = abjad.Voice("c'2 d'2")
+            >>> start_text_span = abjad.StartTextSpan()
+            >>> abjad.attach(start_text_span, voice[0])
+            >>> stop_text_span = abjad.StopTextSpan(leak=True)
+            >>> abjad.attach(stop_text_span, voice[0])
+            >>> abjad.show(voice) # doctest: +SKIP
+
+            >>> abjad.f(voice)
+            \new Voice
+            {
+                c'2
+                \startTextSpan
+                <> \stopTextSpan
+                d'2
+            }
+
+            Start offset and leaked start offset are the same for
+            start-text-span:
+
+            >>> wrapper = abjad.inspect(voice[0]).wrapper(abjad.StartTextSpan)
+            >>> wrapper.start_offset, wrapper.leaked_start_offset
+            (Offset((0, 1)), Offset((0, 1)))
+
+            Start offset and leaked start offset differ for stop-text-span:
+
+            >>> wrapper = abjad.inspect(voice[0]).wrapper(abjad.StopTextSpan)
+            >>> wrapper.start_offset, wrapper.leaked_start_offset
+            (Offset((0, 1)), Offset((1, 2)))
+
+        Returns offset.
+        """
+        from abjad.top.inspect import inspect
+
+        if self._synthetic_offset is not None:
+            return self._synthetic_offset
+        if not getattr(self.indicator, "leak", False):
+            return inspect(self._component).timespan().start_offset
+        else:
+            return inspect(self._component).timespan().stop_offset
 
     @property
     def start_offset(self):

@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_LilyPondParser__misc__chord_repetition_01():

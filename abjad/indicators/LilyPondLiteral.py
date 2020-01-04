@@ -1,4 +1,5 @@
 import typing
+
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
@@ -76,13 +77,13 @@ class LilyPondLiteral(object):
         >>> staff = abjad.Staff("c'8 d'8 e'8 f'8")
         >>> abjad.slur(staff[:])
         >>> literal = abjad.LilyPondLiteral(r'\slurDotted')
-        >>> abjad.attach(literal, staff[0], tag='RED')
+        >>> abjad.attach(literal, staff[0], tag=abjad.tags.ONLY_PARTS)
         >>> abjad.show(staff) # doctest: +SKIP
 
         >>> abjad.f(staff)
         \new Staff
         {
-            \slurDotted %! RED
+            \slurDotted %! +PARTS
             c'8
             (
             d'8
@@ -103,7 +104,7 @@ class LilyPondLiteral(object):
         ...     r'\once \override Staff.StaffSymbol.color = #red',
         ...     ]
         >>> literal = abjad.LilyPondLiteral(lines)
-        >>> abjad.attach(literal, staff[2], tag='RED')
+        >>> abjad.attach(literal, staff[2], tag=abjad.tags.ONLY_PARTS)
         >>> abjad.show(staff) # doctest: +SKIP
 
         >>> abjad.f(staff)
@@ -112,9 +113,9 @@ class LilyPondLiteral(object):
             c'8
             (
             d'8
-            \stopStaff %! RED
-            \startStaff %! RED
-            \once \override Staff.StaffSymbol.color = #red %! RED
+            \stopStaff %! +PARTS
+            \startStaff %! +PARTS
+            \once \override Staff.StaffSymbol.color = #red %! +PARTS
             e'8
             f'8
             )

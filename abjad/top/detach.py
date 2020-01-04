@@ -1,7 +1,7 @@
 def detach(argument, target=None, by_id=False):
     r"""
     Detaches indicators-equal-to-``argument`` from ``target``.
-        
+
     Set ``by_id`` to true to detach exact ``argument`` from ``target`` (rather
     than detaching all indicators-equal-to-``argument``).
 
@@ -59,18 +59,18 @@ def detach(argument, target=None, by_id=False):
         parts:
 
         >>> staff = abjad.Staff("c'4 d' e' f'")
-        >>> abjad.attach(markup_1, staff[0], tag='+SCORE')
+        >>> abjad.attach(markup_1, staff[0], tag=abjad.tags.ONLY_SCORE)
         >>> abjad.attach(
         ...     markup_2,
         ...     staff[0],
         ...     deactivate=True,
-        ...     tag='+PARTS_VIOLIN_1',
+        ...     tag=abjad.Tag("+PARTS_VIOLIN_1"),
         ...     )
         >>> abjad.attach(
         ...     markup_3,
         ...     staff[0],
         ...     deactivate=True,
-        ...     tag='+PARTS_VIOLIN_2',
+        ...     tag=abjad.Tag("+PARTS_VIOLIN_2"),
         ...     )
         >>> abjad.show(staff) # doctest: +SKIP
 
@@ -96,7 +96,7 @@ def detach(argument, target=None, by_id=False):
         (Markup(contents=['with the others'], direction=Up), Markup(contents=['with the others'], direction=Up))
 
         >>> abjad.show(staff) # doctest: +SKIP
-        
+
         >>> abjad.f(staff, strict=50)
         \new Staff
         {
@@ -110,18 +110,18 @@ def detach(argument, target=None, by_id=False):
         We start again:
 
         >>> staff = abjad.Staff("c'4 d' e' f'")
-        >>> abjad.attach(markup_1, staff[0], tag='+SCORE')
+        >>> abjad.attach(markup_1, staff[0], tag=abjad.tags.ONLY_SCORE)
         >>> abjad.attach(
         ...     markup_2,
         ...     staff[0],
         ...     deactivate=True,
-        ...     tag='+PARTS_VIOLIN_1',
+        ...     tag=abjad.Tag("+PARTS_VIOLIN_1"),
         ...     )
         >>> abjad.attach(
         ...     markup_3,
         ...     staff[0],
         ...     deactivate=True,
-        ...     tag='+PARTS_VIOLIN_2',
+        ...     tag=abjad.Tag("+PARTS_VIOLIN_2"),
         ...     )
         >>> abjad.show(staff) # doctest: +SKIP
 
@@ -145,7 +145,7 @@ def detach(argument, target=None, by_id=False):
         (Markup(contents=['with the others'], direction=Up),)
 
         >>> abjad.show(staff) # doctest: +SKIP
-        
+
         >>> abjad.f(staff, strict=50)
         \new Staff
         {
@@ -261,7 +261,7 @@ def detach(argument, target=None, by_id=False):
     if before_grace_container is not None:
         items.append(before_grace_container)
     if by_id is True:
-        items = [_ for _ in items if id(item) == id(argument)]
+        items = [_ for _ in items if id(_) == id(argument)]
     for item in items:
         item._detach()
     items = tuple(items)

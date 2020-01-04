@@ -1,7 +1,6 @@
-import collections
 import typing
-from abjad import enums
-from abjad import typings
+
+from abjad import enums, typings
 from abjad.markups import Markup
 from abjad.mathtools import Ratio
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
@@ -512,8 +511,6 @@ class MetricModulation(object):
     ### PRIVATE METHODS ###
 
     def _get_compact_output(self):
-        import abjad
-
         if self._note_to_note():
             arguments = self._get_markup_arguments()
             left_exponent, left_dots, right_exponent, right_dots = arguments

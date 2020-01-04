@@ -11,9 +11,9 @@ import itertools
 import math
 import numbers
 import typing
+
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
-
 
 ### FUNCTIONS ###
 
@@ -497,7 +497,7 @@ def factors(n) -> typing.List[int]:
     return factors
 
 
-def fraction_to_proper_fraction(rational) -> typing.Tuple[int, fractions.Fraction]:
+def fraction_to_proper_fraction(rational,) -> typing.Tuple[int, fractions.Fraction]:
     """
     Changes ``rational`` to proper fraction.
 

@@ -1,3 +1,5 @@
+from abjad.system.Tag import Tag
+
 from .Context import Context
 
 
@@ -51,7 +53,7 @@ class StaffGroup(Context):
         lilypond_type: str = "StaffGroup",
         simultaneous: bool = True,
         name: str = None,
-        tag: str = None,
+        tag: Tag = None,
     ) -> None:
         Context.__init__(
             self,

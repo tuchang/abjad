@@ -1,4 +1,5 @@
 import typing
+
 from abjad import enums
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
@@ -236,13 +237,13 @@ class StopPianoPedal(object):
             >>> abjad.tweak(stop_piano_pedal).color = 'blue'
             >>> abjad.f(stop_piano_pedal)
             abjad.StopPianoPedal(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
             >>> stop_piano_pedal_2 = copy.copy(stop_piano_pedal)
             >>> abjad.f(stop_piano_pedal_2)
             abjad.StopPianoPedal(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
         """

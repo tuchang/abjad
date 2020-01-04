@@ -1,4 +1,5 @@
 from abjad.system.FormatSpecification import FormatSpecification
+
 from . import constants
 from .Pitch import Pitch
 from .PitchClass import PitchClass

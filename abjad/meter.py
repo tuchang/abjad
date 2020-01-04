@@ -5,12 +5,11 @@ Tools for modeling musical meter.
 import bisect
 import collections
 import typing
+
 import uqbar.graphs
+
 from abjad import indicators as abjad_indicators
-from abjad import mathtools
-from abjad import markups
-from abjad import rhythmtrees
-from abjad import system
+from abjad import markups, mathtools, rhythmtrees, system
 from abjad.core.Chord import Chord
 from abjad.core.Container import Container
 from abjad.core.LogicalTie import LogicalTie
@@ -19,15 +18,10 @@ from abjad.core.Rest import Rest
 from abjad.core.Selection import Selection
 from abjad.core.Skip import Skip
 from abjad.core.Tuplet import Tuplet
-from abjad.indicators.RepeatTie import RepeatTie
-from abjad.indicators.Tie import Tie
 from abjad.system.StorageFormatManager import StorageFormatManager
+from abjad.timespans import Timespan, TimespanList
 from abjad.top.inspect import inspect
 from abjad.top.mutate import mutate
-from abjad.top.select import select
-from abjad.timespans import Timespan
-from abjad.timespans import TimespanList
-from abjad.timespans import TimespanList
 from abjad.utilities.Duration import Duration
 from abjad.utilities.Multiplier import Multiplier
 from abjad.utilities.Offset import Offset
@@ -58,7 +52,7 @@ class Meter(object):
             1/4
             1/4))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `2/4` comprises two beats.
 
@@ -73,7 +67,7 @@ class Meter(object):
             1/4
             1/4))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `3/4` comprises three beats.
 
@@ -91,7 +85,7 @@ class Meter(object):
             1/4
             1/4))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `4/4` comprises four beats.
 
@@ -111,7 +105,7 @@ class Meter(object):
                 1/8
                 1/8))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `6/8` comprises two beats of three parts each.
 
@@ -139,7 +133,7 @@ class Meter(object):
                 1/8
                 1/8))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `12/8` comprises four beats of three parts each.
 
@@ -158,7 +152,7 @@ class Meter(object):
                 1/4
                 1/4))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `5/4` comprises two unequal beats. By default unequal beats
         are arranged from greatest to least.
@@ -181,7 +175,7 @@ class Meter(object):
                 1/4
                 1/4))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `7/4` comprises three unequal beats. Beats are arranged from
         greatest to least by default.
@@ -207,7 +201,7 @@ class Meter(object):
                 1/4
                 1/4))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         `7/4` with beats arragned from least to greatest.
 
@@ -229,7 +223,7 @@ class Meter(object):
                 1/4
                 1/4))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
         Same meter customized to contain four compound beats:
 
@@ -256,7 +250,7 @@ class Meter(object):
                 1/8
                 1/8))))
 
-        >>> graph(meter) # doctest: +SKIP
+        >>> abjad.graph(meter) # doctest: +SKIP
 
     Prime divisions greater than ``3`` are converted to sequences of ``2``
     and ``3`` summing to that prime. Summands are arranged from greatest
@@ -277,7 +271,7 @@ class Meter(object):
     ### INITIALIZER ###
 
     def __init__(
-        self, argument=None, increase_monotonic=None, preferred_boundary_depth=None
+        self, argument=None, increase_monotonic=None, preferred_boundary_depth=None,
     ):
         argument = argument or (4, 4)
         assert isinstance(preferred_boundary_depth, (int, type(None)))
@@ -322,7 +316,9 @@ class Meter(object):
                                     preprolated_duration=preprolated_duration
                                 )
                                 grouping.append(child)
-                                recurse(child, factors, denominator, increase_monotonic)
+                                recurse(
+                                    child, factors, denominator, increase_monotonic,
+                                )
                         else:
                             for _ in range(part):
                                 grouping.append(
@@ -427,7 +423,7 @@ class Meter(object):
 
             >>> meter = abjad.Meter((7, 4))
             >>> meter_graph = meter.__graph__()
-            >>> graph(meter_graph) # doctest: +SKIP
+            >>> abjad.graph(meter_graph) # doctest: +SKIP
 
             ..  docs::
 
@@ -718,7 +714,7 @@ class Meter(object):
         rewrite_tuplets=True,
     ):
         def recurse(
-            boundary_depth=None, boundary_offsets=None, depth=0, logical_tie=None
+            boundary_depth=None, boundary_offsets=None, depth=0, logical_tie=None,
         ):
             offsets = _MeterManager.get_offsets_at_depth(depth, offset_inventory)
             logical_tie_duration = logical_tie._get_preprolated_duration()
@@ -1655,7 +1651,7 @@ class MeterList(TypedList):
         postscript_scale *= float(scale)
         postscript_x_offset = (minimum * postscript_scale) - 1
         timespan_markup = timespans._make_timespan_list_markup(
-            timespans, postscript_x_offset, postscript_scale, draw_offsets=False
+            timespans, postscript_x_offset, postscript_scale, draw_offsets=False,
         )
         ps = markups.Postscript()
         rational_x_offset = Offset(0)

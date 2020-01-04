@@ -1,6 +1,8 @@
 from abjad import typings
+from abjad.system.Tag import Tag
 from abjad.top.parse import parse
 from abjad.utilities.Duration import Duration
+
 from .Leaf import Leaf
 
 
@@ -39,7 +41,7 @@ class Rest(Leaf):
         written_duration=None,
         *,
         multiplier: typings.DurationTyping = None,
-        tag: str = None,
+        tag: Tag = None,
     ) -> None:
         original_input = written_duration
         if isinstance(written_duration, Leaf):

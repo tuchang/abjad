@@ -1,10 +1,12 @@
 import collections
 import inspect
 import operator
+
 from abjad import mathtools
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.top.new import new
+
 from .Expression import Expression
 from .Sequence import Sequence
 
@@ -147,7 +149,11 @@ class Pattern(object):
         "_template",
     )
 
-    _name_to_operator = {"and": operator.and_, "or": operator.or_, "xor": operator.xor}
+    _name_to_operator = {
+        "and": operator.and_,
+        "or": operator.or_,
+        "xor": operator.xor,
+    }
 
     _publish_storage_format = True
 
@@ -1445,7 +1451,7 @@ class Pattern(object):
         indices = indices or []
         template = Pattern._get_template(inspect.currentframe())
         return Pattern(
-            indices=indices, inverted=inverted, period=period, template=template
+            indices=indices, inverted=inverted, period=period, template=template,
         )
 
     @staticmethod

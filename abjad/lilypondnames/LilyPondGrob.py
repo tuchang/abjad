@@ -1,6 +1,8 @@
 import typing
-from .LilyPondGrobInterface import LilyPondGrobInterface
+
 from abjad.system.StorageFormatManager import StorageFormatManager
+
+from .LilyPondGrobInterface import LilyPondGrobInterface
 
 
 class LilyPondGrob(object):

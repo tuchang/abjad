@@ -1,4 +1,5 @@
 from abjad.system.StorageFormatManager import StorageFormatManager
+
 from .FormatSpecification import FormatSpecification
 from .SlotContributions import SlotContributions
 

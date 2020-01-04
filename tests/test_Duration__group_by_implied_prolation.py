@@ -1,11 +1,12 @@
-import abjad
 import pytest
+
+import abjad
 
 
 def test_Duration__group_by_implied_prolation_01():
 
     with pytest.raises(Exception):
-        Duation._group_by_implied_prolation([])
+        abjad.Duation._group_by_implied_prolation([])
 
 
 def test_Duration__group_by_implied_prolation_02():

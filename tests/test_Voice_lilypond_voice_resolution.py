@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_Voice_lilypond_voice_resolution_01():

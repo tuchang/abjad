@@ -1,6 +1,7 @@
 #! /usr/bin/env python
-import abjad
 import random
+
+import abjad
 
 
 def make_mozart_measure_corpus():

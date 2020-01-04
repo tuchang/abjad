@@ -1,20 +1,21 @@
 import collections
 import inspect
+import typing
+
 from abjad import enums
 from abjad.indicators.LilyPondComment import LilyPondComment
 from abjad.indicators.LilyPondLiteral import LilyPondLiteral
-from abjad.markups import Markup
-from abjad.markups import MarkupCommand
+from abjad.markups import Markup, MarkupCommand
 from abjad.mathtools import NonreducedFraction
 from abjad.pitch.IntervalClassVector import IntervalClassVector
 from abjad.pitch.NamedInterval import NamedInterval
 from abjad.pitch.NamedIntervalClass import NamedIntervalClass
 from abjad.pitch.NamedPitch import NamedPitch
+from abjad.pitch.NumberedInterval import NumberedInterval
+from abjad.pitch.NumberedIntervalClass import NumberedIntervalClass
 from abjad.pitch.NumberedInversionEquivalentIntervalClass import (
     NumberedInversionEquivalentIntervalClass,
 )
-from abjad.pitch.NumberedInterval import NumberedInterval
-from abjad.pitch.NumberedIntervalClass import NumberedIntervalClass
 from abjad.pitch.NumberedPitch import NumberedPitch
 from abjad.pitch.NumberedPitchClass import NumberedPitchClass
 from abjad.pitch.PitchClassSet import PitchClassSet
@@ -22,6 +23,7 @@ from abjad.pitch.PitchSegment import PitchSegment
 from abjad.pitch.SetClass import SetClass
 from abjad.scheme import SchemeColor
 from abjad.system.StorageFormatManager import StorageFormatManager
+from abjad.system.Tag import Tag
 from abjad.top.attach import attach
 from abjad.top.detach import detach
 from abjad.top.inspect import inspect as abjad_inspect
@@ -32,8 +34,9 @@ from abjad.top.select import select
 from abjad.top.tweak import tweak
 from abjad.utilities.Duration import Duration
 from abjad.utilities.Expression import Expression
-from .Component import Component
+
 from .Chord import Chord
+from .Component import Component
 from .Note import Note
 from .Skip import Skip
 
@@ -294,11 +297,9 @@ class Label(object):
         return self._deactivate
 
     @property
-    def tag(self):
+    def tag(self) -> typing.Optional[Tag]:
         """
         Gets tag.
-
-        Returns string or none.
         """
         return self._tag
 
@@ -1881,7 +1882,7 @@ class Label(object):
                 if not pitches:
                     continue
                 interval_class_vector = IntervalClassVector(
-                    pitches, item_class=NumberedInversionEquivalentIntervalClass
+                    pitches, item_class=NumberedInversionEquivalentIntervalClass,
                 )
                 markup = interval_class_vector._label
                 label = Markup(markup, direction=direction)
@@ -1911,8 +1912,11 @@ class Label(object):
                     leaf = vertical_moment.start_leaves[-1]
                 self._attach(label, leaf)
 
-    def with_durations(self, direction=enums.Up, denominator=None):
-        r"""Labels logical ties with durations.
+    def with_durations(
+        self, *, denominator=None, direction=enums.Up, in_seconds: bool = None
+    ):
+        r"""
+        Labels logical ties with durations.
 
         ..  container:: example
 
@@ -1938,8 +1942,8 @@ class Label(object):
                         d'8
                         ^ \markup {
                             \fraction
-                                1
-                                2
+                                4
+                                8
                             }
                         ~
                         d'4.
@@ -1980,8 +1984,8 @@ class Label(object):
                         d'8
                         ^ \markup {
                             \fraction
-                                1
-                                2
+                                4
+                                8
                             }
                         ~
                         d'4.
@@ -2093,12 +2097,13 @@ class Label(object):
         if self._expression:
             return self._update_expression(inspect.currentframe())
         for logical_tie in iterate(self.client).logical_ties():
-            duration = abjad_inspect(logical_tie).duration()
+            duration = abjad_inspect(logical_tie).duration(in_seconds=in_seconds)
             if denominator is not None:
                 duration = NonreducedFraction(duration)
                 duration = duration.with_denominator(denominator)
             pair = duration.pair
-            label = Markup.fraction(*pair, direction=direction)
+            numerator, denominator = pair
+            label = Markup.fraction(numerator, denominator, direction=direction)
             self._attach(label, logical_tie.head)
 
     def with_indices(self, direction=enums.Up, prototype=None):
@@ -3497,7 +3502,7 @@ class Label(object):
                     if "#" in string:
                         string = '"' + string + '"'
                     label = Markup(
-                        rf"\markup {{ {string} }}", direction=direction, literal=True
+                        rf"\markup {{ {string} }}", direction=direction, literal=True,
                     )
                 elif isinstance(leaf, Chord):
                     pitches = leaf.written_pitches

@@ -1,5 +1,6 @@
 from abjad import mathtools
 from abjad.top.new import new
+
 from .Segment import Segment
 
 

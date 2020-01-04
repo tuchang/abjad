@@ -1,6 +1,8 @@
 import typing
+
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.utilities.String import String
+
 from .LilyPondNameManager import LilyPondNameManager
 
 
@@ -25,8 +27,7 @@ class LilyPondGrobNameManager(LilyPondNameManager):
         self, name
     ) -> typing.Union[LilyPondNameManager, "LilyPondGrobNameManager"]:
         r"""
-        Gets LilyPondNameManager (or LilyPondGrobNameManager) keyed to 
-        ``name``.
+        Gets LilyPondNameManager (or LilyPondGrobNameManager) keyed to ``name``.
 
         ..  container:: example
 

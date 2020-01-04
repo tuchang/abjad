@@ -4,6 +4,7 @@ Instrument classes.
 
 import copy
 import typing
+
 from abjad.pitch.NamedPitch import NamedPitch
 from abjad.pitch.NamedPitchClass import NamedPitchClass
 from abjad.pitch.PitchRange import PitchRange

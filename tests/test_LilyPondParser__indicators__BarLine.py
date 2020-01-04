@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_LilyPondParser__indicators__BarLine_01():

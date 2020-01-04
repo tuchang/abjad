@@ -1,10 +1,6 @@
-from ply.yacc import (  # type: ignore
-    YaccProduction,
-    YaccSymbol,
-    error_count,
-    format_result,
-    format_stack_entry,
-)
+import sys
+
+from ply.yacc import YaccProduction, YaccSymbol, error_count  # type: ignore
 
 
 def _parse(self, input=None, lexer=None, debug=None, tracking=0, tokenfunc=None):
@@ -219,7 +215,7 @@ def _parse(self, input=None, lexer=None, debug=None, tracking=0, tokenfunc=None)
                 # --! DEBUG
                 return result
 
-        if t == None:
+        if t is None:
 
             # --! DEBUG
             # debug.error('Error  : %s',

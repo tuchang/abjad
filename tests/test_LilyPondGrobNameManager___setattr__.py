@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_LilyPondGrobNameManager___setattr___01():

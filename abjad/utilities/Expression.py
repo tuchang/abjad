@@ -3,7 +3,9 @@ import inspect
 import itertools
 import numbers
 import typing
+
 import uqbar.enums
+
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.Signature import Signature
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -1130,6 +1132,8 @@ class Expression(object):
 
     @staticmethod
     def _to_evaluable_string(argument):
+        from . import Sequence
+
         if argument is None:
             pass
         elif isinstance(argument, str):
@@ -1138,14 +1142,16 @@ class Expression(object):
             argument = f"abjad.{argument.__repr__()}"
         elif isinstance(argument, numbers.Number):
             argument = str(argument)
-        elif isinstance(argument, (list, tuple)):
+        # elif isinstance(argument, (list, tuple)):
+        elif isinstance(argument, (list, tuple, Sequence)):
             item_strings = []
             item_count = len(argument)
             for item in argument:
                 item_string = Expression._to_evaluable_string(item)
                 item_strings.append(item_string)
             items = ", ".join(item_strings)
-            if isinstance(argument, list):
+            # if isinstance(argument, list):
+            if isinstance(argument, (list, Sequence)):
                 argument = f"[{items}]"
             elif isinstance(argument, tuple):
                 if item_count == 1:
@@ -1176,22 +1182,28 @@ class Expression(object):
         return argument
 
     @staticmethod
-    def _wrap_arguments(frame, static_class=None):
+    def _wrap_arguments(frame, *, static_class=None):
         try:
             frame_info = inspect.getframeinfo(frame)
             function_name = frame_info.function
             argument_info = inspect.getargvalues(frame)
+            # static method
             if static_class:
                 method_name = frame.f_code.co_name
                 static_method = getattr(static_class, method_name)
                 signature = inspect.signature(static_method)
                 argument_names = argument_info.args[:]
-            else:
-                assert argument_info.args[0] == "self"
+            # bound method
+            elif argument_info.args and argument_info.args[0] == "self":
                 self = argument_info.locals["self"]
                 function = getattr(self, function_name)
                 signature = inspect.signature(function)
                 argument_names = argument_info.args[1:]
+            # function
+            else:
+                function = frame.f_globals[function_name]
+                signature = inspect.signature(function)
+                argument_names = argument_info.args[:]
             argument_strings = []
             for argument_name in argument_names:
                 argument_value = argument_info.locals[argument_name]
@@ -1209,7 +1221,7 @@ class Expression(object):
                     argument_string = "{argument_name}={argument_value}"
                     argument_value = Expression._to_evaluable_string(argument_value)
                     argument_string = argument_string.format(
-                        argument_name=argument_name, argument_value=argument_value
+                        argument_name=argument_name, argument_value=argument_value,
                     )
                     argument_strings.append(argument_string)
             arguments = ", ".join(argument_strings)
@@ -1734,8 +1746,8 @@ class Expression(object):
                         d'8
                         ^ \markup {
                             \fraction
-                                1
-                                2
+                                4
+                                8
                             }
                         ~
                         d'4.

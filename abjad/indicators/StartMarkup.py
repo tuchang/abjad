@@ -1,4 +1,5 @@
 import typing
+
 from abjad.markups import Markup
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -240,7 +241,7 @@ class StartMarkup(object):
     def tweaks(self) -> None:
         r"""
         Are not implemented on start markup.
-        
+
         The LilyPond ``\instrumentName`` command refuses tweaks.
 
         Craft explicit markup instead.

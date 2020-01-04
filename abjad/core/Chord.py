@@ -1,13 +1,15 @@
 import copy
 import typing
+
 from abjad import instruments
-from abjad import mathtools
 from abjad import pitch as abjad_pitch
 from abjad import typings
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
+from abjad.system.Tag import Tag
 from abjad.top.inspect import inspect
 from abjad.top.parse import parse
 from abjad.utilities.Duration import Duration
+
 from .DrumNoteHead import DrumNoteHead
 from .Leaf import Leaf
 from .NoteHead import NoteHead
@@ -59,7 +61,7 @@ class Chord(Leaf):
     ### INITIALIZER ###
 
     def __init__(
-        self, *arguments, multiplier: typings.DurationTyping = None, tag: str = None
+        self, *arguments, multiplier: typings.DurationTyping = None, tag: Tag = None,
     ) -> None:
         from abjad.ly import drums
         from .Note import Note
@@ -151,7 +153,7 @@ class Chord(Leaf):
             new_chord.note_heads.append(note_head)
         return new_chord
 
-    def __getnewargs__(self) -> typing.Tuple[abjad_pitch.PitchSegment, Duration]:
+    def __getnewargs__(self,) -> typing.Tuple[abjad_pitch.PitchSegment, Duration]:
         """
         Gets new chord arguments.
 

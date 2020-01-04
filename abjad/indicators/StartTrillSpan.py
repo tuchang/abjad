@@ -1,14 +1,10 @@
 import typing
-from abjad import enums
-from abjad import markups
-from abjad import typings
-from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
+
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.pitch.NamedInterval import NamedInterval
 from abjad.pitch.NamedPitch import NamedPitch
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
-from abjad.utilities.String import String
 
 
 class StartTrillSpan(object):
@@ -43,7 +39,7 @@ class StartTrillSpan(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = ("_interval", "_left_broken", "_pitch", "_tweaks")
+    __slots__ = ("_interval", "_pitch", "_tweaks")
 
     _context = "Voice"
 
@@ -255,13 +251,13 @@ class StartTrillSpan(object):
             >>> abjad.tweak(start_trill_span).color = 'blue'
             >>> abjad.f(start_trill_span)
             abjad.StartTrillSpan(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
             >>> start_trill_span_2 = copy.copy(start_trill_span)
             >>> abjad.f(start_trill_span_2)
             abjad.StartTrillSpan(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
         """

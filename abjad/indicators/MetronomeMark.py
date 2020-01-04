@@ -1,21 +1,12 @@
 import collections
-from fractions import Fraction
-
-try:
-    from quicktions import Fraction  # type: ignore
-except ImportError:
-    pass
 import functools
 import math
 import typing
-from abjad import enums
-from abjad import exceptions
-from abjad import mathtools
-from abjad import typings
+from fractions import Fraction
+
+from abjad import exceptions, mathtools, typings
 from abjad.markups import Markup
-from abjad.markups import MarkupCommand
-from abjad.mathtools import NonreducedFraction
-from abjad.mathtools import Ratio
+from abjad.mathtools import NonreducedFraction, Ratio
 from abjad.scheme import Scheme
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
@@ -25,7 +16,11 @@ from abjad.top.sequence import sequence
 from abjad.utilities.Duration import Duration
 from abjad.utilities.Enumerator import Enumerator
 from abjad.utilities.Multiplier import Multiplier
-from .LilyPondLiteral import LilyPondLiteral
+
+try:
+    from quicktions import Fraction  # type: ignore
+except ImportError:
+    pass
 
 
 @functools.total_ordering
@@ -304,9 +299,10 @@ class MetronomeMark(object):
         )
         nonreduced_fraction = NonreducedFraction(new_quarters_per_minute / 4)
         nonreduced_fraction = nonreduced_fraction.with_denominator(minimum_denominator)
-        new_units_per_minute, new_reference_duration_denominator = (
-            nonreduced_fraction.pair
-        )
+        (
+            new_units_per_minute,
+            new_reference_duration_denominator,
+        ) = nonreduced_fraction.pair
         new_reference_duration = Duration(1, new_reference_duration_denominator)
         metronome_mark = type(self)(new_reference_duration, new_units_per_minute)
         return metronome_mark
@@ -640,7 +636,7 @@ class MetronomeMark(object):
         elif isinstance(self.units_per_minute, tuple):
             string = "{}={}-{}"
             string = string.format(
-                self._dotted, self.units_per_minute[0], self.units_per_minute[1]
+                self._dotted, self.units_per_minute[0], self.units_per_minute[1],
             )
         else:
             raise TypeError(f"unknown: {self.units_per_minute!r}.")
@@ -699,9 +695,10 @@ class MetronomeMark(object):
         )
         nonreduced_fraction = NonreducedFraction(new_quarters_per_minute / 4)
         nonreduced_fraction = nonreduced_fraction.with_denominator(minimum_denominator)
-        new_units_per_minute, new_reference_duration_denominator = (
-            nonreduced_fraction.pair
-        )
+        (
+            new_units_per_minute,
+            new_reference_duration_denominator,
+        ) = nonreduced_fraction.pair
         new_reference_duration = Duration(1, new_reference_duration_denominator)
         metronome_mark = type(self)(
             reference_duration=new_reference_duration,
@@ -749,12 +746,12 @@ class MetronomeMark(object):
         if isinstance(self.units_per_minute, tuple):
             string = "{}={}-{}"
             string = string.format(
-                self._dotted, self.units_per_minute[0], self.units_per_minute[1]
+                self._dotted, self.units_per_minute[0], self.units_per_minute[1],
             )
             return string
         elif isinstance(self.units_per_minute, Fraction):
             markup = MetronomeMark.make_tempo_equation_markup(
-                self.reference_duration, self.units_per_minute, decimal=self.decimal
+                self.reference_duration, self.units_per_minute, decimal=self.decimal,
             )
             string = str(markup)
             return string
@@ -819,7 +816,12 @@ class MetronomeMark(object):
         dot_count = self.reference_duration.dot_count
         stem_height = 1
         if not self.decimal:
-            return (duration_log, dot_count, stem_height, self.units_per_minute)
+            return (
+                duration_log,
+                dot_count,
+                stem_height,
+                self.units_per_minute,
+            )
         if isinstance(self.decimal, str):
             return (duration_log, dot_count, stem_height, self.decimal)
         assert self.decimal is True, repr(self.decimal)
@@ -845,7 +847,6 @@ class MetronomeMark(object):
             ...     abjad.Duration(1, 4),
             ...     67.5,
             ...  )
-            >>> markup = markup.with_color('red')
             >>> mark = abjad.MetronomeMark(
             ...     reference_duration=(1, 4),
             ...     units_per_minute=abjad.Fraction(135, 2),
@@ -863,11 +864,7 @@ class MetronomeMark(object):
                 <<
                     \new Staff
                     {
-                        \tempo \markup {
-                            \with-color
-                                #red
-                                \markup \abjad-metronome-mark-markup #2 #0 #1 #\"67.5\"
-                            }
+                        \tempo \markup \abjad-metronome-mark-markup #2 #0 #1 #"67.5"
                         c'4
                         d'4
                         e'4
@@ -936,12 +933,12 @@ class MetronomeMark(object):
 
             >>> staff = abjad.Staff("c'4 d' e' f'")
             >>> metronome_mark_1 = abjad.MetronomeMark((1, 4), 72)
-            >>> abjad.attach(metronome_mark_1, staff[0]) 
+            >>> abjad.attach(metronome_mark_1, staff[0])
             >>> metronome_mark_2 = abjad.MetronomeMark(
             ...     textual_indication='Allegro',
             ...     hide=True,
             ... )
-            >>> abjad.attach(metronome_mark_2, staff[2]) 
+            >>> abjad.attach(metronome_mark_2, staff[2])
             >>> score = abjad.Score([staff])
             >>> abjad.show(score) # doctest: +SKIP
 
@@ -1089,7 +1086,7 @@ class MetronomeMark(object):
     def tweaks(self) -> None:
         r"""
         Are not implemented on metronome mark.
-        
+
         The LilyPond ``\tempo`` command refuses tweaks.
 
         Override the LilyPond ``MetronomeMark`` grob instead.

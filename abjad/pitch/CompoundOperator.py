@@ -1,6 +1,7 @@
 import collections
-from abjad import markups
+
 from abjad.system.StorageFormatManager import StorageFormatManager
+
 from .Duplication import Duplication
 from .Inversion import Inversion
 from .Multiplication import Multiplication

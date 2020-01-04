@@ -1,4 +1,5 @@
 import typing
+
 from abjad import enums
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -11,7 +12,7 @@ class StopGroup(object):
     ..  container:: example
 
         >>> abjad.StopGroup()
-        StopGroup() 
+        StopGroup()
 
     """
 

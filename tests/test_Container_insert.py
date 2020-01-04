@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_Container_insert_01():
@@ -165,7 +164,7 @@ def test_Container_insert_07():
 
     assert abjad.inspect(voice).wellformed()
     assert abjad.inspect(staff).wellformed()
-    assert not note in voice
+    assert note not in voice
     assert note._parent is staff
 
 

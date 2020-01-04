@@ -3,8 +3,10 @@ import functools
 import math
 import numbers
 import typing
+
 from abjad import mathtools
 from abjad.system.StorageFormatManager import StorageFormatManager
+
 from . import constants
 
 try:

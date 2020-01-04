@@ -1,4 +1,5 @@
 import typing
+
 from abjad.markups import Markup
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -296,7 +297,7 @@ class MarginMarkup(object):
     def tweaks(self) -> None:
         r"""
         Are not implemented on margin markup.
-        
+
         The LilyPond ``\shortInstrumentName`` command refuses tweaks.
 
         Craft explicit markup instead.

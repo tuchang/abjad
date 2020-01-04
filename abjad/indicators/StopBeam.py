@@ -1,4 +1,5 @@
 import typing
+
 from abjad import enums
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -11,7 +12,7 @@ class StopBeam(object):
     ..  container:: example
 
         >>> abjad.StopBeam()
-        StopBeam() 
+        StopBeam()
 
     """
 
@@ -40,7 +41,7 @@ class StopBeam(object):
 
     def __repr__(self) -> str:
         """
-        Gets interpreter representation.
+        Delegates to storage format manager.
         """
         return StorageFormatManager(self).get_repr_format()
 

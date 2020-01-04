@@ -1,12 +1,8 @@
 import typing
-from abjad import enums
-from abjad import markups
-from abjad import typings
-from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
+
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
-from abjad.utilities.String import String
 
 
 class GlissandoIndicator(object):
@@ -47,7 +43,6 @@ class GlissandoIndicator(object):
         "_allow_repeats",
         "_allow_ties",
         "_parenthesize_repeats",
-        "_right_broken",
         "_stems",
         "_style",
         "_zero_padding",
@@ -68,7 +63,6 @@ class GlissandoIndicator(object):
         allow_repeats: bool = None,
         allow_ties: bool = None,
         parenthesize_repeats: bool = None,
-        right_broken: bool = None,
         stems: bool = None,
         style: str = None,
         tweaks: LilyPondTweakManager = None,
@@ -83,9 +77,6 @@ class GlissandoIndicator(object):
         if parenthesize_repeats is not None:
             parenthesize_repeats = bool(parenthesize_repeats)
         self._parenthesize_repeats = parenthesize_repeats
-        if right_broken is not None:
-            right_broken = bool(right_broken)
-        self._right_broken = right_broken
         if stems is not None:
             stems = bool(stems)
         self._stems = stems
@@ -226,18 +217,18 @@ class GlissandoIndicator(object):
                 \new Staff
                 {
                     d'8
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     \once \override NoteHead.X-extent = #'(0 . 0)
                     \once \override NoteHead.transparent = ##t
                     d'4.
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     \once \override NoteHead.X-extent = #'(0 . 0)
                     \once \override NoteHead.transparent = ##t
                     d'4.
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     \once \override NoteHead.X-extent = #'(0 . 0)
                     \once \override NoteHead.transparent = ##t
                     d'8
@@ -262,18 +253,18 @@ class GlissandoIndicator(object):
                 \new Staff
                 {
                     c'8.
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     \once \override NoteHead.X-extent = #'(0 . 0)
                     \once \override NoteHead.transparent = ##t
                     d'8.
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     \once \override NoteHead.X-extent = #'(0 . 0)
                     \once \override NoteHead.transparent = ##t
                     e'8.
-                    - \abjad-zero-padding-glissando
-                    \glissando
+                    - \abjad-zero-padding-glissando %! abjad.glissando(7)
+                    \glissando                      %! abjad.glissando(7)
                     f'8.
                 }
 

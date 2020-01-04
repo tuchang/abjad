@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import os
-import setuptools
 
+import setuptools
 
 version_file_path = os.path.join(os.path.dirname(__file__), "abjad", "_version.py")
 with open(version_file_path, "r") as file_pointer:
@@ -28,6 +28,7 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License (GPL)",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Artistic Software",
 ]
@@ -35,18 +36,17 @@ classifiers = [
 entry_points = {"console_scripts": ["ajv = abjad.cli:run_ajv"]}
 
 extras_require = {
-    "accelerated": ["quicktions>=1.3"],
-    "book": ["abjad-ext-book >= 3.0.0, < 3.1.0"],
-    "cli": ["abjad-ext-cli >= 3.0.0, < 3.1.0"],
-    "ipython": ["abjad-ext-ipython >= 3.0.0, < 3.1.0"],
-    "nauert": ["abjad-ext-nauert >= 3.0.0, < 3.1.0"],
-    "rmakers": ["abjad-ext-rmakers >= 3.0.0, < 3.1.0"],
-    "tonality": ["abjad-ext-tonality >= 3.0.0, < 3.1.0"],
+    "accelerated": ["quicktions >= 1.3"],
+    "cli": ["abjad-ext-cli >= 3.1.0, < 3.2.0"],
+    "ipython": ["abjad-ext-ipython >= 3.1.0, < 3.2.0"],
+    "nauert": ["abjad-ext-nauert >= 3.1.0, < 3.2.0"],
+    "rmakers": ["abjad-ext-rmakers >= 3.1.0, < 3.2.0"],
+    "tonality": ["abjad-ext-tonality >= 3.1.0, < 3.2.0"],
     "test": [
         "black",
         "flake8",
         "isort",
-        "mypy >= 0.660",
+        "mypy >= 0.750",
         "pytest >= 4.1.0",
         "pytest-cov >= 2.6.0",
         "pytest-helpers-namespace >= 2019.1.8",
@@ -60,7 +60,7 @@ keywords = [
     "lilypond",
 ]
 
-install_requires = ["ply", "roman", "uqbar >= 0.4.0"]
+install_requires = ["ply", "roman", "uqbar >= 0.4.4, < 0.5.0"]
 
 if __name__ == "__main__":
     setuptools.setup(
@@ -75,9 +75,10 @@ if __name__ == "__main__":
         keywords=", ".join(keywords),
         license="MIT",
         long_description=long_description,
+        long_description_content_type="text/x-rst",
         name="Abjad",
         packages=["abjad"],
         platforms="Any",
-        url="http://www.projectabjad.org",
+        url="https://abjad.github.io",
         version=__version__,
     )

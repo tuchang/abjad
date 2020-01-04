@@ -1,6 +1,13 @@
 #! /usr/bin/env python
-import abjad
 import copy
+
+import abjad
+
+try:
+    import abjadext.tonality
+except ImportError:
+    print("NOTE: The Pärt demo requires abjad-ext-tonality")
+    pass
 
 
 class PartCantusScoreTemplate:
@@ -59,8 +66,6 @@ def create_pitch_contour_reservoir():
     """
     Creates pitch contour reservoir.
     """
-    import abjadext.tonality
-
     scale = abjadext.tonality.Scale(("a", "minor"))
     pitch_ranges = {
         "First Violin": abjad.PitchRange("[C4, A6]"),
@@ -203,12 +208,12 @@ def add_string_music_to_score(score):
     edit_bass_voice(score, durated_reservoir)
     # chop all string parts into 6/4 measures
     strings_staff_group = score["Strings Staff Group"]
-    with abjad.ForbidUpdate(score):
-        for voice in abjad.iterate(strings_staff_group).components(abjad.Voice):
-            shards = abjad.mutate(voice[:]).split([(6, 4)], cyclic=True)
-            for shard in shards:
-                container = abjad.Container()
-                abjad.mutate(shard).wrap(container)
+    # NOTE: this takes a long time:
+    for voice in abjad.iterate(strings_staff_group).components(abjad.Voice):
+        shards = abjad.mutate(voice[:]).split([(6, 4)], cyclic=True)
+        for shard in shards:
+            container = abjad.Container()
+            abjad.mutate(shard).wrap(container)
 
 
 def edit_first_violin_voice(score, durated_reservoir):
@@ -539,10 +544,9 @@ def apply_final_bar_lines(score):
     """
     Applies final bar lines to score.
     """
-    for voice in abjad.iterate(score).components(abjad.Voice):
-        bar_line = abjad.BarLine("|.")
-        leaf = abjad.inspect(voice).leaf(-1)
-        abjad.attach(bar_line, leaf)
+    last_leaf = abjad.inspect(score).leaf(-1)
+    bar_line = abjad.BarLine("|.")
+    abjad.attach(bar_line, last_leaf)
 
 
 def apply_page_breaks(score):

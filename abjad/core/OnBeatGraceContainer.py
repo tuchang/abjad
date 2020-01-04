@@ -1,15 +1,21 @@
 import typing
+
 from abjad import typings
 from abjad.indicators.LilyPondLiteral import LilyPondLiteral
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
+from abjad.system.Tag import Tag
+from abjad.system.Tags import Tags
 from abjad.top.attach import attach
+from abjad.top.detach import detach
 from abjad.top.inspect import inspect as abjad_inspect
 from abjad.top.mutate import mutate
-from abjad.top.override import override
-from abjad.top.tweak import tweak
 from abjad.top.select import select
+from abjad.top.tweak import tweak
 from abjad.utilities.Duration import Duration
+
 from .Container import Container
+
+abjad_tags = Tags()
 
 
 class OnBeatGraceContainer(Container):
@@ -43,9 +49,9 @@ class OnBeatGraceContainer(Container):
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceOne
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceOne %! abjad.on_beat_grace_container(3)
                             <
                                 \tweak font-size #0
                                 \tweak transparent ##t
@@ -70,12 +76,12 @@ class OnBeatGraceContainer(Container):
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceTwo
+                            \voiceTwo %! abjad.on_beat_grace_container(4)
                             d'4
                             e'4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     f'4
                 }
             }
@@ -94,7 +100,7 @@ class OnBeatGraceContainer(Container):
         identifier: str = None,
         leaf_duration: typings.DurationTyping = None,
         name: str = None,
-        tag: str = None,
+        tag: Tag = None,
     ) -> None:
         super().__init__(components, identifier=identifier, name=name, tag=tag)
         if leaf_duration is not None:
@@ -112,6 +118,39 @@ class OnBeatGraceContainer(Container):
         return ([],)
 
     ### PRIVATE METHODS ###
+
+    # NOTE: format="absolute_before" for \oneVoice so that this works:
+    #
+    #           \oneVoice                                                                  %! abjad.on_beat_grace_container(5)
+    #           \override Stem.direction = #down                                           %! baca.stem_down():baca.OverrideCommand._call(1)
+    #
+    # ... because this ...
+    #
+    #           \override Stem.direction = #down                                           %! baca.stem_down():baca.OverrideCommand._call(1)
+    #           \oneVoice                                                                  %! abjad.on_beat_grace_container(5)
+    #
+    # ... doesn't work.
+    #
+    # This is hackish, and some sort of longer term solution should
+    # happen later.
+    def _attach_lilypond_one_voice(self):
+        from .Voice import Voice
+
+        anchor_leaf = self._get_on_beat_anchor_leaf()
+        anchor_voice = abjad_inspect(anchor_leaf).parentage().get(Voice)
+        final_anchor_leaf = abjad_inspect(anchor_voice).leaf(-1)
+        next_leaf = abjad_inspect(final_anchor_leaf).leaf(1)
+        literal = LilyPondLiteral(r"\oneVoice", format_slot="absolute_before")
+        if abjad_inspect(next_leaf).has_indicator(literal):
+            return
+        if isinstance(next_leaf._parent, OnBeatGraceContainer):
+            return
+        if next_leaf._parent._is_on_beat_anchor_voice():
+            return
+        site = "abjad.OnBeatGraceContainer._attach_lilypond_one_voice()"
+        tag = Tag(site)
+        tag = tag.append(abjad_tags.ONE_VOICE_COMMAND)
+        attach(literal, next_leaf, tag=tag)
 
     def _format_invocation(self):
         return r'\context Voice = "On_Beat_Grace_Container"'
@@ -262,9 +301,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceOne
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceOne %! abjad.on_beat_grace_container(3)
                             <
                                 \tweak font-size #0
                                 \tweak transparent ##t
@@ -288,12 +327,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceTwo
+                            \voiceTwo %! abjad.on_beat_grace_container(4)
                             d'4
                             e'4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     f'4
                 }
             }
@@ -321,9 +360,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceOne
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceOne %! abjad.on_beat_grace_container(3)
                             <
                                 \tweak font-size #0
                                 \tweak transparent ##t
@@ -347,12 +386,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceTwo
+                            \voiceTwo %! abjad.on_beat_grace_container(4)
                             <b d'>4
                             <c' e'>4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     <d' f'>4
                 }
             }
@@ -378,9 +417,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceOne
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceOne %! abjad.on_beat_grace_container(3)
                             <
                                 \tweak font-size #0
                                 \tweak transparent ##t
@@ -405,12 +444,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceTwo
+                            \voiceTwo %! abjad.on_beat_grace_container(4)
                             d'4
                             e'4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     f'4
                 }
             }
@@ -438,9 +477,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceOne
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceOne %! abjad.on_beat_grace_container(3)
                             <
                                 \tweak font-size #0
                                 \tweak transparent ##t
@@ -465,12 +504,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceTwo
+                            \voiceTwo %! abjad.on_beat_grace_container(4)
                             <b d'>4
                             <c' e'>4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     <d' f'>4
                 }
             }
@@ -478,7 +517,7 @@ def on_beat_grace_container(
     ..  container:: example
 
         GRACE NOTES BELOW.
-        
+
         Note-to-note anchor:
 
         >>> music_voice = abjad.Voice("c'4 d' e' f'", name="Music_Voice")
@@ -504,9 +543,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceTwo
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceTwo %! abjad.on_beat_grace_container(3)
                             <
                                 g
                                 \tweak font-size #0
@@ -530,12 +569,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceOne
+                            \voiceOne %! abjad.on_beat_grace_container(4)
                             d'4
                             e'4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     f'4
                 }
             }
@@ -567,9 +606,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceTwo
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceTwo %! abjad.on_beat_grace_container(3)
                             <
                                 g
                                 \tweak font-size #0
@@ -593,12 +632,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceOne
+                            \voiceOne %! abjad.on_beat_grace_container(4)
                             <d' f'>4
                             <e' g'>4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     <f' a'>4
                 }
             }
@@ -628,9 +667,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceTwo
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceTwo %! abjad.on_beat_grace_container(3)
                             <
                                 e
                                 g
@@ -655,12 +694,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceOne
+                            \voiceOne %! abjad.on_beat_grace_container(4)
                             d'4
                             e'4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     f'4
                 }
             }
@@ -692,9 +731,9 @@ def on_beat_grace_container(
                     <<
                         \context Voice = "On_Beat_Grace_Container"
                         {
-                            \set fontSize = #-3
-                            \slash
-                            \voiceTwo
+                            \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                            \slash %! abjad.on_beat_grace_container(2)
+                            \voiceTwo %! abjad.on_beat_grace_container(3)
                             <
                                 e
                                 g
@@ -719,12 +758,12 @@ def on_beat_grace_container(
                         }
                         \context Voice = "Music_Voice"
                         {
-                            \voiceOne
+                            \voiceOne %! abjad.on_beat_grace_container(4)
                             <d' f'>4
                             <e' g'>4
                         }
                     >>
-                    \oneVoice
+                    \oneVoice %! abjad.on_beat_grace_container(5)
                     <f' a'>4
                 }
             }
@@ -741,16 +780,17 @@ def on_beat_grace_container(
         ... )
         Traceback (most recent call last):
             ...
-        Exception: graces Duration(11, 8) exceed anchor Duration(1, 4).
+        Exception: grace Duration(11, 8) exceeds anchor Duration(1, 4).
 
     """
-    from .Chord import Chord
     from .Container import Container
-    from .Note import Note
     from .Selection import Selection
     from .Voice import Voice
     from abjad.spanners import beam
     from abjad.spanners import slur
+
+    def _site(n):
+        return Tag(f"abjad.on_beat_grace_container({n})")
 
     assert isinstance(anchor_voice_selection, Selection)
     if not anchor_voice_selection.are_contiguous_same_parent(
@@ -778,18 +818,18 @@ def on_beat_grace_container(
     insert_duration = abjad_inspect(anchor_voice_insert).duration()
     grace_container_duration = abjad_inspect(on_beat_grace_container).duration()
     if insert_duration < grace_container_duration:
-        message = f"graces {repr(grace_container_duration)}"
-        message += f" exceed anchor {repr(insert_duration)}."
+        message = f"grace {repr(grace_container_duration)}"
+        message += f" exceeds anchor {repr(insert_duration)}."
         raise Exception(message)
     if font_size is not None:
         string = rf"\set fontSize = #{font_size}"
         literal = LilyPondLiteral(string)
-        attach(literal, on_beat_grace_container)
+        attach(literal, on_beat_grace_container, tag=_site(1))
     if not do_not_beam:
         beam(on_beat_grace_container[:])
     if not do_not_slash:
         literal = LilyPondLiteral(r"\slash")
-        attach(literal, on_beat_grace_container[0])
+        attach(literal, on_beat_grace_container[0], tag=_site(2))
     if not do_not_slur:
         slur(on_beat_grace_container[:])
     voice_number_to_string = {
@@ -799,16 +839,20 @@ def on_beat_grace_container(
         4: r"\voiceFour",
     }
     first_grace = abjad_inspect(on_beat_grace_container).leaf(0)
+    one_voice_literal = LilyPondLiteral(r"\oneVoice", format_slot="absolute_before")
     string = voice_number_to_string.get(grace_voice_number, None)
     if string is not None:
-        attach(LilyPondLiteral(string), first_grace)
+        literal
+        detach(one_voice_literal, anchor_leaf)
+        attach(LilyPondLiteral(string), first_grace, tag=_site(3))
     string = voice_number_to_string.get(anchor_voice_number, None)
     if string is not None:
-        attach(LilyPondLiteral(string), anchor_leaf)
+        detach(one_voice_literal, anchor_leaf)
+        attach(LilyPondLiteral(string), anchor_leaf, tag=_site(4))
     if not do_not_stop_polyphony:
         last_anchor_leaf = abjad_inspect(anchor_voice_selection).leaf(-1)
-        next_in_voice = abjad_inspect(last_anchor_leaf).leaf(1)
-        if next_in_voice is not None:
-            literal = LilyPondLiteral(r"\oneVoice")
-            attach(literal, next_in_voice)
+        next_leaf = abjad_inspect(last_anchor_leaf).leaf(1)
+        if next_leaf is not None:
+            literal = LilyPondLiteral(r"\oneVoice", format_slot="absolute_before")
+            attach(literal, next_leaf, tag=_site(5))
     return on_beat_grace_container

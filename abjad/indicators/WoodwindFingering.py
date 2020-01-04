@@ -1,8 +1,8 @@
 import collections
 import typing
+
 from abjad.markups import MarkupCommand
-from abjad.scheme import Scheme
-from abjad.scheme import SchemePair
+from abjad.scheme import Scheme, SchemePair
 from abjad.system.StorageFormatManager import StorageFormatManager
 
 

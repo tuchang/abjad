@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_LilyPondParser__indicators__MetronomeMark_01():

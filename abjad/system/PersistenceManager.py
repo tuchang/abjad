@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import tempfile
+
 from .StorageFormatManager import StorageFormatManager
 
 
@@ -52,7 +53,7 @@ class PersistenceManager(object):
     ### PUBLIC METHODS ###
 
     def as_ly(
-        self, ly_file_path=None, illustrate_function=None, strict=None, **keywords
+        self, ly_file_path=None, illustrate_function=None, strict=None, **keywords,
     ):
         """
         Persists client as LilyPond file.
@@ -62,7 +63,7 @@ class PersistenceManager(object):
         ..  container:: example
 
             >>> staff = abjad.Staff("c'4 e'4 d'4 f'4")
-            >>> for x in persist(staff).as_ly('~/example.ly'): # doctest: +SKIP
+            >>> for x in abjad.persist(staff).as_ly('~/example.ly'): # doctest: +SKIP
             ...     x
             ...
             '/Users/josiah/Desktop/example.ly'
@@ -109,7 +110,7 @@ class PersistenceManager(object):
         ..  container:: example
 
             >>> staff = abjad.Staff("c'4 e'4 d'4 f'4")
-            >>> for x in persist(staff).as_midi(): # doctest: +SKIP
+            >>> for x in abjad.persist(staff).as_midi(): # doctest: +SKIP
             ...     x
             ...
             '/Users/josiah/.abjad/output/1415.midi'
@@ -145,7 +146,12 @@ class PersistenceManager(object):
         midi_file_path = "{}.{}".format(os.path.splitext(ly_file_path)[0], extension)
         if remove_ly:
             os.remove(ly_file_path)
-        return (midi_file_path, abjad_formatting_time, lilypond_rendering_time, success)
+        return (
+            midi_file_path,
+            abjad_formatting_time,
+            lilypond_rendering_time,
+            success,
+        )
 
     def as_pdf(
         self,
@@ -163,7 +169,7 @@ class PersistenceManager(object):
         ..  container:: example
 
             >>> staff = abjad.Staff("c'4 e'4 d'4 f'4")
-            >>> for x in persist(staff).as_pdf(): # doctest: +SKIP
+            >>> for x in abjad.persist(staff).as_pdf(): # doctest: +SKIP
             ...     x
             ...
             '/Users/josiah/.abjad/output/1416.pdf'
@@ -201,7 +207,12 @@ class PersistenceManager(object):
         lilypond_rendering_time = timer.elapsed_time
         if remove_ly:
             os.remove(ly_file_path)
-        return (pdf_file_path, abjad_formatting_time, lilypond_rendering_time, success)
+        return (
+            pdf_file_path,
+            abjad_formatting_time,
+            lilypond_rendering_time,
+            success,
+        )
 
     def as_png(
         self,
@@ -224,7 +235,7 @@ class PersistenceManager(object):
             >>> abjad.attach(command, container[-1])
             >>> staff.extend(200 * container)
 
-            >>> result = persist(staff).as_png() # doctest: +SKIP
+            >>> result = abjad.persist(staff).as_png() # doctest: +SKIP
             >>> for x in result[0]: # doctest: +SKIP
             ...     x
             ...

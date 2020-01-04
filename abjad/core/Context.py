@@ -1,10 +1,13 @@
 import copy
 import typing
+
 from abjad.instruments import Instrument
 from abjad.lilypondnames.LilyPondContext import LilyPondContext
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
+from abjad.system.Tag import Tag
 from abjad.system.Wrapper import Wrapper
 from abjad.top.inspect import inspect
+
 from .Container import Container
 
 
@@ -75,14 +78,14 @@ class Context(Container):
         lilypond_type: str = "Context",
         simultaneous: bool = None,
         name: str = None,
-        tag: str = None,
+        tag: Tag = None,
     ) -> None:
         self._consists_commands: typing.List[str] = []
         self._dependent_wrappers: typing.List[Wrapper] = []
         self._remove_commands: typing.List[str] = []
         self.lilypond_type = lilypond_type
         Container.__init__(
-            self, simultaneous=simultaneous, components=components, name=name, tag=tag
+            self, simultaneous=simultaneous, components=components, name=name, tag=tag,
         )
 
     ### SPECIAL METHODS ###
@@ -234,24 +237,24 @@ class Context(Container):
         self._update_now(indicators=True)
         return self._format_component()
 
-    def _get_persistent_wrappers(self, *, omit_annotation=None):
-        self._update_now(indicators=True)
+    @staticmethod
+    def _get_persistent_wrappers(*, dependent_wrappers=None, omit_with_indicator=None):
         wrappers = {}
-        for wrapper in self._dependent_wrappers:
+        for wrapper in dependent_wrappers:
             if wrapper.annotation:
                 continue
             indicator = wrapper.indicator
             if not getattr(indicator, "persistent", False):
                 continue
             assert isinstance(indicator.persistent, bool)
-            is_phantom = False
-            if omit_annotation is not None:
+            should_omit = False
+            if omit_with_indicator is not None:
                 parentage = inspect(wrapper.component).parentage()
                 for component in parentage:
-                    if inspect(component).annotation(omit_annotation) is True:
-                        is_phantom = True
+                    if inspect(component).has_indicator(omit_with_indicator):
+                        should_omit = True
                         continue
-            if is_phantom:
+            if should_omit:
                 continue
             if hasattr(indicator, "parameter"):
                 key = indicator.parameter
@@ -311,7 +314,7 @@ class Context(Container):
             ...     )
             >>> context.lilypond_type
             'ViolinStaff'
-        
+
         Gets and sets lilypond type of context.
 
         Returns string.
@@ -363,7 +366,7 @@ class Context(Container):
         return self._remove_commands
 
     @property
-    def tag(self) -> typing.Optional[str]:
+    def tag(self) -> typing.Optional[Tag]:
         r"""
         Gets tag.
 
@@ -372,7 +375,7 @@ class Context(Container):
             >>> context = abjad.Context(
             ...     "c'4 d' e' f'",
             ...     lilypond_type='CustomContext',
-            ...     tag='RED',
+            ...     tag=abjad.Tag('RED'),
             ...     )
             >>> abjad.show(context) # doctest: +SKIP
 

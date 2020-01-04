@@ -1,5 +1,6 @@
-import abjad
 import pytest
+
+import abjad
 
 
 def test_Mutation_fuse_01():
@@ -42,7 +43,7 @@ def test_Mutation_fuse_04():
     """
 
     voice = abjad.Voice([abjad.Note(0, (2, 16)), abjad.Note(9, (3, 16))])
-    fused = abjad.mutate(voice[:]).fuse()
+    abjad.mutate(voice[:]).fuse()
 
     assert format(voice) == abjad.String.normalize(
         r"""

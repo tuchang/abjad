@@ -1,8 +1,6 @@
 import typing
+
 from abjad import enums
-from abjad import markups
-from abjad import typings
-from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -279,13 +277,13 @@ class StartSlur(object):
             >>> abjad.tweak(start_slur).color = 'blue'
             >>> abjad.f(start_slur)
             abjad.StartSlur(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
             >>> start_slur_2 = copy.copy(start_slur)
             >>> abjad.f(start_slur_2)
             abjad.StartSlur(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
         """

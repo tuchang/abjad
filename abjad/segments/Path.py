@@ -2,20 +2,18 @@ import importlib
 import os
 import pathlib
 import shutil
+import traceback
 import typing
+
 from abjad import typings
-from abjad.core.MultimeasureRest import MultimeasureRest
-from abjad.core.Container import Container
 from abjad.core.Score import Score
-from abjad.core.Staff import Staff
 from abjad.core.StaffGroup import StaffGroup
 from abjad.indicators.Clef import Clef
 from abjad.indicators.LilyPondLiteral import LilyPondLiteral
-from abjad.indicators.MarginMarkup import MarginMarkup
 from abjad.indicators.TimeSignature import TimeSignature
 from abjad.system.IOManager import IOManager
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
-from abjad.system.Tags import Tags
+from abjad.system.Tag import Tag
 from abjad.top.activate import activate
 from abjad.top.attach import attach
 from abjad.top.deactivate import deactivate
@@ -23,6 +21,7 @@ from abjad.top.iterate import iterate
 from abjad.utilities.CyclicTuple import CyclicTuple
 from abjad.utilities.OrderedDict import OrderedDict
 from abjad.utilities.String import String
+
 from .Line import Line
 from .Part import Part
 from .PartManifest import PartManifest
@@ -290,7 +289,6 @@ class Path(pathlib.PosixPath):
                 continue
             if not path.is_dir():
                 continue
-            has_contents = False
             if all(_.name.startswith(".") for _ in path.iterdir()):
                 return type(self)(path)
 
@@ -339,7 +337,6 @@ class Path(pathlib.PosixPath):
             return paths
         predicate = self.get_name_predicate()
         is_external = self.is_external()
-        is_scores = self.is_scores()
         is_segments = self.is_segments()
         names = []
         for name in sorted([_.name for _ in self.iterdir()]):
@@ -467,7 +464,7 @@ class Path(pathlib.PosixPath):
     def build(self) -> typing.Optional["Path"]:
         """
         Gets build directory.
-        
+
         Directory must be build directory, _segments direcotry or part
         directory.
 
@@ -783,7 +780,7 @@ class Path(pathlib.PosixPath):
 
     def activate(
         self,
-        tag: typing.Union[str, typing.Callable],
+        tag: typing.Union[Tag, typing.Callable],
         *,
         indent: int = 0,
         message_zero: bool = False,
@@ -805,14 +802,16 @@ class Path(pathlib.PosixPath):
         activates ``tag`` in LilyPond files given in case 1.
 
         Returns triple.
-        
+
         First item in triple is count of deactivated tags activated by method.
-        
+
         Second item in pair is count of already-active tags skipped by method.
 
         Third item in pair is list of canonical string messages that explain
         what happened.
         """
+        if isinstance(tag, str):
+            raise Exception(f"must be tag or callable: {tag!r}")
         if self.name == skip_file_name:
             return None
         assert isinstance(indent, int), repr(indent)
@@ -823,7 +822,10 @@ class Path(pathlib.PosixPath):
                 text = self.read_text()
                 if undo:
                     text, count, skipped = deactivate(
-                        text, tag, prepend_empty_chord=prepend_empty_chord, skipped=True
+                        text,
+                        tag,
+                        prepend_empty_chord=prepend_empty_chord,
+                        skipped=True,
                     )
                 else:
                     text, count, skipped = activate(text, tag, skipped=True)
@@ -833,7 +835,7 @@ class Path(pathlib.PosixPath):
             count, skipped = 0, 0
             for path in sorted(self.glob("**/*")):
                 path = type(self)(path)
-                if not path.suffix in (".ily", ".ly"):
+                if path.suffix not in (".ily", ".ly"):
                     continue
                 if not (
                     path.name.startswith("illustration")
@@ -854,14 +856,10 @@ class Path(pathlib.PosixPath):
             name = str(tag)
         if undo:
             adjective = "inactive"
-            antonym = "active"
             gerund = "deactivating"
-            infinitive = "deactivate"
         else:
             adjective = "active"
-            antonym = "inactivate"
             gerund = "activating"
-            infinitive = "activate"
         messages = []
         total = count + skipped
         if total == 0 and message_zero:
@@ -1128,7 +1126,7 @@ class Path(pathlib.PosixPath):
 
     def deactivate(
         self,
-        tag: typing.Union[str, typing.Callable],
+        tag: typing.Union[Tag, typing.Callable],
         *,
         indent: int = 0,
         message_zero: bool = False,
@@ -1139,6 +1137,8 @@ class Path(pathlib.PosixPath):
         """
         Deactivates ``tag`` in path.
         """
+        if isinstance(tag, str):
+            raise Exception(f"must be tag or callable: {tag!r}")
         return self.activate(
             tag,
             name=name,
@@ -1169,7 +1169,7 @@ class Path(pathlib.PosixPath):
         Writes ``.ily`` to this path with ``.ily` suffix when ``include_path``
         is not set.
         """
-        tag = "abjad.Path.extern"
+        tag = Tag("abjad.Path.extern()")
         if not self.suffix == ".ly":
             raise Exception(f"must be lilypond file: {self}.")
         if include_path is None:
@@ -1207,7 +1207,12 @@ class Path(pathlib.PosixPath):
                         count = len(line) - len(line.lstrip())
                         indent = count * " "
                         dereference = indent + fr"\{name}"
-                        strings = LilyPondFormatManager.tag([dereference], tag=tag)
+                        first_line = finished_variables[name][0]
+                        if "NOT_TOPMOST" in first_line:
+                            tag_ = tag.append(Tag("NOT_TOPMOST"))
+                        else:
+                            tag_ = tag
+                        strings = LilyPondFormatManager.tag([dereference], tag=tag_)
                         dereference = strings[0]
                         dereference = dereference + "\n"
                         if bool(stack):
@@ -1864,8 +1869,7 @@ class Path(pathlib.PosixPath):
 
             >>> path.get_title()
             '(untitled score)'
-        
-        Returns string.
+
         """
         if year and self.get_metadatum("year"):
             title = self.get_title(year=False)
@@ -2788,10 +2792,6 @@ class Path(pathlib.PosixPath):
             message = "empty container-to-part-assignment dictionary"
             return message
         for i, (segment_name, dictionary_) in enumerate(dictionary.items()):
-            if i == 0:
-                first_segment = True
-            else:
-                first_segment = False
             pairs = []
             for identifier, (part_assignment, timespan) in dictionary_.items():
                 if part in part_assignment:
@@ -3072,7 +3072,7 @@ class Path(pathlib.PosixPath):
         return path
 
     def write_metadata_py(
-        self, metadata, *, file_name="__metadata__.py", variable_name="metadata"
+        self, metadata, *, file_name="__metadata__.py", variable_name="metadata",
     ) -> None:
         """
         Writes ``metadata`` to metadata file in current directory.

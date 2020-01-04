@@ -1,7 +1,8 @@
-import abjad
 import inspect
+
 import pytest
 
+import abjad
 
 ignored_names = (
     "__dict__",

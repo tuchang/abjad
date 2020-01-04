@@ -31,7 +31,7 @@ class Aggregate(object):
 def test_new_01():
 
     old_aggregate = Aggregate(
-        pitch_segment=abjad.PitchSegment("c d e f"), ratio=abjad.Ratio([1, 2, 3])
+        pitch_segment=abjad.PitchSegment("c d e f"), ratio=abjad.Ratio([1, 2, 3]),
     )
 
     assert format(old_aggregate) == abjad.String.normalize(
@@ -92,7 +92,7 @@ def test_new_01():
 def test_new_02():
 
     old_aggregate = Aggregate(
-        pitch_segment=abjad.PitchSegment("c d e f"), ratio=abjad.Ratio([1, 2, 3])
+        pitch_segment=abjad.PitchSegment("c d e f"), ratio=abjad.Ratio([1, 2, 3]),
     )
 
     assert format(old_aggregate) == abjad.String.normalize(

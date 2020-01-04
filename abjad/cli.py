@@ -10,8 +10,10 @@ import pathlib
 import re
 import shutil
 import types
-from abjad import utilities
+
 from uqbar.cli import CLI, CLIAggregator
+
+from abjad import utilities
 
 
 class AbjDevScript(CLIAggregator):

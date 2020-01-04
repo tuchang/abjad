@@ -1,8 +1,10 @@
 import collections
 import typing
+
 from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.top.inspect import inspect
 from abjad.top.select import select
+
 from .Component import Component
 
 

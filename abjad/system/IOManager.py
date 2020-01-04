@@ -3,7 +3,6 @@ import datetime
 import io
 import os
 import pathlib
-import platform
 import pstats
 import re
 import shutil
@@ -11,6 +10,7 @@ import subprocess
 import sys
 import traceback
 import typing
+
 from .AbjadConfiguration import AbjadConfiguration
 from .StorageFormatManager import StorageFormatManager
 
@@ -376,7 +376,7 @@ class IOManager(object):
         Redirects stderr to stdout.
         """
         return subprocess.Popen(
-            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         )
 
     @staticmethod
@@ -529,7 +529,7 @@ class IOManager(object):
         Profiles ``argument``.
 
         ..  container:: example
-            
+
             ::
 
                 >>> argument = 'abjad.Staff("c8 c8 c8 c8 c8 c8 c8 c8")'
@@ -648,14 +648,14 @@ class IOManager(object):
             lilypond_path, flags, lilypond_base, ly_path
         )
         process = subprocess.Popen(
-            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         )
         subprocess_output, _ = process.communicate()
-        subprocess_output = subprocess_output.decode(errors="ignore")
+        subprocess_output_string = subprocess_output.decode(errors="ignore")
         exit_code = process.returncode
         with open(log_file_path, "w") as file_pointer:
             file_pointer.write(date + "\n")
-            file_pointer.write(subprocess_output)
+            file_pointer.write(subprocess_output_string)
         postscript_path = ly_path.replace(".ly", ".ps")
         try:
             os.remove(postscript_path)

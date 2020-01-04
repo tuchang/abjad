@@ -1,6 +1,7 @@
 import abc
 import collections
 import types
+
 from abjad import mathtools
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.utilities.TypedCollection import TypedCollection

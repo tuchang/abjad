@@ -1,12 +1,12 @@
 import pytest
+
 from abjad.pitch import (
     NamedPitch,
     NamedPitchClass,
-    Octave,
     NumberedPitch,
     NumberedPitchClass,
+    Octave,
 )
-
 
 values = [
     ("'", 4),

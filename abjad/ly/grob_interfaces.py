@@ -729,7 +729,11 @@ grob_interfaces = {
         "item-interface",
         "span-bar-interface",
     ],
-    "SpanBarStub": ["grob-interface", "item-interface", "pure-from-neighbor-interface"],
+    "SpanBarStub": [
+        "grob-interface",
+        "item-interface",
+        "pure-from-neighbor-interface",
+    ],
     "StaffGrouper": ["grob-interface", "spanner-interface", "staff-grouper-interface"],
     "StaffSpacing": [
         "grob-interface",

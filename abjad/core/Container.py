@@ -1,21 +1,19 @@
 import collections
 import typing
+
 import uqbar.graphs
-from abjad import enums
-from abjad import exceptions
-from abjad import mathtools
-from abjad import rhythmtrees
-from abjad.indicators.TimeSignature import TimeSignature
-from abjad.mathtools import NonreducedFraction
+
+from abjad import exceptions, rhythmtrees
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
+from abjad.system.Tag import Tag
 from abjad.top.inspect import inspect
 from abjad.top.iterate import iterate
 from abjad.top.mutate import mutate
 from abjad.top.parse import parse
 from abjad.top.select import select
 from abjad.utilities.Duration import Duration
-from abjad.utilities.Sequence import Sequence
+
 from .Component import Component
 from .Leaf import Leaf
 from .Note import Note
@@ -191,7 +189,7 @@ class Container(Component):
         identifier: str = None,
         simultaneous: bool = None,
         name: str = None,
-        tag: str = None,
+        tag: Tag = None,
     ) -> None:
         components = components or []
         Component.__init__(self, tag=tag)
@@ -678,7 +676,7 @@ class Container(Component):
             for component in components:
                 if not isinstance(component, Component):
                     message = f"must be component: {component!r}."
-                    raise Exception(component)
+                    raise Exception(message)
         if self._all_are_orphan_components(components):
             self._components = list(components)
             self[:]._set_parents(self)
@@ -832,7 +830,6 @@ class Container(Component):
             start, stop = 0, 0
         else:
             start, stop, stride = i.indices(len(self))
-        old_components = self[start:stop]
         del self[start:stop]
         self._components.__setitem__(slice(start, start), argument)
         for component in argument:
@@ -924,7 +921,8 @@ class Container(Component):
                     leaf_right_of_split = leaf
             duration_crossing_containers = duration_crossing_descendants[:-1]
             if not len(duration_crossing_containers):
-                return left_list, right_list
+                # return left_list, right_list
+                raise Exception("how did we get here?")
         # if split point falls between leaves
         # then find leaf to immediate right of split point
         # in order to start upward crawl through duration-crossing containers
@@ -963,7 +961,10 @@ class Container(Component):
                     inspect(leaf_left_of_split).parentage().root
                     is inspect(leaf_right_of_split).parentage().root
                 ):
-                    leaves_around_split = (leaf_left_of_split, leaf_right_of_split)
+                    leaves_around_split = (
+                        leaf_left_of_split,
+                        leaf_right_of_split,
+                    )
                     selection = select(leaves_around_split)
                     selection._attach_tie_to_leaves()
         # return list-wrapped halves of container
@@ -1284,7 +1285,7 @@ class Container(Component):
                 argument_.append(item)
             argument = argument_
         self.__setitem__(
-            slice(len(self), len(self)), argument.__getitem__(slice(0, len(argument)))
+            slice(len(self), len(self)), argument.__getitem__(slice(0, len(argument))),
         )
 
     def index(self, component) -> int:

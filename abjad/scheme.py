@@ -4,10 +4,9 @@ Tools for modeling Scheme datastructures used in LilyPond.
 
 import functools
 import typing
-from abjad import enums
-from abjad import typings
+
+from abjad import enums, typings
 from abjad.mathtools import NonreducedFraction
-from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.utilities.String import String

@@ -1,7 +1,8 @@
-import abjad
 import inspect
+
 import pytest
 
+import abjad
 
 _allowed_to_be_empty_string = (
     abjad.Accidental,

@@ -5,18 +5,15 @@ Tools for modeling LilyPond's markup and postscript.
 import collections
 import numbers
 import typing
-from abjad import Fraction
-from abjad import enums
-from abjad import mathtools
+
+from abjad import Fraction, enums, mathtools
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
-from abjad.scheme import Scheme
-from abjad.scheme import SchemeColor
-from abjad.scheme import SchemePair
+from abjad.scheme import Scheme, SchemeColor, SchemePair
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.StorageFormatManager import StorageFormatManager
+from abjad.top import new
 from abjad.utilities.String import String
 from abjad.utilities.TypedList import TypedList
-from abjad.top import new
 
 
 class Markup(object):
@@ -100,8 +97,8 @@ class Markup(object):
         Markup can be tagged:
 
         >>> staff = abjad.Staff("c'4 d' e' f'")
-        >>> markup = abjad.Markup('Allegro', direction=abjad.Up).italic()
-        >>> abjad.attach(markup, staff[0], tag='RED:M1')
+        >>> markup = abjad.Markup("Allegro", direction=abjad.Up).italic()
+        >>> abjad.attach(markup, staff[0], tag=abjad.Tag("RED:M1"))
         >>> abjad.show(staff) # doctest: +SKIP
 
         >>> abjad.f(staff)
@@ -122,12 +119,12 @@ class Markup(object):
         Markup can be deactively tagged:
 
         >>> staff = abjad.Staff("c'4 d' e' f'")
-        >>> markup = abjad.Markup('Allegro', direction=abjad.Up).italic()
+        >>> markup = abjad.Markup("Allegro", direction=abjad.Up).italic()
         >>> abjad.attach(
         ...     markup,
         ...     staff[0],
         ...     deactivate=True,
-        ...     tag='RED:M1',
+        ...     tag=abjad.Tag("RED:M1"),
         ...     )
         >>> abjad.show(staff) # doctest: +SKIP
 
@@ -177,7 +174,13 @@ class Markup(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = ("_annotation", "_contents", "_direction", "_literal", "_tweaks")
+    __slots__ = (
+        "_annotation",
+        "_contents",
+        "_direction",
+        "_literal",
+        "_tweaks",
+    )
 
     _private_attributes_to_copy = ("_tweaks",)
 
@@ -638,7 +641,7 @@ class Markup(object):
         manager = StorageFormatManager(self)
         names = list(manager.signature_keyword_names)
         return FormatSpecification(
-            client=self, repr_is_indented=False, storage_format_kwargs_names=names
+            client=self, repr_is_indented=False, storage_format_kwargs_names=names,
         )
 
     def _get_lilypond_format(self):
@@ -855,7 +858,7 @@ class Markup(object):
 
     @classmethod
     def abjad_metronome_mark(
-        class_, duration_log, dot_count, stem_height, units_per_minute, direction=None
+        class_, duration_log, dot_count, stem_height, units_per_minute, direction=None,
     ):
         r"""
         Abjad ``\abjad-metronome-mark-markup`` command.
@@ -1428,8 +1431,6 @@ class Markup(object):
 
         Returns new markup.
         """
-        import abjad
-
         contents = self._parse_markup_command_argument(self)
         axis = Scheme(axis)
         # TODO: make Scheme(Up) work
@@ -2776,7 +2777,7 @@ class Markup(object):
             >>> abjad.show(staff) # doctest: +SKIP
 
             ..  docs::
-            
+
                 >>> abjad.f(staff)
                 \new Staff
                 {
@@ -3125,9 +3126,6 @@ class MarkupCommand(object):
 
             >>> command = abjad.MarkupCommand('hspace', 0)
             >>> command
-            MarkupCommand('hspace', 0)
-
-            >>> eval(repr(command))
             MarkupCommand('hspace', 0)
 
         Returns string.

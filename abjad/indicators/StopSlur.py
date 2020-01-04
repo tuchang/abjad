@@ -1,4 +1,5 @@
 import typing
+
 from abjad import enums
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -11,7 +12,7 @@ class StopSlur(object):
     ..  container:: example
 
         >>> abjad.StopSlur()
-        StopSlur() 
+        StopSlur()
 
     """
 

@@ -1,5 +1,6 @@
 import functools
 import typing
+
 from abjad import typings
 from abjad.markups import Markup
 from abjad.system.StorageFormatManager import StorageFormatManager

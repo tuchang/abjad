@@ -1,7 +1,8 @@
 import collections
-import inspect
+
 from abjad.top.new import new
 from abjad.utilities.Duration import Duration
+
 from .Set import Set
 
 

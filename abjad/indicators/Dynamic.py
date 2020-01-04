@@ -1,12 +1,10 @@
 import typing
-from abjad import enums
-from abjad import mathtools
+
+from abjad import enums, mathtools
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
-from abjad.mathtools import Infinity
-from abjad.mathtools import NegativeInfinity
+from abjad.mathtools import Infinity, NegativeInfinity
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
-from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.system.Tags import Tags
 from abjad.utilities.String import String
@@ -439,12 +437,6 @@ class Dynamic(object):
                 bundle.after.articulations.append(string)
         return bundle
 
-    @staticmethod
-    def _tag_hide(strings):
-        return LilyPondFormatManager.tag(
-            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
-        )
-
     ### PUBLIC PROPERTIES ###
 
     @property
@@ -494,7 +486,7 @@ class Dynamic(object):
             >>> abjad.attach(abjad.Dynamic("p"), staff[0])
             >>> abjad.attach(abjad.Dynamic("f"), staff[1])
             >>> abjad.show(staff) # doctest: +SKIP
-            
+
             ..  docs::
 
                 >>> abjad.f(staff)
@@ -512,7 +504,7 @@ class Dynamic(object):
             >>> abjad.attach(abjad.Dynamic("p", direction=abjad.Up), staff[0])
             >>> abjad.attach(abjad.Dynamic("f", direction=abjad.Up), staff[1])
             >>> abjad.show(staff) # doctest: +SKIP
-            
+
             ..  docs::
 
                 >>> abjad.f(staff)
@@ -530,7 +522,7 @@ class Dynamic(object):
             >>> abjad.attach(abjad.Dynamic("p", direction=abjad.Down), staff[0])
             >>> abjad.attach(abjad.Dynamic("f", direction=abjad.Down), staff[1])
             >>> abjad.show(staff) # doctest: +SKIP
-            
+
             ..  docs::
 
                 >>> abjad.f(staff)
@@ -550,7 +542,7 @@ class Dynamic(object):
             >>> abjad.attach(abjad.Dynamic('"p"'), staff[0])
             >>> abjad.attach(abjad.Dynamic('"f"'), staff[1])
             >>> abjad.show(staff) # doctest: +SKIP
-            
+
             ..  docs::
 
                 >>> abjad.f(staff)
@@ -590,7 +582,7 @@ class Dynamic(object):
             >>> abjad.attach(abjad.Dynamic('"p"', direction=abjad.Up), staff[0])
             >>> abjad.attach(abjad.Dynamic('"f"', direction=abjad.Up), staff[1])
             >>> abjad.show(staff) # doctest: +SKIP
-            
+
             ..  docs::
 
                 >>> abjad.f(staff)
@@ -812,8 +804,8 @@ class Dynamic(object):
         ..  container:: example
 
             >>> voice = abjad.Voice("c'4 d' e' f'")
-            >>> abjad.attach(abjad.Dynamic('f'), voice[0]) 
-            >>> abjad.attach(abjad.Dynamic('mf', hide=True), voice[2]) 
+            >>> abjad.attach(abjad.Dynamic('f'), voice[0])
+            >>> abjad.attach(abjad.Dynamic('mf', hide=True), voice[2])
             >>> abjad.show(voice) # doctest: +SKIP
 
             >>> abjad.f(voice)
@@ -1279,7 +1271,7 @@ class Dynamic(object):
             >>> abjad.attach(dynamic, staff[0])
             Traceback (most recent call last):
                 ...
-            abjad.exceptions.PersistentIndicatorError: 
+            abjad.exceptions.PersistentIndicatorError:
             <BLANKLINE>
             Can not attach ...
             <BLANKLINE>
@@ -1381,6 +1373,22 @@ class Dynamic(object):
 
         """
         return argument in Dynamic._dynamic_names
+
+    @property
+    def spanner_stop(self) -> bool:
+        """
+        Is true
+
+        ..  container:: example
+
+            >>> abjad.Dynamic("p").spanner_stop
+            True
+
+            >>> abjad.Dynamic("niente").spanner_stop
+            True
+
+        """
+        return True
 
     @property
     def tweaks(self) -> typing.Optional[LilyPondTweakManager]:

@@ -1,8 +1,5 @@
 import typing
-from abjad import enums
-from abjad import markups
-from abjad import typings
-from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
+
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
@@ -189,13 +186,13 @@ class StartBeam(object):
             >>> abjad.tweak(start_beam).color = 'blue'
             >>> abjad.f(start_beam)
             abjad.StartBeam(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
             >>> start_beam_2 = copy.copy(start_beam)
             >>> abjad.f(start_beam_2)
             abjad.StartBeam(
-                tweaks=LilyPondTweakManager(('color', 'blue')),
+                tweaks=LilyPondTweakManager(('_literal', None), ('color', 'blue')),
                 )
 
         """

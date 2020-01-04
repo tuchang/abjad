@@ -1,13 +1,9 @@
 import collections
-import copy
 import inspect
 import itertools
 import typing
-from abjad import enums
-from abjad import exceptions
-from abjad import mathtools
-from abjad import typings
-from abjad.indicators.RepeatTie import RepeatTie
+
+from abjad import enums, mathtools, typings
 from abjad.indicators.Tie import Tie
 from abjad.mathtools import Ratio
 from abjad.pitch.PitchSet import PitchSet
@@ -18,17 +14,18 @@ from abjad.top.detach import detach
 from abjad.top.inspect import inspect as abjad_inspect
 from abjad.top.iterate import iterate
 from abjad.top.mutate import mutate
-from abjad.top.select import select
 from abjad.top.new import new
+from abjad.top.select import select
 from abjad.utilities.CyclicTuple import CyclicTuple
 from abjad.utilities.Duration import Duration
 from abjad.utilities.DurationInequality import DurationInequality
+from abjad.utilities.Expression import Expression
 from abjad.utilities.LengthInequality import LengthInequality
-from abjad.utilities.OrderedDict import OrderedDict
+from abjad.utilities.Offset import Offset
 from abjad.utilities.Pattern import Pattern
 from abjad.utilities.PitchInequality import PitchInequality
 from abjad.utilities.Sequence import Sequence
-from abjad.utilities.Expression import Expression
+
 from .Chord import Chord
 from .Component import Component
 from .Leaf import Leaf
@@ -395,7 +392,6 @@ class Selection(collections.abc.Sequence):
             return None
         first = self[0]
         first_multiplier = first.multiplier
-        first_type = type(first)
         for tuplet in self[1:]:
             if tuplet.multiplier != first_multiplier:
                 raise ValueError("tuplets must carry same multiplier.")
@@ -649,7 +645,7 @@ class Selection(collections.abc.Sequence):
         template=None,
     ):
         callback = Expression._frame_to_callback(
-            frame, evaluation_template=evaluation_template, map_operand=map_operand
+            frame, evaluation_template=evaluation_template, map_operand=map_operand,
         )
         callback = new(callback, lone=lone)
         expression = self._expression.append_callback(callback)
@@ -793,7 +789,7 @@ class Selection(collections.abc.Sequence):
             # false if components are in same score and are discontiguous
             if current_parentage.root == first_root:
                 if not previous._immediately_precedes(
-                    current, ignore_before_after_grace=ignore_before_after_grace
+                    current, ignore_before_after_grace=ignore_before_after_grace,
                 ):
                     return False
             previous = current
@@ -941,9 +937,6 @@ class Selection(collections.abc.Sequence):
             True
 
         """
-        from .AfterGraceContainer import AfterGraceContainer
-        from .BeforeGraceContainer import BeforeGraceContainer
-
         if self._expression:
             return self._update_expression(inspect.currentframe())
         prototype = prototype or (Component,)
@@ -1845,7 +1838,7 @@ class Selection(collections.abc.Sequence):
         return type(self)([_ for _ in self if predicate(_)])
 
     def filter_duration(
-        self, operator, duration: typings.DurationTyping, *, preprolated: bool = None
+        self, operator, duration: typings.DurationTyping, *, preprolated: bool = None,
     ) -> typing.Union["Selection", Expression]:
         r"""
         Filters selection by ``operator`` and ``duration``.
@@ -2596,7 +2589,7 @@ class Selection(collections.abc.Sequence):
         return type(self)(Sequence(self).flatten(depth=depth))
 
     def get(
-        self, indices: typing.Union[typing.Sequence[int], Pattern], period: int = None
+        self, indices: typing.Union[typing.Sequence[int], Pattern], period: int = None,
     ) -> typing.Union["Selection", Expression]:
         r"""
         Gets patterned items.
@@ -3320,7 +3313,13 @@ class Selection(collections.abc.Sequence):
         for item in self[1:]:
             this_timespan = abjad_inspect(selection[-1]).timespan()
             that_timespan = abjad_inspect(item).timespan()
-            if this_timespan.stop_offset == that_timespan.start_offset:
+            # remove displacement
+            this_stop_offset = this_timespan.stop_offset
+            this_stop_offset = Offset(this_stop_offset.pair)
+            that_start_offset = that_timespan.start_offset
+            that_start_offset = Offset(that_start_offset.pair)
+            # if this_timespan.stop_offset == that_timespan.start_offset:
+            if this_stop_offset == that_start_offset:
                 selection.append(item)
             else:
                 result.append(type(self)(selection))
@@ -4914,7 +4913,7 @@ class Selection(collections.abc.Sequence):
 
         ..  container:: example
 
-            Excludes leaves with ``'HIDDEN'`` annotation:
+            Excludes leaves with ``abjad.const.HIDDEN`` indicator:
 
             ..  container:: example
 
@@ -4922,12 +4921,12 @@ class Selection(collections.abc.Sequence):
                 ...     \times 2/3 { r8 d' e' } f' r
                 ...     r f' \times 2/3 { e' d' r8 }
                 ...     """)
-                >>> abjad.annotate(staff[-1][-2], 'HIDDEN', True)
-                >>> abjad.annotate(staff[-1][-1], 'HIDDEN', True)
+                >>> abjad.attach(abjad.const.HIDDEN, staff[-1][-2])
+                >>> abjad.attach(abjad.const.HIDDEN, staff[-1][-1])
                 >>> abjad.setting(staff).auto_beaming = False
                 >>> abjad.show(staff) # doctest: +SKIP
 
-                >>> result = abjad.select(staff).leaves(exclude='HIDDEN')
+                >>> result = abjad.select(staff).leaves(exclude=abjad.const.HIDDEN)
 
                 >>> for item in result:
                 ...     item
@@ -4943,7 +4942,7 @@ class Selection(collections.abc.Sequence):
 
             ..  container:: example expression
 
-                >>> selector = abjad.select().leaves(exclude='HIDDEN')
+                >>> selector = abjad.select().leaves(exclude=abjad.const.HIDDEN)
                 >>> result = selector(staff)
 
                 >>> selector.print(result)
@@ -7166,7 +7165,7 @@ class Selection(collections.abc.Sequence):
             return self._update_expression(inspect.currentframe())
         result = []
         groups = Sequence(self).partition_by_counts(
-            [abs(_) for _ in counts], cyclic=cyclic, enchain=enchain, overhang=overhang
+            [abs(_) for _ in counts], cyclic=cyclic, enchain=enchain, overhang=overhang,
         )
         groups = list(groups)
         total = len(groups)
@@ -7197,7 +7196,7 @@ class Selection(collections.abc.Sequence):
         return type(self)(result)
 
     def partition_by_durations(
-        self, durations, *, cyclic=False, fill=None, in_seconds=False, overhang=False
+        self, durations, *, cyclic=False, fill=None, in_seconds=False, overhang=False,
     ) -> typing.Union["Selection", Expression]:
         r"""
         Partitions selection by ``durations``.
@@ -8749,6 +8748,165 @@ class Selection(collections.abc.Sequence):
                     }
                 >>
 
+        ..  container:: example
+
+            REGRESSION. Works with grace note (and containers):
+
+            >>> music_voice = abjad.Voice(
+            ...     "c'16 d' e' r d'4 e' r8 f'", name="Music_Voice"
+            ... )
+            >>> container = abjad.BeforeGraceContainer("cs'16")
+            >>> abjad.attach(container, music_voice[4])
+            >>> container = abjad.on_beat_grace_container(
+            ...     "g'16 gs' a' as'", music_voice[5:7]
+            ... )
+            >>> abjad.attach(abjad.Articulation(">"), container[0])
+            >>> container = abjad.AfterGraceContainer("fs'16")
+            >>> abjad.attach(container, music_voice[-1])
+            >>> staff = abjad.Staff([music_voice])
+            >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        c'16
+                        d'16
+                        e'16
+                        r16
+                        \grace {
+                            cs'16
+                        }
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                                \slash %! abjad.on_beat_grace_container(2)
+                                \voiceOne %! abjad.on_beat_grace_container(3)
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                gs'16
+                                a'16
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo %! abjad.on_beat_grace_container(4)
+                                e'4
+                                r8
+                            }
+                        >>
+                        \oneVoice %! abjad.on_beat_grace_container(5)
+                        \afterGrace
+                        f'8
+                        {
+                            fs'16
+                        }
+                    }
+                }
+
+            ..  container:: example
+
+                >>> selector = abjad.select().runs()
+                >>> result = selector(staff)
+
+                >>> for item in result:
+                ...     item
+                ...
+                Selection([Note("c'16"), Note("d'16"), Note("e'16")])
+                Selection([Note("cs'16"), Note("d'4"), Chord("<e' g'>16"), Note("gs'16"), Note("a'16"), Note("as'16"), Note("e'4")])
+                Selection([Note("f'8"), Note("fs'16")])
+
+            ..  container:: example expression
+
+                >>> selector = abjad.select().runs()
+                >>> result = selector(staff)
+
+                >>> selector.print(result)
+                Selection([Note("c'16"), Note("d'16"), Note("e'16")])
+                Selection([Note("cs'16"), Note("d'4"), Chord("<e' g'>16"), Note("gs'16"), Note("a'16"), Note("as'16"), Note("e'4")])
+                Selection([Note("f'8"), Note("fs'16")])
+
+                >>> selector.color(result)
+                >>> abjad.show(staff) # doctest: +SKIP
+
+            ..  docs::
+
+                >>> abjad.f(staff, strict=89)
+                \new Staff
+                {
+                    \context Voice = "Music_Voice"
+                    {
+                        \abjad-color-music #'red
+                        c'16
+                        \abjad-color-music #'red
+                        d'16
+                        \abjad-color-music #'red
+                        e'16
+                        r16
+                        \grace {
+                            \abjad-color-music #'blue
+                            cs'16
+                        }
+                        \abjad-color-music #'blue
+                        d'4
+                        <<
+                            \context Voice = "On_Beat_Grace_Container"
+                            {
+                                \set fontSize = #-3                                                      %! abjad.on_beat_grace_container(1)
+                                \slash                                                                   %! abjad.on_beat_grace_container(2)
+                                \voiceOne                                                                %! abjad.on_beat_grace_container(3)
+                                \abjad-color-music #'blue
+                                <
+                                    \tweak font-size #0
+                                    \tweak transparent ##t
+                                    e'
+                                    g'
+                                >16
+                                - \accent
+                                [
+                                (
+                                \abjad-color-music #'blue
+                                gs'16
+                                \abjad-color-music #'blue
+                                a'16
+                                \abjad-color-music #'blue
+                                as'16
+                                )
+                                ]
+                            }
+                            \context Voice = "Music_Voice"
+                            {
+                                \voiceTwo                                                                %! abjad.on_beat_grace_container(4)
+                                \abjad-color-music #'blue
+                                e'4
+                                r8
+                            }
+                        >>
+                        \oneVoice                                                                        %! abjad.on_beat_grace_container(5)
+                        \abjad-color-music #'red
+                        \afterGrace
+                        f'8
+                        {
+                            \abjad-color-music #'red
+                            fs'16
+                        }
+                    }
+                }
+
         """
         if self._expression:
             return self._update_expression(inspect.currentframe())
@@ -9226,7 +9384,10 @@ class Selection(collections.abc.Sequence):
                     result.append(tuplet)
         return type(self)(result)
 
-    def with_next_leaf(self) -> typing.Union["Selection", Expression]:
+    # TODO: write grace examples
+    def with_next_leaf(
+        self, *, grace: bool = None
+    ) -> typing.Union["Selection", Expression]:
         r"""
         Extends selection with next leaf.
 
@@ -9473,9 +9634,9 @@ class Selection(collections.abc.Sequence):
                         <<
                             \context Voice = "On_Beat_Grace_Container"
                             {
-                                \set fontSize = #-3
-                                \slash
-                                \voiceOne
+                                \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                                \slash %! abjad.on_beat_grace_container(2)
+                                \voiceOne %! abjad.on_beat_grace_container(3)
                                 <
                                     \tweak font-size #0
                                     \tweak transparent ##t
@@ -9493,11 +9654,11 @@ class Selection(collections.abc.Sequence):
                             }
                             \context Voice = "Music_Voice"
                             {
-                                \voiceTwo
+                                \voiceTwo %! abjad.on_beat_grace_container(4)
                                 e'4
                             }
                         >>
-                        \oneVoice
+                        \oneVoice %! abjad.on_beat_grace_container(5)
                         \afterGrace
                         f'4
                         {
@@ -9556,9 +9717,9 @@ class Selection(collections.abc.Sequence):
                         <<
                             \context Voice = "On_Beat_Grace_Container"
                             {
-                                \set fontSize = #-3
-                                \slash
-                                \voiceOne
+                                \set fontSize = #-3                                                      %! abjad.on_beat_grace_container(1)
+                                \slash                                                                   %! abjad.on_beat_grace_container(2)
+                                \voiceOne                                                                %! abjad.on_beat_grace_container(3)
                                 \abjad-color-music #'blue
                                 <
                                     \tweak font-size #0
@@ -9580,12 +9741,12 @@ class Selection(collections.abc.Sequence):
                             }
                             \context Voice = "Music_Voice"
                             {
-                                \voiceTwo
+                                \voiceTwo                                                                %! abjad.on_beat_grace_container(4)
                                 \abjad-color-music #'blue
                                 e'4
                             }
                         >>
-                        \oneVoice
+                        \oneVoice                                                                        %! abjad.on_beat_grace_container(5)
                         \afterGrace
                         f'4
                         {
@@ -9599,9 +9760,19 @@ class Selection(collections.abc.Sequence):
         if self._expression:
             return self._update_expression(inspect.currentframe())
         leaves = list(self.leaves())
-        next_leaf = abjad_inspect(leaves[-1]).leaf(1)
-        if next_leaf is not None:
-            leaves.append(next_leaf)
+        previous_leaf = leaves[-1]
+        while True:
+            next_leaf = abjad_inspect(previous_leaf).leaf(1)
+            if next_leaf is None:
+                break
+            if (
+                grace is None
+                or (grace is True and abjad_inspect(next_leaf).grace())
+                or (grace is False and not abjad_inspect(next_leaf).grace())
+            ):
+                leaves.append(next_leaf)
+                break
+            previous_leaf = next_leaf
         return type(self)(leaves)
 
     def with_previous_leaf(self) -> typing.Union["Selection", Expression]:
@@ -9764,9 +9935,9 @@ class Selection(collections.abc.Sequence):
                         <<
                             \context Voice = "On_Beat_Grace_Container"
                             {
-                                \set fontSize = #-3
-                                \slash
-                                \voiceOne
+                                \set fontSize = #-3 %! abjad.on_beat_grace_container(1)
+                                \slash %! abjad.on_beat_grace_container(2)
+                                \voiceOne %! abjad.on_beat_grace_container(3)
                                 <
                                     \tweak font-size #0
                                     \tweak transparent ##t
@@ -9784,11 +9955,11 @@ class Selection(collections.abc.Sequence):
                             }
                             \context Voice = "Music_Voice"
                             {
-                                \voiceTwo
+                                \voiceTwo %! abjad.on_beat_grace_container(4)
                                 e'4
                             }
                         >>
-                        \oneVoice
+                        \oneVoice %! abjad.on_beat_grace_container(5)
                         \afterGrace
                         f'4
                         {
@@ -9849,9 +10020,9 @@ class Selection(collections.abc.Sequence):
                         <<
                             \context Voice = "On_Beat_Grace_Container"
                             {
-                                \set fontSize = #-3
-                                \slash
-                                \voiceOne
+                                \set fontSize = #-3                                                      %! abjad.on_beat_grace_container(1)
+                                \slash                                                                   %! abjad.on_beat_grace_container(2)
+                                \voiceOne                                                                %! abjad.on_beat_grace_container(3)
                                 \abjad-color-music #'blue
                                 <
                                     \tweak font-size #0
@@ -9873,11 +10044,11 @@ class Selection(collections.abc.Sequence):
                             }
                             \context Voice = "Music_Voice"
                             {
-                                \voiceTwo
+                                \voiceTwo                                                                %! abjad.on_beat_grace_container(4)
                                 e'4
                             }
                         >>
-                        \oneVoice
+                        \oneVoice                                                                        %! abjad.on_beat_grace_container(5)
                         \abjad-color-music #'red
                         \afterGrace
                         f'4

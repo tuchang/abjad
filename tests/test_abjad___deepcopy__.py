@@ -1,8 +1,9 @@
-import abjad
 import copy
 import inspect
+
 import pytest
 
+import abjad
 
 ignored_classes = (
     abjad.parser.LilyPondParser,

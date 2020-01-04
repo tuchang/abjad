@@ -1,9 +1,9 @@
 import typing
+
 from abjad import enums
 from abjad.lilypondnames.LilyPondGrobOverride import LilyPondGrobOverride
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
-from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.system.StorageFormatManager import StorageFormatManager
 from abjad.system.Tags import Tags
 from abjad.utilities.String import String
@@ -46,7 +46,7 @@ class StartHairpin(object):
 
     ### CLASS VARIABLES ###
 
-    __slots__ = ("_direction", "_left_broken", "_shape", "_tweaks")
+    __slots__ = ("_direction", "_shape", "_tweaks")
 
     _context = "Voice"
 
@@ -72,14 +72,10 @@ class StartHairpin(object):
         shape="<",
         *,
         direction: enums.VerticalAlignment = None,
-        left_broken: bool = None,
         tweaks: LilyPondTweakManager = None,
     ) -> None:
         direction_ = String.to_tridirectional_lilypond_symbol(direction)
         self._direction = direction_
-        if left_broken is not None:
-            left_broken = bool(left_broken)
-        self._left_broken = left_broken
         assert shape in self._known_shapes, repr(shape)
         self._shape = shape
         if tweaks is not None:
@@ -131,7 +127,7 @@ class StartHairpin(object):
     @staticmethod
     def _circled_tip():
         return LilyPondGrobOverride(
-            grob_name="Hairpin", once=True, property_path="circled-tip", value=True
+            grob_name="Hairpin", once=True, property_path="circled-tip", value=True,
         )
 
     @staticmethod
@@ -167,8 +163,6 @@ class StartHairpin(object):
             strings.append(string)
         else:
             raise ValueError(self.shape)
-        if self.left_broken is True:
-            strings = self._tag_hide(strings)
         return strings
 
     def _get_lilypond_format_bundle(self, component=None):
@@ -185,15 +179,6 @@ class StartHairpin(object):
         strings = self._get_lilypond_format()
         bundle.after.spanners.extend(strings)
         return bundle
-
-    @staticmethod
-    def _tag_hide(strings):
-        import abjad
-
-        abjad_tags = abjad.Tags()
-        return LilyPondFormatManager.tag(
-            strings, deactivate=False, tag=abjad_tags.HIDE_TO_JOIN_BROKEN_SPANNERS
-        )
 
     ### PUBLIC PROPERTIES ###
 
@@ -272,39 +257,6 @@ class StartHairpin(object):
 
         """
         return self._known_shapes
-
-    @property
-    def left_broken(self) -> typing.Optional[bool]:
-        r"""
-        Is true when hairpin formats with left broken tag.
-
-        ..  container:: example
-
-            >>> staff = abjad.Staff("c'4 d' e' f'")
-            >>> start_hairpin = abjad.StartHairpin('<', left_broken=True)
-            >>> dynamic = abjad.Dynamic('f')
-            >>> abjad.attach(start_hairpin, staff[0])
-            >>> abjad.attach(dynamic, staff[-1])
-            >>> abjad.override(staff).dynamic_line_spanner.staff_padding = 4.5
-            >>> abjad.show(staff) # doctest: +SKIP
-
-            >>> abjad.f(staff)
-            \new Staff
-            \with
-            {
-                \override DynamicLineSpanner.staff-padding = #4.5
-            }
-            {
-                c'4
-                \< %! HIDE_TO_JOIN_BROKEN_SPANNERS
-                d'4
-                e'4
-                f'4
-                \f
-            }
-
-        """
-        return self._left_broken
 
     @property
     def parameter(self) -> str:

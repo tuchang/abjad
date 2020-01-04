@@ -1,21 +1,22 @@
 import collections
 import numbers
 import typing
+
 from abjad import mathtools
 from abjad import pitch as abjad_pitch
 from abjad import typings
 from abjad.mathtools import NonreducedFraction
-from abjad.top.attach import attach
+from abjad.system.Tag import Tag
 from abjad.utilities.Duration import Duration
-from abjad.utilities.Multiplier import Multiplier
 from abjad.utilities.Sequence import Sequence
+
 from .Chord import Chord
 from .Leaf import Leaf
 from .MultimeasureRest import MultimeasureRest
 from .Note import Note
 from .Rest import Rest
-from .Skip import Skip
 from .Selection import Selection
+from .Skip import Skip
 
 
 class LeafMaker(object):
@@ -439,7 +440,7 @@ class LeafMaker(object):
         forbidden_note_duration: typings.DurationTyping = None,
         forbidden_rest_duration: typings.DurationTyping = None,
         skips_instead_of_rests: bool = None,
-        tag: str = None,
+        tag: Tag = None,
         use_multimeasure_rests: bool = None,
     ) -> None:
         if increase_monotonic is not None:
@@ -459,7 +460,7 @@ class LeafMaker(object):
             skips_instead_of_rests = bool(skips_instead_of_rests)
         self._skips_instead_of_rests = skips_instead_of_rests
         if tag is not None:
-            assert isinstance(tag, str), repr(tag)
+            assert isinstance(tag, Tag), repr(tag)
         self._tag = tag
         if use_multimeasure_rests is not None:
             use_multimeasure_rests = bool(use_multimeasure_rests)
@@ -706,7 +707,7 @@ class LeafMaker(object):
         return self._skips_instead_of_rests
 
     @property
-    def tag(self) -> typing.Optional[str]:
+    def tag(self) -> typing.Optional[Tag]:
         r"""
         Gets tag.
 
@@ -714,7 +715,7 @@ class LeafMaker(object):
 
             Integer and string elements in ``pitches`` result in notes:
 
-            >>> maker = abjad.LeafMaker(tag='leaf_maker')
+            >>> maker = abjad.LeafMaker(tag=abjad.Tag("leaf_maker"))
             >>> pitches = [2, 4, 'F#5', 'G#5']
             >>> duration = abjad.Duration(1, 4)
             >>> leaves = maker(pitches, duration)

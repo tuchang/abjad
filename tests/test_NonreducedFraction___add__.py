@@ -1,6 +1,8 @@
-import abjad
 import platform
+
 import pytest
+
+import abjad
 
 
 def test_NonreducedFraction___add___01():

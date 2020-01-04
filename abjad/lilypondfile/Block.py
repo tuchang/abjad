@@ -300,7 +300,7 @@ class Block(object):
             >>> lilypond_file.items.append(score_block)
 
             >>> abjad.f(lilypond_file)
-            \score { %! abjad.LilyPondFile
+            \score { %! abjad.LilyPondFile._get_formatted_blocks()
                 <<
                 { \include "layout.ly" }
                 \new Staff
@@ -311,7 +311,7 @@ class Block(object):
                     f'4
                 }
                 >>
-            } %! abjad.LilyPondFile
+            } %! abjad.LilyPondFile._get_formatted_blocks()
 
         Returns list.
         """

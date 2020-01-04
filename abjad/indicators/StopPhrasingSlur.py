@@ -1,4 +1,5 @@
 import typing
+
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
 
@@ -10,7 +11,7 @@ class StopPhrasingSlur(object):
     ..  container:: example
 
         >>> abjad.StopPhrasingSlur()
-        StopPhrasingSlur() 
+        StopPhrasingSlur()
 
     """
 

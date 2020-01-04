@@ -1,27 +1,27 @@
 import abc
 import copy
 import typing
+
 import uqbar.graphs
-from abjad import enums
-from abjad import exceptions
+
+from abjad import enums, exceptions, mathtools
 from abjad.indicators.MetronomeMark import MetronomeMark
 from abjad.indicators.RepeatTie import RepeatTie
 from abjad.indicators.Tie import Tie
-from abjad.mathtools import NonreducedFraction
-from abjad.mathtools import Ratio
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatManager import LilyPondFormatManager
 from abjad.system.Tag import Tag
 from abjad.top.attach import attach
 from abjad.top.detach import detach
 from abjad.top.inspect import inspect
-from abjad.top.override import override
 from abjad.top.mutate import mutate
+from abjad.top.override import override
 from abjad.top.select import select
 from abjad.top.setting import setting
 from abjad.utilities.Duration import Duration
 from abjad.utilities.Multiplier import Multiplier
 from abjad.utilities.Sequence import Sequence
+
 from .Component import Component
 
 
@@ -34,7 +34,12 @@ class Leaf(Component):
 
     ### CLASS VARIABLES ##
 
-    _allowable_format_slots = ("absolute_before", "before", "after", "absolute_after")
+    _allowable_format_slots = (
+        "absolute_before",
+        "before",
+        "after",
+        "absolute_after",
+    )
 
     __slots__ = (
         "_after_grace_container",
@@ -46,7 +51,7 @@ class Leaf(Component):
     ### INITIALIZER ###
 
     @abc.abstractmethod
-    def __init__(self, written_duration, *, multiplier=None, tag: str = None) -> None:
+    def __init__(self, written_duration, *, multiplier=None, tag: Tag = None) -> None:
         Component.__init__(self, tag=tag)
         self._after_grace_container = None
         self._before_grace_container = None
@@ -503,7 +508,9 @@ class Leaf(Component):
     ### PUBLIC PROPERTIES ###
 
     @property
-    def multiplier(self) -> typing.Union[Multiplier, NonreducedFraction, None]:
+    def multiplier(
+        self,
+    ) -> typing.Union[Multiplier, mathtools.NonreducedFraction, None]:
         """
         Gets multiplier.
         """
@@ -511,7 +518,7 @@ class Leaf(Component):
 
     @multiplier.setter
     def multiplier(self, argument):
-        if isinstance(argument, (NonreducedFraction, type(None))):
+        if isinstance(argument, (mathtools.NonreducedFraction, type(None))):
             multiplier = argument
         else:
             multiplier = Multiplier(argument)

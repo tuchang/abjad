@@ -2,6 +2,7 @@ import collections
 import importlib
 import inspect
 import types
+
 from .FormatSpecification import FormatSpecification
 
 # from abjad.utilities.OrderedDict import OrderedDict
@@ -195,7 +196,7 @@ class StorageFormatManager(object):
             for value in args_values:
                 agent = type(self)(value)
                 pieces = agent._dispatch_formatting(
-                    as_storage_format=as_storage_format, is_indented=is_indented
+                    as_storage_format=as_storage_format, is_indented=is_indented,
                 )
                 for piece in pieces[:-1]:
                     positional_argument_pieces.append(prefix + piece)
@@ -207,7 +208,7 @@ class StorageFormatManager(object):
                     continue
                 agent = type(self)(value)
                 pieces = agent._dispatch_formatting(
-                    as_storage_format=as_storage_format, is_indented=is_indented
+                    as_storage_format=as_storage_format, is_indented=is_indented,
                 )
                 pieces[0] = "{}={}".format(name, pieces[0])
                 for piece in pieces[:-1]:
@@ -565,7 +566,12 @@ class StorageFormatManager(object):
         try:
             signature = inspect.signature(subject)
         except ValueError:
-            return (positional_names, keyword_names, accepts_args, accepts_kwargs)
+            return (
+                positional_names,
+                keyword_names,
+                accepts_args,
+                accepts_kwargs,
+            )
         for name, parameter in signature.parameters.items():
             if parameter.kind == inspect._POSITIONAL_OR_KEYWORD:
                 if parameter.default == parameter.empty:

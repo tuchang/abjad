@@ -1,6 +1,7 @@
 from abjad import mathtools
-from . import constants
 from abjad.system.FormatSpecification import FormatSpecification
+
+from . import constants
 from .IntervalClass import IntervalClass
 
 

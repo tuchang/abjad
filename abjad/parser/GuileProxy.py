@@ -1,4 +1,5 @@
 import typing
+
 from abjad import core
 from abjad import indicators as abjad_indicators
 from abjad import pitch as abjad_pitch

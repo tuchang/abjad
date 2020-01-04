@@ -1,7 +1,8 @@
-import abjad
 import inspect
+
 import pytest
 
+import abjad
 
 ignored_classes = (abjad.String, abjad.StorageFormatManager, abjad.FormatSpecification)
 

@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_Leaf_duration_assign_01():

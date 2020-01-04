@@ -1,5 +1,4 @@
 import abjad
-import pytest
 
 
 def test_Parentage_logical_voice_01():

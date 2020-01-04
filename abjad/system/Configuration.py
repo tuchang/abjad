@@ -1,10 +1,12 @@
 import abc
 import os
 import pathlib
-import six
 import tempfile
 import time
 import traceback
+
+import six
+
 from .StorageFormatManager import StorageFormatManager
 
 
@@ -232,7 +234,6 @@ class Configuration(object):
                 if not path.exists() or (path.exists() and os.access(str(path), flags)):
                     self._cached_configuration_directory = path
                     return self._cached_configuration_directory
-            temp_directory = self.temp_directory
             path = self.temp_directory / directory_name
             self._cached_configuration_directory = path
         return self._cached_configuration_directory

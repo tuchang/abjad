@@ -1,3 +1,5 @@
+import sys
+
 from ply.yacc import (  # type: ignore
     YaccProduction,
     YaccSymbol,
@@ -78,7 +80,7 @@ def _parse_debug(self, input=None, lexer=None, debug=None, tracking=0, tokenfunc
             "Stack  : %s",
             (
                 "%s . %s"
-                % (" ".join([xx.type for xx in symstack][1:]), str(self.lookahead))
+                % (" ".join([xx.type for xx in symstack][1:]), str(self.lookahead),)
             ).lstrip(),
         )
         # --! DEBUG
@@ -237,14 +239,14 @@ def _parse_debug(self, input=None, lexer=None, debug=None, tracking=0, tokenfunc
                 # --! DEBUG
                 return result
 
-        if t == None:
+        if t is None:
 
             # --! DEBUG
             debug.error(
                 "Error  : %s",
                 (
                     "%s . %s"
-                    % (" ".join([xx.type for xx in symstack][1:]), str(self.lookahead))
+                    % (" ".join([xx.type for xx in symstack][1:]), str(self.lookahead),)
                 ).lstrip(),
             )
             # --! DEBUG

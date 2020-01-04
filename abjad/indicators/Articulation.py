@@ -1,11 +1,10 @@
-import copy
 import typing
+
 from abjad import enums
 from abjad.lilypondnames.LilyPondTweakManager import LilyPondTweakManager
 from abjad.system.FormatSpecification import FormatSpecification
 from abjad.system.LilyPondFormatBundle import LilyPondFormatBundle
 from abjad.system.StorageFormatManager import StorageFormatManager
-from abjad.top.attach import attach
 from abjad.utilities.String import String
 
 
@@ -143,10 +142,9 @@ class Articulation(object):
             direction = direction or argument.direction
         name = str(name)
         if "\\" in name:
-            raise Exception("DEPRECATED?")
-            direction, name = name.split("\\")
-            direction = direction.strip()
-            name = name.strip()
+            message = "articulation names need no backslash:\n"
+            message += f"   {repr(name)}"
+            raise Exception(message)
         self._name = name
         direction_ = String.to_tridirectional_ordinal_constant(direction)
         if direction_ is not None:
