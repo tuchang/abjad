@@ -266,7 +266,7 @@ class NumberedInterval(Interval):
     def _from_number(self, argument):
         import abjad
 
-        number = self._to_nearest_quarter_tone(argument)
+        number = self._to_nearest_eighth_tone(argument)
         direction = mathtools.sign(number)
         octaves = 0
         pc_number = abs(number)
