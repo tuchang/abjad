@@ -191,7 +191,7 @@ class IntervalClass(object):
 
     @classmethod
     def _numbered_to_named(cls, number):
-        number = cls._to_nearest_eighth_tone(float(number))
+        number = cls._to_nearest_twelfth_tone(float(number))
         direction = mathtools.sign(number)
         octaves, semitones = divmod(abs(number), 12)
         if semitones == 0 and octaves:
@@ -205,20 +205,15 @@ class IntervalClass(object):
             diatonic_pc_number,
         ) = constants._semitones_to_quality_and_diatonic_number[semitones]
         quality += quartertone
-        diatonic_pc_number = cls._to_nearest_eighth_tone(diatonic_pc_number)
+        diatonic_pc_number = cls._to_nearest_twelfth_tone(diatonic_pc_number)
         return direction, quality, diatonic_pc_number
 
     @staticmethod
-    def _to_nearest_eighth_tone(number):
-        number = round(float(number) * 4) / 4
-        div, mod = divmod(number, 1)
-        if mod == 0.75:
-            div += 0.75  # used to be 1
-        elif mod == 0.5:
-            div += 0.5
-        elif mod == 0.25:  # new
-            div += 0.25  # new
-        return mathtools.integer_equivalent_number_to_integer(div)
+    def _to_nearest_twelfth_tone(number):
+        semitones = Fraction(int(round(12 * number)), 12)
+        if semitones.denominator == 12:
+            semitones = Fraction(int(round(6 * number)), 6)
+        return mathtools.integer_equivalent_number_to_integer(semitones)
 
     @classmethod
     def _validate_quality_and_diatonic_number(cls, quality, diatonic_number):

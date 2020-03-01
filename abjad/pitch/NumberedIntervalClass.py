@@ -211,7 +211,7 @@ class NumberedIntervalClass(IntervalClass):
 
     def _from_number(self, argument):
         direction = mathtools.sign(argument)
-        number = self._to_nearest_eighth_tone(abs(argument))
+        number = self._to_nearest_twelfth_tone(abs(argument))
         pc_number = number % 12
         if pc_number == 0 and number:
             pc_number = 12
