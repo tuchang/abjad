@@ -614,12 +614,12 @@ _alphabetic_accidental_regex_atom = (
 )
 
 _symbolic_accidental_regex_atom = (
-    "(?P<symbolic_accidental>"
+    r"(?P<symbolic_accidental>"
     "[#]+[+]?"
     "|[b]+[~]?"
     "|[+]"
     "|[~]"
-    "|[3681][2]?[\^_]+"
+    r"|[3681][2]?[_^]+"
     "|"
     ")"
 )
