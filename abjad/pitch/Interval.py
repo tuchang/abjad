@@ -6,6 +6,11 @@ import numbers
 from abjad import mathtools
 from abjad.system.StorageFormatManager import StorageFormatManager
 
+try:
+    from quicktions import Fraction
+except ImportError:
+    from fractions import Fraction
+
 from . import constants
 
 
