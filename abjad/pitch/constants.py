@@ -11,15 +11,43 @@ except ImportError:
 _direction_number_to_direction_symbol = {0: "", 1: "+", -1: "-"}
 
 _accidental_abbreviation_to_name = {
-    "ss": "double sharp",
-    "tqs": "three-quarters sharp",
-    "s": "sharp",
-    "qs": "quarter sharp",
-    "": "natural",
-    "qf": "quarter flat",
-    "f": "flat",
-    "tqf": "three-quarters flat",
+    "sxf": "seven-sixths flat",
+    "ttf": "thirteen-twelfths flat",
     "ff": "double flat",
+    "etf": "eleven-twelfths flat",
+    "sef": "seven-eighths flat",
+    "fxf": "five-sixths flat",
+    "tqf": "three-quarters flat",
+    "trf": "two-thirds flat",
+    "fef": "five-eighths flat",
+    "stf": "seven-twelfths flat",
+    "f": "flat",
+    "ftf": "five-twelfths flat",
+    "tef": "three-eighths flat",
+    "rf": "third flat",
+    "qf": "quarter flat",
+    "xf": "sixth flat",
+    "ef": "eighth flat",
+    "tf": "twelfth flat",
+    "": "natural",
+    "ts": "twelfth sharp",
+    "es": "eighth sharp",
+    "xs": "sixth sharp",
+    "qs": "quarter sharp",
+    "rs": "third sharp",
+    "tes": "three-eighths sharp",
+    "fts": "five-twelfths sharp",
+    "s": "sharp",
+    "sts": "seven-twelfths sharp",
+    "fes": "five-eighths sharp",
+    "trs": "two-thirds sharp",
+    "tqs": "three-quarters sharp",
+    "fxs": "five-sixths sharp",
+    "ses": "seven-eighths sharp",
+    "ets": "eleven-twelfths sharp",
+    "ss": "double sharp",
+    "tts": "thirteen-twelfths sharp",
+    "sxs": "seven-sixths sharp",
 }
 
 _accidental_abbreviation_to_semitones = {
@@ -103,15 +131,7 @@ _accidental_abbreviation_to_symbol = {
 }
 
 _accidental_name_to_abbreviation = {
-    "double sharp": "ss",
-    "three-quarters sharp": "tqs",
-    "sharp": "s",
-    "quarter sharp": "qs",
-    "natural": "",
-    "quarter flat": "qf",
-    "flat": "f",
-    "three-quarters flat": "tqf",
-    "double flat": "ff",
+    value: key for key, value in _accidental_abbreviation_to_name.items()
 }
 
 _accidental_semitones_to_abbreviation = {
