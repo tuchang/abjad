@@ -7,6 +7,11 @@ from abjad.system.StorageFormatManager import StorageFormatManager
 
 from . import constants
 
+try:
+    from quicktions import Fraction
+except ImportError:
+    from fractions import Fraction
+
 
 @functools.total_ordering
 class Accidental(object):
@@ -85,23 +90,34 @@ class Accidental(object):
                         elif prefix.startswith("f"):
                             semitones -= len(prefix)
                         if suffix == "s":
-                            semitones += 0.5
+                            semitones += Fraction(1, 2)
                             if prefix == "t":
                                 semitones += 1
                         elif suffix == "f":
-                            semitones -= 0.5
+                            semitones -= Fraction(1, 2)
                             if prefix == "t":
                                 semitones -= 1
                     elif group_dict["symbolic_accidental"]:
                         semitones += name.count("#")
                         semitones -= name.count("b")
                         if name.endswith("+"):
-                            semitones += 0.5
+                            semitones += Fraction(1, 2)
                         elif name.endswith("~"):
-                            semitones -= 0.5
+                            semitones -= Fraction(1, 2)
         elif isinstance(name, numbers.Number):
-            semitones = float(name)
-            assert (semitones % 1.0) in (0.0, 0.5)
+            semitones = abjad.Fraction(int(round(12 * name)), 12)
+            if semitones.denominator == 12:
+                semitones = abjad.Fraction(int(round(6 * name)), 6)
+            assert (semitones % Fraction(1)) in (
+                Fraction(0),
+                Fraction(1, 12),
+                Fraction(1, 8),
+                Fraction(1, 6),
+                Fraction(1, 3),
+                Fraction(1, 4),
+                Fraction(3, 8),
+                Fraction(5, 12),
+                Fraction(1, 2),)
         elif hasattr(name, "accidental"):
             _arrow = name.accidental.arrow
             semitones = name.accidental.semitones
@@ -337,7 +353,7 @@ class Accidental(object):
         semitones, remainder = divmod(semitones, 1.0)
         abbreviation = character * int(semitones)
         if remainder:
-            abbreviation += "q{}".format(character)
+            abbreviation += "q{}".format(character) #other remainders
         return abbreviation
 
     def __sub__(self, argument):
@@ -487,7 +503,7 @@ class Accidental(object):
             -2
 
             >>> abjad.Accidental('tqf').semitones
-            -1.5
+            Fraction(-3, 2)
 
             >>> abjad.Accidental('f').semitones
             -1
@@ -496,13 +512,13 @@ class Accidental(object):
             0
 
             >>> abjad.Accidental('qs').semitones
-            0.5
+            Fraction(1, 2)
 
             >>> abjad.Accidental('s').semitones
             1
 
             >>> abjad.Accidental('tqs').semitones
-            1.5
+            Fraction(3, 2)
 
             >>> abjad.Accidental('ss').semitones
             2
