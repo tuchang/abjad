@@ -6,6 +6,11 @@ import numbers
 from abjad import mathtools
 from abjad.system.StorageFormatManager import StorageFormatManager
 
+try:
+    from quicktions import Fraction
+except ImportError:
+    from fractions import Fraction
+
 from . import constants
 
 
@@ -206,7 +211,7 @@ class Interval(object):
         ) = constants._semitones_to_quality_and_diatonic_number[semitones]
         quality += quartertone
         diatonic_number += octaves * 7
-        diatonic_number = cls._to_nearest_quarter_tone(diatonic_number)
+        diatonic_number = cls._to_nearest_twelfth_tone(diatonic_number)
         return direction, quality, diatonic_number
 
     @staticmethod
@@ -218,6 +223,13 @@ class Interval(object):
         elif mod == 0.5:
             div += 0.5
         return mathtools.integer_equivalent_number_to_integer(div)
+
+    @staticmethod
+    def _to_nearest_twelfth_tone(number):
+        semitones = Fraction(int(round(12 * number)), 12)
+        if semitones.denominator == 12:
+            semitones = Fraction(int(round(6 * number)), 6)
+        return mathtools.integer_equivalent_number_to_integer(semitones)
 
     @classmethod
     def _validate_quality_and_diatonic_number(cls, quality, diatonic_number):
