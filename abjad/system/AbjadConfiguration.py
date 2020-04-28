@@ -315,7 +315,7 @@ class AbjadConfiguration(Configuration):
 
             >>> abjad_configuration = abjad.AbjadConfiguration()
             >>> abjad_configuration.get_lilypond_minimum_version_string() # doctest: +SKIP
-            '2.19.0'
+            '2.21.1'
 
         Returns string.
         """
@@ -333,7 +333,7 @@ class AbjadConfiguration(Configuration):
 
             >>> abjad_configuration = abjad.AbjadConfiguration()
             >>> abjad_configuration.get_lilypond_version_string()
-            '2.19...'
+            '2.21...'
 
         Returns string.
         """
