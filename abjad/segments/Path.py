@@ -2089,6 +2089,21 @@ class Path(pathlib.PosixPath):
         else:
             return False
 
+    def is_definitionspace(self) -> bool:
+        """
+        Is true when path is any of material, materials, segment or
+        segments directories.
+        """
+        if self.is_material():
+            return True
+        if self.is_materials():
+            return True
+        if self.is_segment():
+            return True
+        if self.is_segments():
+            return True
+        return False
+
     def is_distribution(self) -> bool:
         """
         Is true when path is distribution directory.
@@ -2471,6 +2486,9 @@ class Path(pathlib.PosixPath):
                 return True
         if "contents" in prototype and self.is_contents():
             return True
+        if "definitionspace" in prototype:
+            if self.is_definitionspace():
+                return True
         if "illustrationspace" in prototype:
             if self.is_illustrationspace():
                 return True
