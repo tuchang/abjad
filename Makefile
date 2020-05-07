@@ -46,6 +46,7 @@ gh-pages:
 isort:
 	isort \
 		--case-sensitive \
+		--line-width 90 \
 		--multi-line 3 \
 		--project abjad \
 		--project abjadext \
