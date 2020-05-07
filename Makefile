@@ -1,7 +1,7 @@
 .PHONY: docs build gh-pages
 
 project = abjad
-errors = E123,E203,E265,E266,E501,E722,F81,W503
+errors = E123,E203,E231,E265,E266,E501,E722,F81,W503
 formatPaths = ${project}/ tests/ *.py
 testPaths = ${project}/ tests/
 flakeOptions = --exclude=boilerplate,abjad/__init__.py,abjad/pitch/__init__.py --max-line-length=90 --isolated
