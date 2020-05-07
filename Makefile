@@ -106,8 +106,8 @@ pytest-x:
 		${testPaths}
 
 reformat:
-	make isort-reformat
 	make black-reformat
+	make isort-reformat
 
 release:
 	make -C docs/ clean html
