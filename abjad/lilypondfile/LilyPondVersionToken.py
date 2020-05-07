@@ -7,8 +7,8 @@ class LilyPondVersionToken(object):
 
     ..  container:: example
 
-        >>> abjad.LilyPondVersionToken()
-        LilyPondVersionToken('2.21...')
+        >>> abjad.LilyPondVersionToken() # doctest: +SKIP
+        LilyPondVersionToken('2.19.84')
 
     """
 
@@ -36,7 +36,7 @@ class LilyPondVersionToken(object):
 
             >>> token = abjad.LilyPondVersionToken()
             >>> print(format(token)) # doctest: +SKIP
-            \version "2.21.1"
+            \version "2.19.84"
 
         Return string.
         """
@@ -54,7 +54,7 @@ class LilyPondVersionToken(object):
 
             >>> token = abjad.LilyPondVersionToken()
             >>> token # doctest: +SKIP
-            LilyPondVersionToken('2.21.1')
+            LilyPondVersionToken('2.19.84')
 
         Returns string.
         """
@@ -80,17 +80,17 @@ class LilyPondVersionToken(object):
             ...     version_string=None,
             ...     )
             >>> token.version_string # doctest: +SKIP
-            '2.21.1'
+            '2.19.84'
 
         ..  container:: example
 
             Gets version string from explicit input:
 
             >>> token = abjad.LilyPondVersionToken(
-            ...     version_string='2.21.1',
+            ...     version_string='2.19.84',
             ...     )
             >>> token.version_string
-            '2.21.1'
+            '2.19.84'
 
         Returns string.
         """
