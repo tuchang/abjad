@@ -2,7 +2,9 @@
 Tools for modeling score package directory layout.
 """
 
-from .GroupedRhythmicStavesScoreTemplate import GroupedRhythmicStavesScoreTemplate
+from .GroupedRhythmicStavesScoreTemplate import (
+    GroupedRhythmicStavesScoreTemplate,
+)
 from .GroupedStavesScoreTemplate import GroupedStavesScoreTemplate
 from .Job import Job
 from .Line import Line

@@ -17,7 +17,9 @@ from .Inversion import Inversion
 from .Multiplication import Multiplication
 from .NamedInterval import NamedInterval
 from .NamedIntervalClass import NamedIntervalClass
-from .NamedInversionEquivalentIntervalClass import NamedInversionEquivalentIntervalClass
+from .NamedInversionEquivalentIntervalClass import (
+    NamedInversionEquivalentIntervalClass,
+)
 from .NamedPitch import NamedPitch
 from .NamedPitchClass import NamedPitchClass
 from .NumberedInterval import NumberedInterval
